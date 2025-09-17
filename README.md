@@ -16,6 +16,26 @@ This project is a "Crossy Road" style game developed in Unity, designed to showc
 * **Blockchain**: Solana (Devnet)
 * **SDK**: Solana.Unity-SDK
 
+## 📁 Project Structure
+
+The project follows a clean and scalable folder structure to keep all assets organized. All custom-created assets are located within the `_Project` folder to separate them from imported packages.
+
+```plaintext
+Assets/
+└── _Project/
+    ├── Art/
+    │   ├── Materials/
+    │   └── Models/
+    ├── Prefabs/
+    ├── Scenes/
+    └── Scripts/
+        ├── Data/         (For ScriptableObjects)
+        ├── Managers/
+        ├── Player/
+        ├── Solana/
+        └── World/
+```
+
 ## 🚀 Getting Started
 
 To run this project locally, follow these steps:
