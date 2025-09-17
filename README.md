@@ -42,7 +42,7 @@ To run this project locally, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/your-project-name.git](https://github.com/your-username/your-project-name.git)
+    git clone [CrossyRoad](https://github.com/JoshhSandhu/CrossyRoad.git)
     ```
 2.  **Open in Unity:** Open the project using Unity Hub. Unity will import all the necessary packages.
 
