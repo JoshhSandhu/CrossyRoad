@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -10,9 +11,18 @@ public class PlayerControler : MonoBehaviour
 {
     public static event Action OnPlayerMovedForward;  //player moved forward event
 
+    // public feilds
+    [Tooltip("hight of the player hops")]
+    [SerializeField]
+    private float hopHeight = 0.5f;
+    [Tooltip("duration of the player hops")]
+    [SerializeField]
+    private float hopDuration = 0.2f;
+
     //private feilds
-    private Vector3 targetPosition;
-    private float moveSpeed = 10f; //speed of movement
+    private bool isMoving = false; //to check if the player is moving
+    //private Vector3 targetPosition;
+    //private float moveSpeed = 10f; //speed of movement
     private int forwardPosZ = 0; //to track the forward position of the player
 
     //for the new input system var
@@ -42,23 +52,8 @@ public class PlayerControler : MonoBehaviour
         playerInputActions.Player.Disable();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        targetPosition = transform.position;
-    }
-
-    void Update()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-    }
-
     private void OnMove(InputAction.CallbackContext context)
     {
-        if(Vector3.Distance(transform.position, targetPosition) > 0.01f)
-        {
-        return;
-        }
         Vector2 inputDirection = context.ReadValue<Vector2>();
 
 
@@ -94,11 +89,6 @@ public class PlayerControler : MonoBehaviour
 
     private void OnTouchEnd(InputAction.CallbackContext context)
     {
-        //only accept input if the player is not moving
-        if ( Vector3.Distance(transform.position, targetPosition) > 0.01f)
-        {
-            return;
-        }
         Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
         ProcessSwipe(touchEndPos);
     }
@@ -138,11 +128,40 @@ public class PlayerControler : MonoBehaviour
 
     private void movePlayer(Vector3 direction)
     {
-        targetPosition += direction;
-        if (direction == Vector3.forward && (int)targetPosition.z > forwardPosZ)
+        if (isMoving)
         {
-            forwardPosZ = (int)targetPosition.z;
-            OnPlayerMovedForward?.Invoke();
+            return;
         }
+
+        Vector3 destination = transform.position + direction;
+        StartCoroutine(HopCoroutine(destination));
+    
+        if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
+        {
+            forwardPosZ = (int)destination.z;
+            OnPlayerMovedForward?.Invoke();
+        } 
+    }
+
+    private IEnumerator HopCoroutine(Vector3 destination)
+    {
+        isMoving = true;
+        Vector3 startPos = transform.position;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < hopDuration)
+        {
+            transform.position = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
+
+            //to make the player jump and come down
+            float offsetY = hopHeight * 4 * (elapsedTime/hopDuration) * ( 1 - (elapsedTime/hopDuration)); //claculates the height using a simple parabola eq
+            transform.position += new Vector3(0, offsetY, 0);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = destination;
+        isMoving = false;
     }
 }
