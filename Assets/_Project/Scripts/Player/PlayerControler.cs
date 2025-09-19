@@ -19,6 +19,8 @@ public class PlayerControler : MonoBehaviour
     [SerializeField]
     private float hopDuration = 0.2f;
 
+    public static event Action<int> OnScoreChanged; //event for score change
+
     //private feilds
     private bool isMoving = false; //to check if the player is moving
     //private Vector3 targetPosition;
@@ -140,6 +142,7 @@ public class PlayerControler : MonoBehaviour
         {
             forwardPosZ = (int)destination.z;
             OnPlayerMovedForward?.Invoke();
+            OnScoreChanged?.Invoke(forwardPosZ);
         } 
     }
 
@@ -171,9 +174,15 @@ public class PlayerControler : MonoBehaviour
         if (other.CompareTag("Obstacle"))
         {
             Debug.Log("Game Over!");
+            UIManager.Instance.ShowGameOver();
 
             // To stop the player from moving, we disable this script.
             this.enabled = false;
+        }
+        else if (other.CompareTag("Coin"))
+        {
+            GameManager.Instance.AddCoins();
+            other.gameObject.SetActive(false); //collect the coin
         }
     }
 }

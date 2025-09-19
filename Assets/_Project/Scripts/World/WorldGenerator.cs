@@ -10,6 +10,13 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private ObstacleSpawner obstacleSpawner;
 
+    [Header("Collectables")]
+    [SerializeField]
+    private GameObject coinPrefab;
+    [SerializeField]
+    [UnityEngine.Range(0, 1)]
+    private float coinSpawnChance = 0.25f; //25% chance to spawn a coin
+
     [Header("World Generation Settings")]
     [Tooltip("All the possible lane types")]
     [SerializeField]
@@ -107,6 +114,16 @@ public class WorldGenerator : MonoBehaviour
             currentZpos++; //assuming each lane has a length of 1 unit
 
             obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
+
+            if(!selectedlanetype.canHaveObstacles)
+            {
+                if(Random.value <= coinSpawnChance)
+                {
+                    float randX = Random.Range(-5f, 5f);
+                    Vector3 coinPos = new Vector3(randX, lane.transform.position.y + 1f, lane.transform.position.z);
+                    Instantiate(coinPrefab, coinPos, Quaternion.identity);
+                }
+            }
         }
     }
 
