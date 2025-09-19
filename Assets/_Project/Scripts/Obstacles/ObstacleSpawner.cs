@@ -38,6 +38,7 @@ public class ObstacleSpawner : MonoBehaviour
         //randomly decide a speed for all cars on this lane.
         float speed = Random.Range(5f, 10f);
         float LogSpeed = Random.Range(2f, 7f);
+        float Trainspeed = Random.Range(25f, 30f);
 
         //keep spawning as long as the lane is active
         while (lane.activeInHierarchy)
@@ -67,6 +68,10 @@ public class ObstacleSpawner : MonoBehaviour
             else if (spawnedObstacle.TryGetComponent<Log>(out Log log))
             {
                 log.speed = LogSpeed;
+            }
+            else if (spawnedObstacle.TryGetComponent<Train>(out Train train))
+            {
+                train.speed = Trainspeed;
             }
         }
     }
