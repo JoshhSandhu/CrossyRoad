@@ -5,9 +5,10 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.Rendering;
 
-public class PlayerControler : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public static event Action OnPlayerMovedForward;  //player moved forward event
 
@@ -19,7 +20,10 @@ public class PlayerControler : MonoBehaviour
     [SerializeField]
     private float hopDuration = 0.2f;
 
+    public static event Action<int> OnScoreChanged; //event for score change
+
     //private feilds
+    private Rigidbody playerRb;
     private bool isMoving = false; //to check if the player is moving
     //private Vector3 targetPosition;
     //private float moveSpeed = 10f; //speed of movement
@@ -30,6 +34,10 @@ public class PlayerControler : MonoBehaviour
     private float minSwipeDist = 50f; //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
 
+    private void Awake()
+    {
+        playerRb = GetComponent<Rigidbody>();
+    }
     //subscribe the events
     private void OnEnable()
     {
@@ -95,8 +103,8 @@ public class PlayerControler : MonoBehaviour
 
     private void ProcessSwipe(Vector2 TouchendPos)
     {
-        float swipeDistX = Mathf.Abs(TouchendPos.x - TouchendPos.x);
-        float swipeDistY = Mathf.Abs(TouchendPos.y - TouchendPos.y);
+        float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
+        float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
 
         if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
         {
@@ -132,6 +140,17 @@ public class PlayerControler : MonoBehaviour
         {
             return;
         }
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f))
+        {
+            // If the ray hits a solid obstacle, cancel the move.
+            if (hit.collider.CompareTag("SolidObstacles"))
+            {
+                Debug.Log("Move blocked by a solid obstacle!");
+                return; // Exit the function, do not hop.
+            }
+        }
+        //Detaching the parent if the player is on a log
+        transform.SetParent(null);
 
         Vector3 destination = transform.position + direction;
         StartCoroutine(HopCoroutine(destination));
@@ -140,6 +159,7 @@ public class PlayerControler : MonoBehaviour
         {
             forwardPosZ = (int)destination.z;
             OnPlayerMovedForward?.Invoke();
+            OnScoreChanged?.Invoke(forwardPosZ);
         } 
     }
 
@@ -151,29 +171,67 @@ public class PlayerControler : MonoBehaviour
 
         while (elapsedTime < hopDuration)
         {
-            transform.position = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
+            Vector3 newPosition = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
 
             //to make the player jump and come down
             float offsetY = hopHeight * 4 * (elapsedTime/hopDuration) * ( 1 - (elapsedTime/hopDuration)); //claculates the height using a simple parabola eq
-            transform.position += new Vector3(0, offsetY, 0);
+            playerRb.MovePosition(newPosition + new Vector3(0, offsetY, 0));
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-
-        transform.position = destination;
+        RaycastHit landinghit;
+        playerRb.MovePosition(destination);
+        Physics.Raycast(transform.position, Vector3.down, out landinghit, 1f);
+        //if we landed on a log
+        if (Physics.Raycast(transform.position, Vector3.down, out landinghit, 2f)) // Increased distance to be safe
+        {
+            //Debug.Log("Landed on: " + landinghit.collider.name + " | Tag: " + landinghit.collider.tag);
+            if (landinghit.collider.CompareTag("Platform"))
+            {
+                // We landed safely on a log. Parent to it.
+                transform.SetParent(landinghit.transform);
+            }
+            else if (landinghit.collider.CompareTag("Water"))
+            {
+                // The first thing our ray hit was water. Game Over.
+                GameOver();
+            }
+        }
         isMoving = false;
     }
 
+    //game over logic
+    private void GameOver()
+    {
+        Debug.Log("Game Over!");
+        // The method in your UIManager is likely named ShowGameOverPanel, based on previous scripts
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowGameOver();
+        }
+        this.enabled = false; // Disable this script to stop movement
+    }
     //collision detection
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Obstacle"))
         {
-            Debug.Log("Game Over!");
-
-            // To stop the player from moving, we disable this script.
-            this.enabled = false;
+            GameOver();
         }
+        else if (other.CompareTag("Coin"))
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddCoins();
+            }
+            other.gameObject.SetActive(false);
+        }
+    }
+
+    // This is for physical Collisions (like trees and rocks) that only block you
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
     }
 }
