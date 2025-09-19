@@ -6,6 +6,10 @@ using Random = UnityEngine.Random;
 
 public class WorldGenerator : MonoBehaviour
 {
+    [Header("Dependancies")]
+    [SerializeField]
+    private ObstacleSpawner obstacleSpawner;
+
     [Header("World Generation Settings")]
     [Tooltip("All the possible lane types")]
     [SerializeField]
@@ -101,6 +105,8 @@ public class WorldGenerator : MonoBehaviour
         {
             activeLanes.Enqueue(lane); //adding the lane to the queue
             currentZpos++; //assuming each lane has a length of 1 unit
+
+            obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
         }
     }
 

@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 671401309}
   - component: {fileID: 671401308}
   - component: {fileID: 671401312}
+  - component: {fileID: 671401313}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -245,6 +246,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControler
   hopHeight: 0.5
   hopDuration: 0.2
+--- !u!54 &671401313
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671401307}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &705541571
 GameObject:
   m_ObjectHideFlags: 0
@@ -412,6 +440,8 @@ GameObject:
   - component: {fileID: 1289800178}
   - component: {fileID: 1289800177}
   - component: {fileID: 1289800176}
+  - component: {fileID: 1289800180}
+  - component: {fileID: 1289800179}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -486,13 +516,72 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289800175}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.3553482, y: -0.26500133, z: 0.16511647, w: 0.88104403}
+  m_LocalPosition: {x: 5.1, y: 6.6, z: -9.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45.534, y: -29.94, z: 8.424}
+--- !u!114 &1289800179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289800175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379824b9bc627df4290b08ed7ad7b353, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CamFollow
+  player: {fileID: 671401311}
+  smoothSpeed: 0.125
+  offset: {x: 0, y: 0, z: 0}
+--- !u!114 &1289800180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289800175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &1821926343
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,6 +592,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1821926345}
   - component: {fileID: 1821926344}
+  - component: {fileID: 1821926346}
   m_Layer: 0
   m_Name: WorldGenerator
   m_TagString: Untagged
@@ -522,6 +612,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01fc80f3b0010441942ca7a21af89cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldGenerator
+  obstacleSpawner: {fileID: 1821926346}
   lanetypes:
   - {fileID: 11400000, guid: 30eae7cbe8e712b4699454218eef11ce, type: 2}
   - {fileID: 11400000, guid: d638f991a1753ab488232cab26846b6a, type: 2}
@@ -542,6 +633,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1821926346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821926343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22ef6210493044844b90ba64720a7fee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleSpawner
+  minSpawnTime: 2
+  maxSpawnTime: 5
+  spawnRangeX: 12
 --- !u!1 &1982513664
 GameObject:
   m_ObjectHideFlags: 0

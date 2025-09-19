@@ -8,4 +8,11 @@ public class LaneType : ScriptableObject
 
     [Tooltip("The prefab that will be spawned for this lane")]
     public GameObject lanePrefab;
+
+    [Header("obstacle settings")]
+    [Tooltip("can obstacles spawn on this lane?")]
+    public bool canHaveObstacles = false;
+
+    [Tooltip("the obstecle prefab that will spawn on this lane")]
+    public GameObject[] obstaclePrefab;
 }

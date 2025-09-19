@@ -164,4 +164,16 @@ public class PlayerControler : MonoBehaviour
         transform.position = destination;
         isMoving = false;
     }
+
+    //collision detection
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Obstacle"))
+        {
+            Debug.Log("Game Over!");
+
+            // To stop the player from moving, we disable this script.
+            this.enabled = false;
+        }
+    }
 }
