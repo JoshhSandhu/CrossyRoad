@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     public static event Action<int> OnScoreChanged; //event for score change
 
     //private feilds
+    private Rigidbody playerRb;
     private bool isMoving = false; //to check if the player is moving
     //private Vector3 targetPosition;
     //private float moveSpeed = 10f; //speed of movement
@@ -32,6 +33,10 @@ public class PlayerController : MonoBehaviour
     private float minSwipeDist = 50f; //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
 
+    private void Awake()
+    {
+        playerRb = GetComponent<Rigidbody>();
+    }
     //subscribe the events
     private void OnEnable()
     {
@@ -154,35 +159,51 @@ public class PlayerController : MonoBehaviour
 
         while (elapsedTime < hopDuration)
         {
-            transform.position = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
+            Vector3 newPosition = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
 
             //to make the player jump and come down
             float offsetY = hopHeight * 4 * (elapsedTime/hopDuration) * ( 1 - (elapsedTime/hopDuration)); //claculates the height using a simple parabola eq
-            transform.position += new Vector3(0, offsetY, 0);
+            playerRb.MovePosition(newPosition + new Vector3(0, offsetY, 0));
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        transform.position = destination;
+        playerRb.MovePosition(destination);
         isMoving = false;
     }
 
+    //game over logic
+    private void GameOver()
+    {
+        Debug.Log("Game Over!");
+        // The method in your UIManager is likely named ShowGameOverPanel, based on previous scripts
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowGameOver();
+        }
+        this.enabled = false; // Disable this script to stop movement
+    }
     //collision detection
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Obstacle"))
         {
-            Debug.Log("Game Over!");
-            UIManager.Instance.ShowGameOver();
-
-            // To stop the player from moving, we disable this script.
-            this.enabled = false;
+            GameOver();
         }
         else if (other.CompareTag("Coin"))
         {
-            GameManager.Instance.AddCoins();
-            other.gameObject.SetActive(false); //collect the coin
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddCoins();
+            }
+            other.gameObject.SetActive(false);
         }
+    }
+
+    // This is for physical Collisions (like trees and rocks) that only block you
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
     }
 }

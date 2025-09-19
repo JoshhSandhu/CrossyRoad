@@ -264,8 +264,8 @@ GameObject:
   - component: {fileID: 671401310}
   - component: {fileID: 671401309}
   - component: {fileID: 671401308}
-  - component: {fileID: 671401312}
   - component: {fileID: 671401313}
+  - component: {fileID: 671401314}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -365,20 +365,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &671401312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 671401307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd7e169234169494e87f4b96f7ec781b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerControler
-  hopHeight: 0.5
-  hopDuration: 0.2
 --- !u!54 &671401313
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -403,9 +389,23 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
+--- !u!114 &671401314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671401307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd7e169234169494e87f4b96f7ec781b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  hopHeight: 0.5
+  hopDuration: 0.2
 --- !u!1 &699360874
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,4 +15,8 @@ public class LaneType : ScriptableObject
 
     [Tooltip("the obstecle prefab that will spawn on this lane")]
     public GameObject[] obstaclePrefab;
+
+    [Header("Decorations settings")]
+    [Tooltip("decorations to spawn on this lane")]
+    public GameObject[] decorationsPrefab;
 }

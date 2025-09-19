@@ -124,6 +124,22 @@ public class WorldGenerator : MonoBehaviour
                     Instantiate(coinPrefab, coinPos, Quaternion.identity);
                 }
             }
+
+            if (selectedlanetype.decorationsPrefab.Length >0)
+            {
+                int decorationCount = Random.Range(1, 4); //spawn 1 to 3 decorations
+                for(int i = 0; i < decorationCount; i++)
+                {
+                    GameObject decorationPrefab = selectedlanetype.decorationsPrefab[Random.Range(0, selectedlanetype.decorationsPrefab.Length)];
+
+                    //random pos on the lane
+                    float randX = Random.Range(-8f, 8f);
+                    Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
+
+					GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+					newDecoration.transform.SetParent(lane.transform);
+				}
+			}
         }
     }
 
