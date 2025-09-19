@@ -14,3 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LaneType
   laneName: RoadLane
   lanePrefab: {fileID: 8267557690374008171, guid: 3724c95782c02d74b9436fb41663b2f9, type: 3}
+  canHaveObstacles: 1
+  obstaclePrefab:
+  - {fileID: 976323401879446899, guid: 9a8cd4d045b9ec647bf307b9a0417acd, type: 3}
