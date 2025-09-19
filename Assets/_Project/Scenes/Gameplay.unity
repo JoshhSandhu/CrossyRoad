@@ -360,7 +360,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
-  m_LocalScale: {x: 0.9, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 1, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -995,13 +995,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289800175}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3553482, y: -0.26500133, z: 0.16511647, w: 0.88104403}
-  m_LocalPosition: {x: 5.1, y: 6.6, z: -9.3}
+  m_LocalRotation: {x: 0.38395843, y: -0.09564355, z: 0.064046696, w: 0.91614753}
+  m_LocalPosition: {x: 1.17, y: 5.23, z: -3.85}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45.534, y: -29.94, z: 8.424}
+  m_LocalEulerAnglesHint: {x: 45.707, y: -10.4, z: 3.605}
 --- !u!114 &1289800179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1505,8 +1505,11 @@ MonoBehaviour:
   lanetypes:
   - {fileID: 11400000, guid: 30eae7cbe8e712b4699454218eef11ce, type: 2}
   - {fileID: 11400000, guid: d638f991a1753ab488232cab26846b6a, type: 2}
+  - {fileID: 11400000, guid: 42a2acb3e6693274186a47bbf47d4375, type: 2}
   initialLanes: 20
   maxLanesinscene: 30
+  laneSpawnHeight: 0
+  coinHeightOffset: 0.1
 --- !u!4 &1821926345
 Transform:
   m_ObjectHideFlags: 0

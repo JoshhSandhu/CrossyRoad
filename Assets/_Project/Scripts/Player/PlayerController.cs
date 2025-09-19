@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.Rendering;
 
 public class PlayerController : MonoBehaviour
@@ -102,8 +103,8 @@ public class PlayerController : MonoBehaviour
 
     private void ProcessSwipe(Vector2 TouchendPos)
     {
-        float swipeDistX = Mathf.Abs(TouchendPos.x - TouchendPos.x);
-        float swipeDistY = Mathf.Abs(TouchendPos.y - TouchendPos.y);
+        float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
+        float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
 
         if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
         {
@@ -139,6 +140,17 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f))
+        {
+            // If the ray hits a solid obstacle, cancel the move.
+            if (hit.collider.CompareTag("SolidObstacles"))
+            {
+                Debug.Log("Move blocked by a solid obstacle!");
+                return; // Exit the function, do not hop.
+            }
+        }
+        //Detaching the parent if the player is on a log
+        transform.SetParent(null);
 
         Vector3 destination = transform.position + direction;
         StartCoroutine(HopCoroutine(destination));
@@ -168,8 +180,24 @@ public class PlayerController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-
+        RaycastHit landinghit;
         playerRb.MovePosition(destination);
+        Physics.Raycast(transform.position, Vector3.down, out landinghit, 1f);
+        //if we landed on a log
+        if (Physics.Raycast(transform.position, Vector3.down, out landinghit, 2f)) // Increased distance to be safe
+        {
+            //Debug.Log("Landed on: " + landinghit.collider.name + " | Tag: " + landinghit.collider.tag);
+            if (landinghit.collider.CompareTag("Platform"))
+            {
+                // We landed safely on a log. Parent to it.
+                transform.SetParent(landinghit.transform);
+            }
+            else if (landinghit.collider.CompareTag("Water"))
+            {
+                // The first thing our ray hit was water. Game Over.
+                GameOver();
+            }
+        }
         isMoving = false;
     }
 

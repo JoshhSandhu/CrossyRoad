@@ -30,6 +30,14 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private int maxLanesinscene = 30;
 
+    [Tooltip("lane spawn height")]
+    [SerializeField]
+    private float laneSpawnHeight = 0f;
+
+    [Tooltip("coin spawn height")]
+    [SerializeField] 
+    private float coinHeightOffset = 1f;
+
     //private variables
     private float currentZpos = 0f;
     private Queue<GameObject> activeLanes = new Queue<GameObject>(); //keeping track of active lanes
@@ -104,7 +112,7 @@ public class WorldGenerator : MonoBehaviour
         //using the obj pooler to spawn the lane
         GameObject lane = ObjectPooler.Instance.SpawnFromPool(
             selectedlanetype.laneName,
-            new Vector3(0, 0, currentZpos),
+            new Vector3(0, laneSpawnHeight, currentZpos),
             Quaternion.identity
         );
 
@@ -120,7 +128,7 @@ public class WorldGenerator : MonoBehaviour
                 if(Random.value <= coinSpawnChance)
                 {
                     float randX = Random.Range(-5f, 5f);
-                    Vector3 coinPos = new Vector3(randX, lane.transform.position.y + 1f, lane.transform.position.z);
+                    Vector3 coinPos = new Vector3(randX, lane.transform.position.y + coinHeightOffset, lane.transform.position.z);
                     Instantiate(coinPrefab, coinPos, Quaternion.identity);
                 }
             }
