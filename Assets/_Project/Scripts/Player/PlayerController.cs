@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering;
 
-public class PlayerControler : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public static event Action OnPlayerMovedForward;  //player moved forward event
 

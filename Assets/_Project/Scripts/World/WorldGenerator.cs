@@ -36,12 +36,12 @@ public class WorldGenerator : MonoBehaviour
 
     private void OnEnable()
     {
-        PlayerControler.OnPlayerMovedForward += HandlePlayerMovedForward;
+        PlayerController.OnPlayerMovedForward += HandlePlayerMovedForward;
     }
 
     private void OnDisable()
     {
-        PlayerControler.OnPlayerMovedForward -= HandlePlayerMovedForward;
+        PlayerController.OnPlayerMovedForward -= HandlePlayerMovedForward;
     }
 
     private void Start()

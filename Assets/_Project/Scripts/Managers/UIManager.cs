@@ -30,13 +30,13 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        PlayerControler.OnScoreChanged += UpdateScoreText;
+        PlayerController.OnScoreChanged += UpdateScoreText;
         GameManager.OnCoinsChanged += UpdateCoinsText;
     }
 
     private void OnDisable()
     {
-        PlayerControler.OnScoreChanged -= UpdateScoreText;
+        PlayerController.OnScoreChanged -= UpdateScoreText;
         GameManager.OnCoinsChanged -= UpdateCoinsText;
     }
 
