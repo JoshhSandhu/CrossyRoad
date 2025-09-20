@@ -4,14 +4,6 @@ using UnityEngine;
 public class ObstacleSpawner : MonoBehaviour
 {
     [Header("Settings")]
-    [Tooltip("the min time btw obstacles spawns on a single lane")]
-    [SerializeField]
-    private float minSpawnTime = 2f;
-
-    [Tooltip("the max time btw obstacles spawns on a single lane")]
-    [SerializeField]
-    private float maxSpawnTime = 5f;
-
     [Tooltip("the range on the X axis from where the obstacles spawn from the edge of the screen")]
     [SerializeField]
     private float spawnRangeX = 12f;
@@ -45,71 +37,38 @@ public class ObstacleSpawner : MonoBehaviour
         while (lane.activeInHierarchy)
         {
             //random wait time before next car
-            yield return new WaitForSeconds(Random.Range(minSpawnTime, maxSpawnTime));
+            yield return new WaitForSeconds(Random.Range(laneType.minSpawnTime, laneType.maxSpawnTime));
 
             GameObject obstaclePrefab = laneType.obstaclePrefab[Random.Range(0, laneType.obstaclePrefab.Length)];
 
-            if (laneType.warningSignalPrefab != null)
+            if (signal != null)
             {
-                float warningDuration = 2.5f;
+                float warningDuration = 2.5f; //duration of the warning signal
 
-                Vector3 signalPosition = new Vector3(0, lane.transform.position.y, lane.transform.position.z - 0.5f);
-                Quaternion signalRotation = Quaternion.Euler(0, 90, 0);
-                GameObject signalInstance = Instantiate(laneType.warningSignalPrefab, signalPosition, signalRotation);
-                signalInstance.transform.SetParent(lane.transform);
+                signal.StartCoroutine(signal.FlashWarning(warningDuration));
 
-                Light signalLight = signalInstance.GetComponentInChildren<Light>();
+                yield return new WaitForSeconds(warningDuration);
 
-                if (signalLight != null)
-                {
-                    // Start with the light off
-                    signalLight.enabled = false;
-
-                    for (int i = 0; i < 5; i++)
-                    {
-                        signalLight.enabled = true;
-                        yield return new WaitForSeconds(warningDuration / 10);
-                        signalLight.enabled = false;
-                        yield return new WaitForSeconds(warningDuration / 10);
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("Warning Signal Prefab does not have a Light component in its children!");
-                    yield return new WaitForSeconds(warningDuration);
-                }
-                Destroy(signalInstance);
-
-                Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + 0.5f, lane.transform.position.z);
-                Quaternion spawnRotation = Quaternion.Euler(0, 90 * direction, 0);
-
-                GameObject spawnedObstacle = Instantiate(obstaclePrefab, spawnPosition, spawnRotation);
-                spawnedObstacle.transform.SetParent(lane.transform);
-
-                if (spawnedObstacle.TryGetComponent<Train>(out Train train))
-                {
-                    train.speed = Trainspeed;
-                }
             }
-            else
+              
+            Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + 0.5f, lane.transform.position.z);
+            Quaternion spawnRotation = Quaternion.Euler(0, 90 * direction, 0);
+
+            GameObject spawnedObstacle = Instantiate(obstaclePrefab, spawnPosition, spawnRotation);
+            spawnedObstacle.transform.SetParent(lane.transform);
+
+
+            if (spawnedObstacle.TryGetComponent<Car>(out Car car))
             {
-                
-
-                Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + 0.5f, lane.transform.position.z);
-                Quaternion spawnRotation = Quaternion.Euler(0, 90 * direction, 0);
-
-                GameObject spawnedObstacle = Instantiate(obstaclePrefab, spawnPosition, spawnRotation);
-                spawnedObstacle.transform.SetParent(lane.transform);
-
-
-                if (spawnedObstacle.TryGetComponent<Car>(out Car car))
-                {
-                    car.speed = speed;
-                }
-                else if (spawnedObstacle.TryGetComponent<Log>(out Log log))
-                {
-                    log.speed = LogSpeed;
-                }
+                car.speed = speed;
+            }
+            else if (spawnedObstacle.TryGetComponent<Log>(out Log log))
+            {
+                log.speed = LogSpeed;
+            }
+            else if (spawnedObstacle.TryGetComponent<Train>(out Train train))
+            {
+                train.speed = Trainspeed;
             }
         }
     }

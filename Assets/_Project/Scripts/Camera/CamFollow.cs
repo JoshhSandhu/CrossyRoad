@@ -12,7 +12,7 @@ public class CamFollow : MonoBehaviour
     //distance btw the camera and the player
     public Vector3 offset;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    //start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         offset = transform.position - player.position; //initial offset

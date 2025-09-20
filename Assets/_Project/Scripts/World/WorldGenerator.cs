@@ -121,7 +121,7 @@ public class WorldGenerator : MonoBehaviour
             activeLanes.Enqueue(lane); //adding the lane to the queue
             currentZpos++; //assuming each lane has a length of 1 unit
 
-            obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
+            
 
             if(!selectedlanetype.canHaveObstacles)
             {
@@ -135,19 +135,28 @@ public class WorldGenerator : MonoBehaviour
 
             if (selectedlanetype.decorationsPrefab.Length >0)
             {
-                int decorationCount = Random.Range(1, 4); //spawn 1 to 3 decorations
-                for(int i = 0; i < decorationCount; i++)
+                
+                foreach (GameObject decorationPrefab in selectedlanetype.decorationsPrefab)
                 {
-                    GameObject decorationPrefab = selectedlanetype.decorationsPrefab[Random.Range(0, selectedlanetype.decorationsPrefab.Length)];
+                    if (decorationPrefab.GetComponent<SignalController>() != null)
+                    {
+                        Vector3 signalPos = new Vector3(0, lane.transform.position.y, lane.transform.position.z - 0.5f);
+                        Quaternion signalRotation = Quaternion.Euler(0, 90, 0);
+                        GameObject newSignal = Instantiate(decorationPrefab, signalPos, signalRotation);
+                        newSignal.transform.SetParent(lane.transform);
+                    }
+                    else
+                    {
+                        float randX = Random.Range(-8f, 8f);
+                        Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
 
-                    //random pos on the lane
-                    float randX = Random.Range(-8f, 8f);
-                    Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
-
-					GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-					newDecoration.transform.SetParent(lane.transform);
+                        GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+                        newDecoration.transform.SetParent(lane.transform);
+                    }
+                        
 				}
 			}
+            obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
         }
     }
 

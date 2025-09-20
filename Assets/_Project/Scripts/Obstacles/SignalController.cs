@@ -7,15 +7,17 @@ public class SignalController : MonoBehaviour
 
     void Awake()
     {
-        // Get the Light component from one of the children
         signalLight = GetComponentInChildren<Light>();
-        signalLight.enabled = false; // Start with the light off
+        if (signalLight != null)
+        {
+            signalLight.enabled = false;
+        }
     }
 
-    // A public method that the ObstacleSpawner can call to start the flashing
     public IEnumerator FlashWarning(float duration)
     {
-        // Flash the light 5 times over the given duration
+        if (signalLight == null) yield break;
+
         for (int i = 0; i < 5; i++)
         {
             signalLight.enabled = true;
