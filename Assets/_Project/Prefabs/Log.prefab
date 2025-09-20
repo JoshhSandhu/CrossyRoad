@@ -69,7 +69,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 603a06a768b1d264a9183b4bfb08dc6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Log
-  speed: 3
+  SlowSpeed: 3
+  fastSpeed: 9
+  boundaryX: 9
+  raycastDistance: 0.3
 --- !u!1 &9148394820862364481
 GameObject:
   m_ObjectHideFlags: 0

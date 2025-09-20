@@ -4,17 +4,9 @@ using UnityEngine;
 public class ObstacleSpawner : MonoBehaviour
 {
     [Header("Settings")]
-    [Tooltip("the min time btw obstacles spawns on a single lane")]
-    [SerializeField]
-    private float minSpawnTime = 2f;
-
-    [Tooltip("the max time btw obstacles spawns on a single lane")]
-    [SerializeField]
-    private float maxSpawnTime = 5f;
-
     [Tooltip("the range on the X axis from where the obstacles spawn from the edge of the screen")]
     [SerializeField]
-    private float spawnRangeX = 12f;
+    private float spawnRangeX = 20f;
 
     public void TrySpawningObstacles(GameObject lane, LaneType laneType)
     {
@@ -40,26 +32,31 @@ public class ObstacleSpawner : MonoBehaviour
         float LogSpeed = Random.Range(2f, 7f);
         float Trainspeed = Random.Range(25f, 30f);
 
+        SignalController signal = lane.GetComponentInChildren<SignalController>();
         //keep spawning as long as the lane is active
         while (lane.activeInHierarchy)
         {
             //random wait time before next car
-            yield return new WaitForSeconds(Random.Range(minSpawnTime, maxSpawnTime));
+            yield return new WaitForSeconds(Random.Range(laneType.minSpawnTime, laneType.maxSpawnTime));
 
-            //random obstacle
             GameObject obstaclePrefab = laneType.obstaclePrefab[Random.Range(0, laneType.obstaclePrefab.Length)];
 
-            // Determine the spawn position and rotation.
-            Vector3 spawnPosition = new Vector3(
-                spawnRangeX * -direction,
-                lane.transform.position.y + 0.5f,
-                lane.transform.position.z
-            );
+            if (signal != null)
+            {
+                float warningDuration = 2.5f; //duration of the warning signal
+
+                signal.StartCoroutine(signal.FlashWarning(warningDuration));
+
+                yield return new WaitForSeconds(warningDuration);
+
+            }
+              
+            Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + 0.5f, lane.transform.position.z);
             Quaternion spawnRotation = Quaternion.Euler(0, 90 * direction, 0);
 
             GameObject spawnedObstacle = Instantiate(obstaclePrefab, spawnPosition, spawnRotation);
-            spawnedObstacle.transform.SetParent(lane.transform); // Parent to the lane for organization.
-            
+            spawnedObstacle.transform.SetParent(lane.transform);
+
 
             if (spawnedObstacle.TryGetComponent<Car>(out Car car))
             {
@@ -67,7 +64,9 @@ public class ObstacleSpawner : MonoBehaviour
             }
             else if (spawnedObstacle.TryGetComponent<Log>(out Log log))
             {
-                log.speed = LogSpeed;
+                float baseSpeed = Random.Range(2f, 4f);
+                log.SlowSpeed = baseSpeed;
+                log.fastSpeed = baseSpeed * 3f;
             }
             else if (spawnedObstacle.TryGetComponent<Train>(out Train train))
             {
