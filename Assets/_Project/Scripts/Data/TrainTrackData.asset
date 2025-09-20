@@ -17,4 +17,8 @@ MonoBehaviour:
   canHaveObstacles: 1
   obstaclePrefab:
   - {fileID: 2037450342280266757, guid: f2d0b4aa8198a03448d321fe6f2777a9, type: 3}
-  decorationsPrefab: []
+  decorationsPrefab:
+  - {fileID: 5185157697232924230, guid: ec5f775a5e120db429015eb91534be3f, type: 3}
+  minSpawnTime: 8
+  maxSpawnTime: 15
+  warningSignalPrefab: {fileID: 5185157697232924230, guid: ec5f775a5e120db429015eb91534be3f, type: 3}
