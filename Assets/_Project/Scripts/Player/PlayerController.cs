@@ -227,6 +227,20 @@ public class PlayerController : MonoBehaviour
             }
             other.gameObject.SetActive(false);
         }
+        //else if(other.CompareTag("Water"))
+        //{
+        //    if(transform.parent == null)
+        //    {
+        //        GameOver();
+        //    }
+        //}
+        else if(other.CompareTag("Boundary"))
+        {
+            if(transform.parent != null && transform.parent.CompareTag("Platform"))
+            {
+                GameOver();
+            }
+        }
     }
 
     // This is for physical Collisions (like trees and rocks) that only block you

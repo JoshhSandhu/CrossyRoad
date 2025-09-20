@@ -6,7 +6,7 @@ public class ObstacleSpawner : MonoBehaviour
     [Header("Settings")]
     [Tooltip("the range on the X axis from where the obstacles spawn from the edge of the screen")]
     [SerializeField]
-    private float spawnRangeX = 12f;
+    private float spawnRangeX = 20f;
 
     public void TrySpawningObstacles(GameObject lane, LaneType laneType)
     {
@@ -64,7 +64,9 @@ public class ObstacleSpawner : MonoBehaviour
             }
             else if (spawnedObstacle.TryGetComponent<Log>(out Log log))
             {
-                log.speed = LogSpeed;
+                float baseSpeed = Random.Range(2f, 4f);
+                log.SlowSpeed = baseSpeed;
+                log.fastSpeed = baseSpeed * 3f;
             }
             else if (spawnedObstacle.TryGetComponent<Train>(out Train train))
             {

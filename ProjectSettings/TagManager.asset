@@ -9,6 +9,7 @@ TagManager:
   - Water
   - Platform
   - SolidObstacles
+  - Boundary
   layers:
   - Default
   - TransparentFX

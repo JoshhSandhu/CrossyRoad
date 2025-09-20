@@ -138,7 +138,18 @@ public class WorldGenerator : MonoBehaviour
                 
                 foreach (GameObject decorationPrefab in selectedlanetype.decorationsPrefab)
                 {
-                    if (decorationPrefab.GetComponent<SignalController>() != null)
+                    if (decorationPrefab.CompareTag("Platform"))
+                    {
+                        float currentX = Random.Range(-7f, 7f);
+                        while ( currentX <= 7f)
+                        {
+                            Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y, lane.transform.position.z);
+                            GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+                            newDecoration.transform.SetParent(lane.transform);
+                            currentX += Random.Range(2f, 4f);
+                        }
+                    }
+                    else if (decorationPrefab.GetComponent<SignalController>() != null)
                     {
                         Vector3 signalPos = new Vector3(0, lane.transform.position.y, lane.transform.position.z - 0.5f);
                         Quaternion signalRotation = Quaternion.Euler(0, 90, 0);
