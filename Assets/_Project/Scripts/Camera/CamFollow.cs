@@ -20,8 +20,9 @@ public class CamFollow : MonoBehaviour
 
     private void LateUpdate()
     {
-        Vector3 desiredPosition = player.position + offset; //to follow on both x and z axis
+        if (player == null) return;
 
+        Vector3 desiredPosition = player.position + offset; //to follow on both x and z axis
 
         //smoothly following the player
         Vector3 smoothPosition = Vector3.Lerp( transform.position, desiredPosition, smoothSpeed);
