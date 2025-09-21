@@ -8,6 +8,10 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField]
     private float spawnRangeX = 20f;
 
+    [Header("Collectibles")]
+    [SerializeField] private GameObject coinPrefab;
+    [SerializeField][Range(0, 1)] private float coinSpawnChance = 0.5f; //50% chance for a coin to be on a log
+
     public void TrySpawningObstacles(GameObject lane, LaneType laneType)
     {
         //checking if the lane can have obstacles
@@ -67,6 +71,12 @@ public class ObstacleSpawner : MonoBehaviour
                 float baseSpeed = Random.Range(2f, 4f);
                 log.SlowSpeed = baseSpeed;
                 log.fastSpeed = baseSpeed * 3f;
+
+                if(Random.value <= coinSpawnChance)
+                {
+                    Vector3 coinPos = spawnedObstacle.transform.position + new Vector3(0, -0.2f, 0);
+                    Instantiate(coinPrefab, coinPos, Quaternion.identity, spawnedObstacle.transform);
+                }
             }
             else if (spawnedObstacle.TryGetComponent<Train>(out Train train))
             {

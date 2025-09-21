@@ -11,33 +11,39 @@ using UnityEngine.Rendering;
 public class PlayerController : MonoBehaviour
 {
     public static event Action OnPlayerMovedForward;  //player moved forward event
+    public static event Action<int> OnScoreChanged;   //event for score change
+
+    [Header("Dependancies")]
+    [SerializeField]
+    private CamFollow cameraFollow;
 
     // public feilds
     [Tooltip("hight of the player hops")]
     [SerializeField]
     private float hopHeight = 0.5f;
+
     [Tooltip("duration of the player hops")]
     [SerializeField]
     private float hopDuration = 0.2f;
 
-    public static event Action<int> OnScoreChanged; //event for score change
+    [SerializeField]
+    private float xBoundary = 9f;
 
     //private feilds
     private Rigidbody playerRb;
-    private bool isMoving = false; //to check if the player is moving
-    //private Vector3 targetPosition;
-    //private float moveSpeed = 10f; //speed of movement
-    private int forwardPosZ = 0; //to track the forward position of the player
+    private bool isMoving = false;  //to check if the player is moving
+    private int forwardPosZ = 0;    //to track the forward position of the player
+    private bool isDead = false;    //to keep track if the player is alive or dead
 
-    //for the new input system var
-    private Vector2 touchStartPos;
-    private float minSwipeDist = 50f; //minimum distance for a swipe to be registered
+    private Vector2 touchStartPos;      //for the new input system var
+    private float minSwipeDist = 50f;   //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
 
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody>();
     }
+
     //subscribe the events
     private void OnEnable()
     {
@@ -58,6 +64,11 @@ public class PlayerController : MonoBehaviour
         playerInputActions.Player.PrimaryTouch.started -= OnTouchStart;
         playerInputActions.Player.PrimaryTouch.canceled -= OnTouchEnd;
         playerInputActions.Player.Disable();
+    }
+
+    private void Update()
+    {
+        CheckForOutOfBounds();
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -136,23 +147,30 @@ public class PlayerController : MonoBehaviour
 
     private void movePlayer(Vector3 direction)
     {
-        if (isMoving)
+        if (isMoving || isDead)
         {
             return;
         }
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f))
         {
-            // If the ray hits a solid obstacle, cancel the move.
+            //if the ray hits a solid obstacle, cancel the move.
             if (hit.collider.CompareTag("SolidObstacles"))
             {
                 Debug.Log("Move blocked by a solid obstacle!");
-                return; // Exit the function, do not hop.
+                return; //exit the function, do not hop.
             }
         }
         //Detaching the parent if the player is on a log
         transform.SetParent(null);
 
-        Vector3 destination = transform.position + direction;
+        //rounding the position to avoid floating point errors
+        Vector3 snappedPos = new Vector3(
+            Mathf.Round(transform.position.x),
+            0.5f,
+            Mathf.Round(transform.position.z)
+        );
+
+        Vector3 destination = snappedPos + direction;
         StartCoroutine(HopCoroutine(destination));
     
         if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
@@ -195,29 +213,70 @@ public class PlayerController : MonoBehaviour
             else if (landinghit.collider.CompareTag("Water"))
             {
                 // The first thing our ray hit was water. Game Over.
-                GameOver();
+                GameOver(true);
             }
         }
         isMoving = false;
     }
 
     //game over logic
-    private void GameOver()
+    private void GameOver(bool isDrowning)
     {
+        if (isDead) return;
+        isDead = true;
+
         Debug.Log("Game Over!");
-        // The method in your UIManager is likely named ShowGameOverPanel, based on previous scripts
+
         if (UIManager.Instance != null)
         {
             UIManager.Instance.ShowGameOver();
         }
-        this.enabled = false; // Disable this script to stop movement
+
+        if (isDrowning) {
+            transform.SetParent(null); //detach from the log if we are attched to it
+            if (cameraFollow != null) 
+            {
+                cameraFollow.enabled = false;
+            }
+            StartCoroutine(DrownCoroutine());
+        }
+    }
+
+    private IEnumerator DrownCoroutine()
+    {
+        float Duration = 1f;
+        float elapsedTime = 0f;
+        Vector3 startpos = transform.position;
+        Vector3 endpos = startpos - new Vector3(0, 4, 0); //to sink the player
+
+        while (elapsedTime < Duration)
+        {
+            Vector3 newpos = Vector3.Lerp(startpos, endpos, elapsedTime / Duration);
+            playerRb.MovePosition(newpos);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private void CheckForOutOfBounds()
+    {
+        //check if we are parented to the log or not
+        if(transform.parent != null && transform.parent.CompareTag("Platform"))
+        {
+            //when the player's X pos exceeds the XBoundary value
+            if(Mathf.Abs(transform.position.x) > xBoundary)
+            {
+                //then its game over for the player
+                GameOver(true);
+            }
+        }
     }
     //collision detection
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Obstacle"))
         {
-            GameOver();
+            GameOver(false);
         }
         else if (other.CompareTag("Coin"))
         {
@@ -234,16 +293,16 @@ public class PlayerController : MonoBehaviour
         //        GameOver();
         //    }
         //}
-        else if(other.CompareTag("Boundary"))
-        {
-            if(transform.parent != null && transform.parent.CompareTag("Platform"))
-            {
-                GameOver();
-            }
-        }
+        //else if(other.CompareTag("Boundary"))
+        //{
+        //    if(transform.parent != null && transform.parent.CompareTag("Platform"))
+        //    {
+        //        GameOver();
+        //    }
+        //}
     }
 
-    // This is for physical Collisions (like trees and rocks) that only block you
+    //this is for physical Collisions (like trees and rocks) that only block you
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
