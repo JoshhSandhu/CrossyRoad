@@ -4,6 +4,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    public Transform playerTransform { get; private set; }
 
     public int Coins { get; private set; }
     public static event Action<int> OnCoinsChanged;
@@ -17,6 +18,12 @@ public class GameManager : MonoBehaviour
         else
         {
             Instance = this;
+        }
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
+        {
+            playerTransform = playerObject.transform;
         }
     }
 
