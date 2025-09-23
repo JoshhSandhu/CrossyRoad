@@ -35,7 +35,7 @@ public class WorldGenerator : MonoBehaviour
     private float laneSpawnHeight = 0f;
 
     [Tooltip("coin spawn height")]
-    [SerializeField] 
+    [SerializeField]
     private float coinHeightOffset = 1f;
 
     private LaneType previousLaneType; //to keep track of the previous lane type
@@ -73,12 +73,24 @@ public class WorldGenerator : MonoBehaviour
     //spawns initial set of lanes at the start of the game
     private void InitializeWorld()
     {
+        //2 layers of densly populated lanes
+        for (int z = -6; z < -4; z++)
+        {
+            spawnedLane(0, z, false, true);
+        }
+        //4grass lanes behind the player
+        for (int z = -4; z < 0; z++)
+        {
+            spawnedLane(0, z, true, false);
+        }
+
         //spawnning a few lanes in the start
         for (int i = 0; i < 3; i++)
         {
-            spawnedLane(0);  //first 3 lanes are always grass lanes
+            spawnedLane(0, i, true, false);  //first 3 lanes are always grass lanes
         }
 
+        currentZpos = 3;
         //spawnning random lanes
         for (int i = 3; i < initialLanes; i++)
         {
@@ -101,8 +113,9 @@ public class WorldGenerator : MonoBehaviour
     }
 
     //this script spawns a lane at the current z position
-    private void spawnedLane(int index = -1)
+    private void spawnedLane(int index = -1, float? zPos = null, bool isSafeZone = false, bool isDense = false)
     {
+        float spawnZ = zPos ?? currentZpos;
         if (lanetypes.Count == 0)
         {
             Debug.LogError("No lane types assigned in the inspector.");
@@ -123,20 +136,24 @@ public class WorldGenerator : MonoBehaviour
         //using the obj pooler to spawn the lane
         GameObject lane = ObjectPooler.Instance.SpawnFromPool(
             selectedlanetype.laneName,
-            new Vector3(0, laneSpawnHeight, currentZpos),
+            new Vector3(0, laneSpawnHeight, spawnZ),
             Quaternion.identity
         );
 
-        if(lane != null)
+        if (lane != null)
         {
             activeLanes.Enqueue(lane); //adding the lane to the queue
             currentZpos++; //assuming each lane has a length of 1 unit
 
-            
-
-            if(!selectedlanetype.lanePrefab.CompareTag("Water"))
+            //only incremnet the global z pos if we are not using an override
+            if (zPos != null)
             {
-                if(Random.value <= coinSpawnChance)
+                currentZpos++;
+            }
+
+            if (!selectedlanetype.lanePrefab.CompareTag("Water"))
+            {
+                if (Random.value <= coinSpawnChance)
                 {
                     int randX = Random.Range(-5, 5);
                     Vector3 coinPos = new Vector3(randX, lane.transform.position.y + coinHeightOffset, lane.transform.position.z);
@@ -144,22 +161,26 @@ public class WorldGenerator : MonoBehaviour
                 }
             }
 
-            if (selectedlanetype.decorationsPrefab.Length >0)
+            if (selectedlanetype.decorationsPrefab.Length > 0)
             {
                 List<int> usedXPositions = new List<int>(); //storing the pos where the decorations have already spawned
-                
+
                 foreach (GameObject decorationPrefab in selectedlanetype.decorationsPrefab)
                 {
                     if (decorationPrefab.CompareTag("Platform"))
                     {
-                        int currentX = (previousLaneType != null && previousLaneType.name == "LillyWaterPadData") ? lastLilyPadx : Random.Range(-4,-2);
-                        while ( currentX <= 7f)
+                        int currentX = (previousLaneType != null && previousLaneType.name == "LillyWaterPadData") ? lastLilyPadx : Random.Range(-4, -2);
+                        while (currentX <= 3)
                         {
-                            Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y, lane.transform.position.z);
-                            GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-                            newDecoration.transform.SetParent(lane.transform);
-                            //remembering the last x pos of the lily pad
-                            lastLilyPadx = currentX; 
+                            if (currentX >= -3)
+                            {
+                                Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y, lane.transform.position.z);
+                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+                                newDecoration.transform.SetParent(lane.transform);
+                                lastLilyPadx = currentX;
+                            }
+
+                            //move to the next potential lily pad position
                             currentX += Random.Range(2, 4);
                         }
                     }
@@ -172,23 +193,48 @@ public class WorldGenerator : MonoBehaviour
                     }
                     else
                     {
-                        int decorationCount = Random.Range(0, 3); //randomly decide how many decorations to spawn
-                        for( int i = 0; i < decorationCount; i++)
+                        if (isDense)
                         {
-                            int randX = Random.Range(-5, 6);
-                            //ensuring that no two decorations spawn too close to each other
-                            while (usedXPositions.Exists(x => Mathf.Abs(x - randX) < 2))
+                            GameObject treePrefab = selectedlanetype.decorationsPrefab[0];
+                            for (int x = -5; x <= 5; x++)
                             {
-                                randX = Random.Range(-5, 6);
+                                if (Random.value < 0.75f)
+                                {
+                                    GameObject treeOj = Instantiate(treePrefab, new Vector3(x, lane.transform.position.y + 0.5f, lane.transform.position.z), Quaternion.identity);
+                                    treeOj.transform.SetParent(lane.transform);
+                                }
                             }
-                            usedXPositions.Add(randX);
-                            Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
-                            GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-                            newDecoration.transform.SetParent(lane.transform);
+                        }
+                        else if (isSafeZone)
+                        {
+                            if (Random.value < 0.2f)
+                            {
+                                int randX = Random.Range(-5, 5);
+                                Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
+                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+                                newDecoration.transform.SetParent(lane.transform);
+                            }
+                        }
+                        else
+                        {
+                            int decorationCount = Random.Range(0, 3); //randomly decide how many decorations to spawn
+                            for (int i = 0; i < decorationCount; i++)
+                            {
+                                int randX = Random.Range(-5, 5);
+                                //ensuring that no two decorations spawn too close to each other
+                                while (usedXPositions.Exists(x => Mathf.Abs(x - randX) < 2))
+                                {
+                                    randX = Random.Range(-5, 5);
+                                }
+                                usedXPositions.Add(randX);
+                                Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
+                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
+                                newDecoration.transform.SetParent(lane.transform);
+                            }
                         }
                     }
-				}
-			}
+                }
+            }
             obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
         }
         previousLaneType = selectedlanetype; //remembering the previous lane type

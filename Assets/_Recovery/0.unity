@@ -1932,12 +1932,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldGenerator
   obstacleSpawner: {fileID: 1821926346}
   coinPrefab: {fileID: 6472560904237587238, guid: 2f9e30a8433f3db45884db0465b81534, type: 3}
-  coinSpawnChance: 0.25
+  coinSpawnChance: 0.1
   lanetypes:
   - {fileID: 11400000, guid: 30eae7cbe8e712b4699454218eef11ce, type: 2}
   - {fileID: 11400000, guid: d638f991a1753ab488232cab26846b6a, type: 2}
-  - {fileID: 11400000, guid: c388967410fbce34a827d27c915fec36, type: 2}
   - {fileID: 11400000, guid: 42a2acb3e6693274186a47bbf47d4375, type: 2}
+  - {fileID: 11400000, guid: c388967410fbce34a827d27c915fec36, type: 2}
   - {fileID: 11400000, guid: 60ee8f1220bb9f4439bbd337e247d314, type: 2}
   initialLanes: 20
   maxLanesinscene: 30
