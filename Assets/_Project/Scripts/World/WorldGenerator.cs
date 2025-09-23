@@ -175,11 +175,11 @@ public class WorldGenerator : MonoBehaviour
                         int decorationCount = Random.Range(0, 3); //randomly decide how many decorations to spawn
                         for( int i = 0; i < decorationCount; i++)
                         {
-                            int randX = Random.Range(-8, 8);
+                            int randX = Random.Range(-5, 6);
                             //ensuring that no two decorations spawn too close to each other
                             while (usedXPositions.Exists(x => Mathf.Abs(x - randX) < 2))
                             {
-                                randX = Random.Range(-8, 8);
+                                randX = Random.Range(-5, 6);
                             }
                             usedXPositions.Add(randX);
                             Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);

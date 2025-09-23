@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     private float hopDuration = 0.2f;
 
     [SerializeField]
-    private float xBoundary = 9f;
+    private float xBoundary = 5f;
 
     //private feilds
     private Rigidbody playerRb;

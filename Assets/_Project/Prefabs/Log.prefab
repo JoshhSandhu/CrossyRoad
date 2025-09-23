@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5541410781516081660}
   - component: {fileID: 562434066496381938}
   - component: {fileID: 4888160817970375442}
+  - component: {fileID: -603852629672238482}
   m_Layer: 0
   m_Name: Log
   m_TagString: Platform
@@ -73,6 +74,20 @@ MonoBehaviour:
   fastSpeed: 9
   boundaryX: 9
   raycastDistance: 0.3
+--- !u!114 &-603852629672238482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5713178319686035433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e679ecb75210d934d9eb0f828adc3c6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Despawner
+  despawnDistanceZ: 5
+  despawnDistanceX: 35
 --- !u!1 &9148394820862364481
 GameObject:
   m_ObjectHideFlags: 0

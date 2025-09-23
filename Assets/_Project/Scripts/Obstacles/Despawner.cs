@@ -3,22 +3,30 @@ using UnityEngine;
 public class Despawner : MonoBehaviour
 {
     [Tooltip("reference to the player's transform.")]
-    public Transform player;
+    private Transform player;
 
-    [Tooltip("dist from the player before removing")]
-    [SerializeField] private float despawnDistance = 10f;
+    [Tooltip("dist behind the player before removing")]
+    [SerializeField] private float despawnDistanceZ = 5f;
+
+    [Tooltip("distance from the side of the player before despawning")]
+    [SerializeField] private float despawnDistanceX = 35f;
 
     void Start()
     {
-        if (player == null)
+        //if the player transform is not assigned then assign it automatically
+        if(GameManager.Instance != null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = GameManager.Instance.playerTransform;
         }
     }
 
     void Update()
     {
-        if (transform.position.z < player.position.z - despawnDistance)
+        //if the player doesn't have a ref, we can't do anything
+        if (player == null) { return; }
+
+        //check is the objects is too far behind or to far to the side
+        if (transform.position.z < player.position.z - despawnDistanceZ || Mathf.Abs(transform.position.x) > despawnDistanceX)
         {
             Destroy(gameObject);
         }
