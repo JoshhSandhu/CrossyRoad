@@ -25,7 +25,8 @@ public class ObjectPooler : MonoBehaviour
     
     public void CreatePool(string tag, GameObject prefab, int size)
     {
-        if(poolDict.ContainsKey(tag))
+        Debug.Log($"ObjectPooler.CreatePool called: tag={tag}, prefab={prefab?.name}, size={size}");
+        if (poolDict.ContainsKey(tag))
         {
             Debug.LogWarning("Pool with tag " + tag + " already exists.");
             return;
@@ -42,6 +43,7 @@ public class ObjectPooler : MonoBehaviour
         }
 
         poolDict.Add(tag, objpool); //adding the queue to the dictionary
+        Debug.Log($"Successfully created pool '{tag}' with {size} objects");
     }
 
     public GameObject SpawnFromPool(string tag, Vector3 pos, Quaternion rot)

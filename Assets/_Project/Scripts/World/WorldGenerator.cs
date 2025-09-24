@@ -1,242 +1,127 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
-public class WorldGenerator : MonoBehaviour
+/// <summary>
+/// main world generator class that orchestrates the creation and management of game lanes.
+/// follows SOLID principles by delegating specific responsibilities to specialized components.
+/// </summary>
+public class WorldGenerator : MonoBehaviour, IWorldGenerator
 {
-    [Header("Dependancies")]
-    [SerializeField]
-    private ObstacleSpawner obstacleSpawner;
-
-    [Header("Collectables")]
-    [SerializeField]
-    private GameObject coinPrefab;
-    [SerializeField]
-    [UnityEngine.Range(0, 1)]
-    private float coinSpawnChance = 0.25f; //25% chance to spawn a coin
+    [Header("Dependencies")]
+    [SerializeField] private LaneSpawner laneSpawner;                   // Handles lane spawning logic
+    [SerializeField] private CollectableSpawner collectableSpawner;     // Manages collectable spawning
+    [SerializeField] private DecorationSpawner decorationSpawner;       // Handles decoration spawning
+    [SerializeField] private LaneManager laneManager;                   // Manages active lanes queue
+    [SerializeField] private ObstacleSpawner obstacleSpawner;           // Spawns obstacles on lanes
 
     [Header("World Generation Settings")]
-    [Tooltip("All the possible lane types")]
-    [SerializeField]
-    private List<LaneType> lanetypes;  //using system.collections.generic
-
     [Tooltip("The number of lanes to be generated at the start")]
-    [SerializeField]
-    private int initialLanes = 20;
+    [SerializeField] private int initialLanes = 20;
 
-    [Tooltip("how many lanes to maintian")]
-    [SerializeField]
-    private int maxLanesinscene = 30;
+    //current Z position for lane spawning. Increments as new lanes are created.
+    private float currentZPos = 0f;
 
-    [Tooltip("lane spawn height")]
-    [SerializeField]
-    private float laneSpawnHeight = 0f;
-
-    [Tooltip("coin spawn height")]
-    [SerializeField]
-    private float coinHeightOffset = 1f;
-
-    private LaneType previousLaneType; //to keep track of the previous lane type
-    private int lastLilyPadx = 0;
-
-    //private variables
-    private float currentZpos = 0f;
-    private Queue<GameObject> activeLanes = new Queue<GameObject>(); //keeping track of active lanes
-
+    //subscribe to player movement events when the component is enabled.
     private void OnEnable()
     {
         PlayerController.OnPlayerMovedForward += HandlePlayerMovedForward;
     }
 
+    //unsubscribe from player movement events when the component is disabled.
     private void OnDisable()
     {
         PlayerController.OnPlayerMovedForward -= HandlePlayerMovedForward;
     }
 
+    //initialize the world when the game starts
     private void Start()
     {
-        InitializePool();
+        InitializePools();
         InitializeWorld();
     }
 
-    private void InitializePool()
+    private void InitializePools()
     {
-        foreach (var lanetype in lanetypes)
+        if (laneSpawner != null)
         {
-            //using the obj pooler to create pools for each lane type
-            ObjectPooler.Instance.CreatePool(lanetype.laneName, lanetype.lanePrefab, maxLanesinscene);
+            laneSpawner.Initializepool();
+        }
+        else
+        {
+            Debug.LogError("Cannot initialize pools - LaneSpawner is not assigned!");
         }
     }
 
-    //spawns initial set of lanes at the start of the game
-    private void InitializeWorld()
+    //spawns the initial set of lanes at the start of the game
+    public void InitializeWorld()
     {
-        //2 layers of densly populated lanes
+        //2 layers of densely populated lanes
         for (int z = -6; z < -4; z++)
         {
-            spawnedLane(0, z, false, true);
+            SpawnLane(0, z, false, true);
         }
-        //4grass lanes behind the player
+        //4 grass lanes behind the player
         for (int z = -4; z < 0; z++)
         {
-            spawnedLane(0, z, true, false);
+            SpawnLane(0, z, true, false);
         }
 
-        //spawnning a few lanes in the start
+        //spawning a few lanes in the start
         for (int i = 0; i < 3; i++)
         {
-            spawnedLane(0, i, true, false);  //first 3 lanes are always grass lanes
+            SpawnLane(0, i, true, false);  //first 3 lanes are always grass lanes
         }
 
-        currentZpos = 3;
-        //spawnning random lanes
+        currentZPos = 3;
+        //spawning random lanes
         for (int i = 3; i < initialLanes; i++)
         {
-            spawnedLane();
+            SpawnLane();
         }
     }
 
-    //when the player moves forward this function is called to spawn a new lane
-    private void HandlePlayerMovedForward()
+    //handles player movement forward by spawning new lanes and managing lane cleanup.
+    public void HandlePlayerMovedForward()
     {
         //spawn a new lane
-        spawnedLane();
+        SpawnLane();
 
-        //removin the oldest lane if we have more than maxLanesinscene
-        if (activeLanes.Count > maxLanesinscene)
+        //remove the oldest lane if we have more than max lanes
+        if (laneManager.ShouldRemoveLane())
         {
-            GameObject oldLane = activeLanes.Dequeue();
-            oldLane.SetActive(false);
+            laneManager.RemoveOldestLane();
         }
     }
 
-    //this script spawns a lane at the current z position
-    private void spawnedLane(int index = -1, float? zPos = null, bool isSafeZone = false, bool isDense = false)
+    //spawns a lane at the specified position with given parameters.
+    private void SpawnLane(int index = -1, float? zPos = null, bool isSafeZone = false, bool isDense = false)
     {
-        float spawnZ = zPos ?? currentZpos;
-        if (lanetypes.Count == 0)
-        {
-            Debug.LogError("No lane types assigned in the inspector.");
-            return;
-        }
+        float spawnZ = zPos ?? currentZPos;
 
-        //picking a random lane type if index is not provided
-        int randindex = (index == -1) ? Random.Range(0, lanetypes.Count) : index;
-        LaneType selectedlanetype = lanetypes[randindex];
-
-        //ensuring that the lily lane type does not spawn consecutively
-        if (previousLaneType != null && previousLaneType.name == "LillyWaterPadData" && selectedlanetype.name == "LillyWaterPadData")
-        {
-            randindex = (index == -1) ? Random.Range(0, lanetypes.Count) : index;
-            selectedlanetype = lanetypes[randindex];
-        }
-
-        //using the obj pooler to spawn the lane
-        GameObject lane = ObjectPooler.Instance.SpawnFromPool(
-            selectedlanetype.laneName,
-            new Vector3(0, laneSpawnHeight, spawnZ),
-            Quaternion.identity
-        );
+        GameObject lane = laneSpawner.SpawnLane(index, spawnZ, isSafeZone, isDense);
 
         if (lane != null)
         {
-            activeLanes.Enqueue(lane); //adding the lane to the queue
-            currentZpos++; //assuming each lane has a length of 1 unit
+            laneManager.AddLane(lane);
+            currentZPos++;
 
-            //only incremnet the global z pos if we are not using an override
+            //only increment the global z pos if we are not using an override
             if (zPos != null)
             {
-                currentZpos++;
+                currentZPos++;
             }
 
-            if (!selectedlanetype.lanePrefab.CompareTag("Water"))
-            {
-                if (Random.value <= coinSpawnChance)
-                {
-                    int randX = Random.Range(-5, 5);
-                    Vector3 coinPos = new Vector3(randX, lane.transform.position.y + coinHeightOffset, lane.transform.position.z);
-                    Instantiate(coinPrefab, coinPos, Quaternion.identity);
-                }
-            }
+            //get the lane type for spawning collectables and decorations
+            LaneType laneType = laneSpawner.GetCurrentLaneType();
 
-            if (selectedlanetype.decorationsPrefab.Length > 0)
-            {
-                List<int> usedXPositions = new List<int>(); //storing the pos where the decorations have already spawned
+            //spawn collectables
+            collectableSpawner.TrySpawnCollectable(lane, laneType);
 
-                foreach (GameObject decorationPrefab in selectedlanetype.decorationsPrefab)
-                {
-                    if (decorationPrefab.CompareTag("Platform"))
-                    {
-                        int currentX = (previousLaneType != null && previousLaneType.name == "LillyWaterPadData") ? lastLilyPadx : Random.Range(-4, -2);
-                        while (currentX <= 3)
-                        {
-                            if (currentX >= -3)
-                            {
-                                Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y, lane.transform.position.z);
-                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-                                newDecoration.transform.SetParent(lane.transform);
-                                lastLilyPadx = currentX;
-                            }
+            //spawn decorations
+            decorationSpawner.SpawnDecorations(lane, laneType, isSafeZone, isDense);
 
-                            //move to the next potential lily pad position
-                            currentX += Random.Range(2, 4);
-                        }
-                    }
-                    else if (decorationPrefab.GetComponent<SignalController>() != null)
-                    {
-                        Vector3 signalPos = new Vector3(0, lane.transform.position.y, lane.transform.position.z - 0.5f);
-                        Quaternion signalRotation = Quaternion.Euler(0, 90, 0);
-                        GameObject newSignal = Instantiate(decorationPrefab, signalPos, signalRotation);
-                        newSignal.transform.SetParent(lane.transform);
-                    }
-                    else
-                    {
-                        if (isDense)
-                        {
-                            GameObject treePrefab = selectedlanetype.decorationsPrefab[0];
-                            for (int x = -5; x <= 5; x++)
-                            {
-                                if (Random.value < 0.75f)
-                                {
-                                    GameObject treeOj = Instantiate(treePrefab, new Vector3(x, lane.transform.position.y + 0.5f, lane.transform.position.z), Quaternion.identity);
-                                    treeOj.transform.SetParent(lane.transform);
-                                }
-                            }
-                        }
-                        else if (isSafeZone)
-                        {
-                            if (Random.value < 0.2f)
-                            {
-                                int randX = Random.Range(-5, 5);
-                                Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
-                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-                                newDecoration.transform.SetParent(lane.transform);
-                            }
-                        }
-                        else
-                        {
-                            int decorationCount = Random.Range(0, 3); //randomly decide how many decorations to spawn
-                            for (int i = 0; i < decorationCount; i++)
-                            {
-                                int randX = Random.Range(-5, 5);
-                                //ensuring that no two decorations spawn too close to each other
-                                while (usedXPositions.Exists(x => Mathf.Abs(x - randX) < 2))
-                                {
-                                    randX = Random.Range(-5, 5);
-                                }
-                                usedXPositions.Add(randX);
-                                Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
-                                GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
-                                newDecoration.transform.SetParent(lane.transform);
-                            }
-                        }
-                    }
-                }
-            }
-            obstacleSpawner.TrySpawningObstacles(lane, selectedlanetype);
+            //spawn obstacles
+            obstacleSpawner.TrySpawningObstacles(lane, laneType);
         }
-        previousLaneType = selectedlanetype; //remembering the previous lane type
     }
 }
