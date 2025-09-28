@@ -452,7 +452,7 @@ MonoBehaviour:
   cameraFollow: {fileID: 1289800179}
   hopHeight: 0.5
   hopDuration: 0.2
-  xBoundary: 9
+  xBoundary: 5.5
 --- !u!1 &699360874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1350,11 +1350,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1143326940}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -209.4, y: 240}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 20, y: -20}
   m_SizeDelta: {x: 200, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1423864377
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1709,11 +1709,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1143326940}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 248.17, y: 240}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 30, y: -20}
   m_SizeDelta: {x: 200, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &1663463617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1995,7 +1995,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviourScript
   coinPrefab: {fileID: 6472560904237587238, guid: 2f9e30a8433f3db45884db0465b81534, type: 3}
   coinSpawnChance: 0.25
-  coinHeightOffset: 1
+  coinHeightOffset: 0.1
 --- !u!1 &1821926343
 GameObject:
   m_ObjectHideFlags: 0
