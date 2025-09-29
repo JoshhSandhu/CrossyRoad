@@ -204,7 +204,7 @@ public class PlayerController : MonoBehaviour
         //if we landed on a log
         if (Physics.Raycast(transform.position, Vector3.down, out landinghit, 2f)) // Increased distance to be safe
         {
-            //Debug.Log("Landed on: " + landinghit.collider.name + " | Tag: " + landinghit.collider.tag);
+            Debug.Log("Landed on: " + landinghit.collider.name + " | Tag: " + landinghit.collider.tag);
             if (landinghit.collider.CompareTag("Platform"))
             {
                 // We landed safely on a log. Parent to it.

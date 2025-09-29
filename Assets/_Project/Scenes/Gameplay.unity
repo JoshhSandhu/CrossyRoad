@@ -436,7 +436,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 3
+  m_CollisionDetection: 2
 --- !u!114 &671401314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,7 +450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraFollow: {fileID: 1289800179}
-  hopHeight: 0.5
+  hopHeight: 0.7
   hopDuration: 0.2
   xBoundary: 5.5
 --- !u!1 &699360874
@@ -1159,7 +1159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 379824b9bc627df4290b08ed7ad7b353, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CamFollow
-  player: {fileID: 671401311}
+  player: {fileID: 1880769466}
   smoothSpeed: 0.125
   offset: {x: 0, y: 0, z: 0}
 --- !u!114 &1289800180
@@ -2032,6 +2032,8 @@ MonoBehaviour:
   laneManager: {fileID: 116654930}
   obstacleSpawner: {fileID: 1821926346}
   initialLanes: 20
+  spawnAreaPrefab: {fileID: 2258499817745954151, guid: 9d4514107512cf24f847ba4eef1c19f4, type: 3}
+  spawnAreaDespawnDistance: 10
 --- !u!4 &1821926345
 Transform:
   m_ObjectHideFlags: 0
@@ -2060,8 +2062,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObstacleSpawner
   spawnRangeX: 20
+  carHeightOffset: 0.1
+  logHeightOffset: 0.5
+  trainHeightOffset: 0.15
   coinPrefab: {fileID: 6472560904237587238, guid: 2f9e30a8433f3db45884db0465b81534, type: 3}
-  coinSpawnChance: 0.1
+  coinSpawnChance: 0.15
 --- !u!1 &1859755254
 GameObject:
   m_ObjectHideFlags: 0
@@ -2106,6 +2111,126 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059839389801e20419df84e209cbe5b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DecorationSpawner
+--- !u!1001 &1880769464
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_Name
+      value: Man_Eskimo Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1880769467}
+    - targetCorrespondingSourceObject: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1880769471}
+  m_SourcePrefab: {fileID: 100100000, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+--- !u!1 &1880769465 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+  m_PrefabInstance: {fileID: 1880769464}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1880769466 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
+  m_PrefabInstance: {fileID: 1880769464}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1880769467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1880769465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd7e169234169494e87f4b96f7ec781b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  cameraFollow: {fileID: 1289800179}
+  hopHeight: 0.5
+  hopDuration: 0.2
+  xBoundary: 5
+--- !u!54 &1880769471
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1880769465}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 3
 --- !u!1 &1982513664
 GameObject:
   m_ObjectHideFlags: 0
@@ -2490,3 +2615,4 @@ SceneRoots:
   - {fileID: 2034822378}
   - {fileID: 991696495}
   - {fileID: 747859901}
+  - {fileID: 1880769464}

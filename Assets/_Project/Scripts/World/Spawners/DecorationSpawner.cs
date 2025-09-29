@@ -52,7 +52,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
         {
             if (currentX >= -3)
             {
-                Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y, lane.transform.position.z);
+                Vector3 decorationPos = new Vector3(currentX, lane.transform.position.y + 0.05f, lane.transform.position.z);
                 GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
                 newDecoration.transform.SetParent(lane.transform);
                 lastLilyPadX = currentX;
@@ -95,7 +95,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
         {
             if (Random.value < 0.75f)
             {
-                GameObject treeObj = Instantiate(decorationPrefab, new Vector3(x, lane.transform.position.y + 0.5f, lane.transform.position.z), Quaternion.identity);
+                GameObject treeObj = Instantiate(decorationPrefab, new Vector3(x, lane.transform.position.y + 0.15f, lane.transform.position.z), Quaternion.identity);
                 treeObj.transform.SetParent(lane.transform);
             }
         }
@@ -128,7 +128,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
             }
 
             usedXPositions.Add(randX);
-            Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.5f, lane.transform.position.z);
+            Vector3 decorationPos = new Vector3(randX, lane.transform.position.y + 0.15f, lane.transform.position.z);
             GameObject newDecoration = Instantiate(decorationPrefab, decorationPos, Quaternion.identity);
             newDecoration.transform.SetParent(lane.transform);
         }

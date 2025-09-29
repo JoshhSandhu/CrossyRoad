@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WaterData
   m_EditorClassIdentifier: Assembly-CSharp::LaneType
   laneName: WaterLane
-  lanePrefab: {fileID: 8657745833150458246, guid: 766b0995f6b3dd64a836e0c4e5905c66, type: 3}
+  lanePrefab: {fileID: 7101781484748252511, guid: 5cf3dedfff7fef34ca49dae3347aab93, type: 3}
   canHaveObstacles: 1
   obstaclePrefab:
   - {fileID: 5713178319686035433, guid: 1909626062b1259439e8ac9967b8e02d, type: 3}
