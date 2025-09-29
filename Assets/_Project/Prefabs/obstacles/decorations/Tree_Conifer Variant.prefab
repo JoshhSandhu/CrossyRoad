@@ -13,6 +13,10 @@ PrefabInstance:
       value: Tree_Conifer Variant
       objectReference: {fileID: 0}
     - target: {fileID: 1000010806502382, guid: 6b9fef59fa39f0744ab9d260ec6266d0, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000010806502382, guid: 6b9fef59fa39f0744ab9d260ec6266d0, type: 3}
       propertyPath: m_TagString
       value: SolidObstacles
       objectReference: {fileID: 0}
@@ -68,6 +72,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 64165504547014832, guid: 6b9fef59fa39f0744ab9d260ec6266d0, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -100,5 +108,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.4400942, y: 5.7361794, z: 2.7292051}
+  m_Size: {x: 1.7, y: 5.7361794, z: 1.7}
   m_Center: {x: -0.060791492, y: 2.8545494, z: -0.010021746}

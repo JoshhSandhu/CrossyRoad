@@ -317,7 +317,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &671401308
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -453,6 +453,14 @@ MonoBehaviour:
   hopHeight: 0.7
   hopDuration: 0.2
   xBoundary: 5.5
+  blockingMask:
+    serializedVersion: 2
+    m_Bits: 192
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 784
+  blockCastHalfExtents: {x: 0.35, y: 0.5, z: 0.35}
+  scatterParticleSystem: {fileID: 0}
 --- !u!1 &699360874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,13 +1148,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289800175}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38395843, y: -0.09564355, z: 0.064046696, w: 0.91614753}
-  m_LocalPosition: {x: 1.17, y: 5.23, z: -3.85}
+  m_LocalRotation: {x: 0.4924039, y: -0.1503838, z: 0.08682413, w: 0.85286856}
+  m_LocalPosition: {x: 3, y: 10, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45.707, y: -10.4, z: 3.605}
+  m_LocalEulerAnglesHint: {x: 60, y: -20, z: 0}
 --- !u!114 &1289800179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1160,8 +1168,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CamFollow
   player: {fileID: 1880769466}
-  smoothSpeed: 0.125
-  offset: {x: 0, y: 0, z: 0}
+  Xdamping: 8
+  Zdamping: 5
+  offset: {x: 5, y: 12, z: -10}
+  Zlookahead: 1.5
+  Xfollowclamp: 4
+  Xworldcentere: 0
+  XfollowWeight: 0.6
+  traumaDecay: 1.5
+  maxShakeOffset: 0.2
+  maxShakeAngle: 2
+  CameraShake: 1
+  pitchDegrees: 55
+  yawDegrees: -20
 --- !u!114 &1289800180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1377,8 +1396,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 0
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9798b68fab7ddbc44a4893fbbac08a39, type: 2}
+  m_sharedMaterial: {fileID: -9017553570251827435, guid: 9798b68fab7ddbc44a4893fbbac08a39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1578,7 +1597,7 @@ GameObject:
   - component: {fileID: 1615407006}
   - component: {fileID: 1615407005}
   - component: {fileID: 1615407004}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LeftWall
   m_TagString: Boundary
   m_Icon: {fileID: 0}
@@ -1594,7 +1613,7 @@ Transform:
   m_GameObject: {fileID: 1615407002}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.5, y: 0, z: 50}
+  m_LocalPosition: {x: -6, y: 0, z: 50}
   m_LocalScale: {x: 1, y: 10, z: 200}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1736,15 +1755,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: 0
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9798b68fab7ddbc44a4893fbbac08a39, type: 2}
+  m_sharedMaterial: {fileID: -9017553570251827435, guid: 9798b68fab7ddbc44a4893fbbac08a39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278249983
+  m_fontColor: {r: 1, g: 0.912394, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -2125,7 +2144,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1235504530503327979, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2133,7 +2152,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 1240321527672600373, guid: d588f137ca7650e44ace3c0b94dd8783, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2204,6 +2223,14 @@ MonoBehaviour:
   hopHeight: 0.5
   hopDuration: 0.2
   xBoundary: 5
+  blockingMask:
+    serializedVersion: 2
+    m_Bits: 192
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 784
+  blockCastHalfExtents: {x: 0.35, y: 0.5, z: 0.35}
+  scatterParticleSystem: {fileID: 4285566406749816854, guid: f78764236105ad44e909dda7ef4e799c, type: 3}
 --- !u!54 &1880769471
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2449,7 +2476,7 @@ GameObject:
   - component: {fileID: 2088593555}
   - component: {fileID: 2088593554}
   - component: {fileID: 2088593553}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RightWall
   m_TagString: Boundary
   m_Icon: {fileID: 0}
@@ -2465,7 +2492,7 @@ Transform:
   m_GameObject: {fileID: 2088593551}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.5, y: 0, z: 50}
+  m_LocalPosition: {x: 6, y: 0, z: 50}
   m_LocalScale: {x: 1, y: 10, z: 200}
   m_ConstrainProportionsScale: 0
   m_Children: []

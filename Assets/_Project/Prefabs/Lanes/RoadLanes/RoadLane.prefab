@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 32405777089161442}
   - component: {fileID: 8483377482991989954}
   - component: {fileID: 2352496534723761452}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: rightLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -120,7 +120,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5370650924155211273}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RoadLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,7 +157,7 @@ GameObject:
   - component: {fileID: 3315830591002960560}
   - component: {fileID: 3226807165023823515}
   - component: {fileID: 2519578855705882130}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: leftLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 7140503372414763561}
   - component: {fileID: 5053565011537410196}
   - component: {fileID: 4679850112413985628}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: centerLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
