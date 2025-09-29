@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: TrainTrackData
   m_EditorClassIdentifier: Assembly-CSharp::LaneType
   laneName: TrainTrack
-  lanePrefab: {fileID: 5608951039003921134, guid: f267cba306faede48b234687681aaad1, type: 3}
+  lanePrefab: {fileID: 7773474670239304906, guid: bbfbca3b52184fa4888d856d83166466, type: 3}
   canHaveObstacles: 1
   obstaclePrefab:
-  - {fileID: 2037450342280266757, guid: f2d0b4aa8198a03448d321fe6f2777a9, type: 3}
+  - {fileID: 2593241188539283207, guid: dc3fe577a96a49c4a89e831a0a7b0e71, type: 3}
   decorationsPrefab:
   - {fileID: 5185157697232924230, guid: ec5f775a5e120db429015eb91534be3f, type: 3}
   minSpawnTime: 8

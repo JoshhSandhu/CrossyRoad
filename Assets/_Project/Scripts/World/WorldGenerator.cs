@@ -18,8 +18,15 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
     [Tooltip("The number of lanes to be generated at the start")]
     [SerializeField] private int initialLanes = 20;
 
+    [Header("Spawn Area")]
+    [Tooltip("The spawn area prefab to instantiate at the start")]
+    [SerializeField] private GameObject spawnAreaPrefab;
+    [Tooltip("Distance the player needs to move forward before spawn area despawns")]
+    [SerializeField] private float spawnAreaDespawnDistance = 5f;
+
     //current Z position for lane spawning. Increments as new lanes are created.
     private float currentZPos = 0f;
+    private GameObject spawnAreaInstance;
 
     //subscribe to player movement events when the component is enabled.
     private void OnEnable()
@@ -55,26 +62,22 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
     //spawns the initial set of lanes at the start of the game
     public void InitializeWorld()
     {
-        //2 layers of densely populated lanes
-        for (int z = -6; z < -4; z++)
+        //spawn the spawn area prefab at the specified position
+        if (spawnAreaPrefab != null)
         {
-            SpawnLane(0, z, false, true);
+            spawnAreaInstance = Instantiate(spawnAreaPrefab, new Vector3(0, 0.1f, 0), Quaternion.identity);
+            Debug.Log("Spawn area prefab instantiated at (0, 0.1, 0)");
         }
-        //4 grass lanes behind the player
-        for (int z = -4; z < 0; z++)
+        else
         {
-            SpawnLane(0, z, true, false);
-        }
-
-        //spawning a few lanes in the start
-        for (int i = 0; i < 3; i++)
-        {
-            SpawnLane(0, i, true, false);  //first 3 lanes are always grass lanes
+            Debug.LogWarning("Spawn area prefab is not assigned in WorldGenerator!");
         }
 
+        //set current Z position to 2 for normal lane spawning
         currentZPos = 3;
-        //spawning random lanes
-        for (int i = 3; i < initialLanes; i++)
+
+        //spawning random lanes starting from Z position 2
+        for (int i = 2; i < initialLanes; i++)
         {
             SpawnLane();
         }
@@ -83,6 +86,17 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
     //handles player movement forward by spawning new lanes and managing lane cleanup.
     public void HandlePlayerMovedForward()
     {
+        //check if spawn area should be despawned
+        if (spawnAreaInstance != null && GameManager.Instance.playerTransform != null)
+        {
+            float playerZ = GameManager.Instance.playerTransform.position.z;
+            if (playerZ >= spawnAreaDespawnDistance)
+            {
+                Destroy(spawnAreaInstance);
+                spawnAreaInstance = null;
+                Debug.Log("Spawn area despawned - player moved significantly forward");
+            }
+        }
         //spawn a new lane
         SpawnLane();
 

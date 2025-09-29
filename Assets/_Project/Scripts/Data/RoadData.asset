@@ -13,7 +13,15 @@ MonoBehaviour:
   m_Name: RoadData
   m_EditorClassIdentifier: Assembly-CSharp::LaneType
   laneName: RoadLane
-  lanePrefab: {fileID: 8267557690374008171, guid: 3724c95782c02d74b9436fb41663b2f9, type: 3}
+  lanePrefab: {fileID: 5307389825119829421, guid: d71eb6b6ae366484e88d26826e93e28c, type: 3}
   canHaveObstacles: 1
   obstaclePrefab:
-  - {fileID: 976323401879446899, guid: 9a8cd4d045b9ec647bf307b9a0417acd, type: 3}
+  - {fileID: 6309928204476370802, guid: 3e0671352e5f67c419b72163da1390a4, type: 3}
+  - {fileID: 6388225507973699273, guid: 82955643d3a64644cbafb6ecd343d75f, type: 3}
+  - {fileID: 6532589523143557827, guid: 5cd6ca5a7ceff1549ae53d014b0a6304, type: 3}
+  - {fileID: 6408144579553846398, guid: 16dfd2b0cb25e534ca89a30643918139, type: 3}
+  - {fileID: 3459073321356162068, guid: c5374fae87450c54a9585b669b5d2e2b, type: 3}
+  decorationsPrefab: []
+  minSpawnTime: 2
+  maxSpawnTime: 5
+  warningSignalPrefab: {fileID: 0}

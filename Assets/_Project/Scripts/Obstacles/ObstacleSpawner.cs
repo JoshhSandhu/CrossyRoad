@@ -8,6 +8,14 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField]
     private float spawnRangeX = 20f;
 
+    [Header("Obstacle Heights")]
+    [Tooltip("Height offset for car obstacles")]
+    [SerializeField] private float carHeightOffset = 0.1f;
+    [Tooltip("Height offset for log obstacles")]
+    [SerializeField] private float logHeightOffset = 1f;
+    [Tooltip("Height offset for train obstacles")]
+    [SerializeField] private float trainHeightOffset = 0.15f;
+
     [Header("Collectibles")]
     [SerializeField] private GameObject coinPrefab;
     [SerializeField][Range(0, 1)] private float coinSpawnChance = 0.5f; //50% chance for a coin to be on a log
@@ -54,8 +62,9 @@ public class ObstacleSpawner : MonoBehaviour
                 yield return new WaitForSeconds(warningDuration);
 
             }
-              
-            Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + 0.5f, lane.transform.position.z);
+
+            float heightOffset = GetHeightOffsetForObstacle(obstaclePrefab);
+            Vector3 spawnPosition = new Vector3(spawnRangeX * -direction, lane.transform.position.y + heightOffset, lane.transform.position.z);
             Quaternion spawnRotation = Quaternion.Euler(0, 90 * direction, 0);
 
             GameObject spawnedObstacle = Instantiate(obstaclePrefab, spawnPosition, spawnRotation);
@@ -83,5 +92,23 @@ public class ObstacleSpawner : MonoBehaviour
                 train.speed = Trainspeed;
             }
         }
+    }
+
+    private float GetHeightOffsetForObstacle(GameObject obstaclePrefab)
+    {
+        //check if the prefab has specific components to determine type
+        if (obstaclePrefab.GetComponent<Car>() != null)
+        {
+            return carHeightOffset;
+        }
+        else if (obstaclePrefab.GetComponent<Log>() != null)
+        {
+            return logHeightOffset;
+        }
+        else if (obstaclePrefab.GetComponent<Train>() != null)
+        {
+            return trainHeightOffset;
+        }
+        return carHeightOffset;
     }
 }

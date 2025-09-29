@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: LillyWaterPadData
   m_EditorClassIdentifier: Assembly-CSharp::LaneType
   laneName: LillyLane
-  lanePrefab: {fileID: 8657745833150458246, guid: 766b0995f6b3dd64a836e0c4e5905c66, type: 3}
+  lanePrefab: {fileID: 7101781484748252511, guid: 5cf3dedfff7fef34ca49dae3347aab93, type: 3}
   canHaveObstacles: 0
   obstaclePrefab: []
   decorationsPrefab:
-  - {fileID: 7083629677154580025, guid: 4d7a0e242fb6541438c35cb835b45739, type: 3}
+  - {fileID: 1443864392584114, guid: b0030cebfa39640c1a2bdea00a7d6963, type: 3}
   minSpawnTime: 2
   maxSpawnTime: 5
   warningSignalPrefab: {fileID: 0}
