@@ -65,6 +65,10 @@ PrefabInstance:
       value: Rock_Large Variant
       objectReference: {fileID: 0}
     - target: {fileID: 7908703939953013761, guid: da6b501100a84ce48a803cdbb473794b, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7908703939953013761, guid: da6b501100a84ce48a803cdbb473794b, type: 3}
       propertyPath: m_TagString
       value: SolidObstacles
       objectReference: {fileID: 0}

@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4239347586380910}
   - component: {fileID: 33815448181209958}
   - component: {fileID: 23168300354129296}
-  - component: {fileID: 7823389489999718691}
-  m_Layer: 0
+  - component: {fileID: 2698426952929494869}
+  m_Layer: 9
   m_Name: Lotus_Leaf
   m_TagString: Platform
   m_Icon: {fileID: 0}
@@ -90,8 +90,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &7823389489999718691
-CapsuleCollider:
+--- !u!65 &2698426952929494869
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -108,8 +108,6 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.45
-  m_Height: 0.5
-  m_Direction: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8092061, y: 0.04275022, z: 0.83889925}
   m_Center: {x: -0.010680065, y: 0.031488456, z: 0.04357256}

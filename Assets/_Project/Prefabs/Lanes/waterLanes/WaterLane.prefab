@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6001112445146779697}
   - component: {fileID: 2678175536715406515}
   - component: {fileID: 1879542266091934992}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: leftLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 3783123914189630224}
   - component: {fileID: 4982283392312025335}
   - component: {fileID: 3420793505447846149}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: centerLane
   m_TagString: Water
   m_Icon: {fileID: 0}
@@ -232,7 +232,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5918024310034000174}
   - component: {fileID: 8590654889872125683}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: WaterLane
   m_TagString: Water
   m_Icon: {fileID: 0}
@@ -272,7 +272,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -290,7 +290,7 @@ GameObject:
   - component: {fileID: 9153526891488147750}
   - component: {fileID: 410382536992113333}
   - component: {fileID: 8851780652080757295}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: rightLane
   m_TagString: Untagged
   m_Icon: {fileID: 0}

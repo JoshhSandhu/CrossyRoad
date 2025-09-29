@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.InputSystem.HID;
 using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
@@ -25,15 +26,25 @@ public class PlayerController : MonoBehaviour
     [Tooltip("duration of the player hops")]
     [SerializeField]
     private float hopDuration = 0.2f;
-
     [SerializeField]
     private float xBoundary = 5f;
+    [SerializeField]
+    private LayerMask blockingMask; //solid obstacles and Boundary
+    [SerializeField]
+    private LayerMask groundMask; //for the ground masks (ground, water, platform)
+    [SerializeField]
+    private Vector3 blockCastHalfExtents = new Vector3(0.3f, 0.5f, 0.3f);
+
+    [Header("Death Scatter Settings")]
+    [SerializeField]
+    private ParticleSystem scatterParticleSystem;
 
     //private feilds
     private Rigidbody playerRb;
     private bool isMoving = false;  //to check if the player is moving
     private int forwardPosZ = 0;    //to track the forward position of the player
     private bool isDead = false;    //to keep track if the player is alive or dead
+    private bool hasScattered = false;
 
     private Vector2 touchStartPos;      //for the new input system var
     private float minSwipeDist = 50f;   //minimum distance for a swipe to be registered
@@ -42,6 +53,9 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody>();
+        playerRb.interpolation = RigidbodyInterpolation.Interpolate;
+        playerRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        playerRb.freezeRotation = true;
     }
 
     //subscribe the events
@@ -151,28 +165,39 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f))
-        {
-            //if the ray hits a solid obstacle, cancel the move.
-            if (hit.collider.CompareTag("SolidObstacles"))
-            {
-                Debug.Log("Move blocked by a solid obstacle!");
-                return; //exit the function, do not hop.
-            }
-        }
-        //Detaching the parent if the player is on a log
-        transform.SetParent(null);
 
-        //rounding the position to avoid floating point errors
         Vector3 snappedPos = new Vector3(
             Mathf.Round(transform.position.x),
-            0.5f,
+            transform.position.y + 0.5f,
             Mathf.Round(transform.position.z)
         );
 
         Vector3 destination = snappedPos + direction;
+
+        if(Mathf.Abs(destination.x) > xBoundary)
+        {
+            return;
+        }
+
+        //compute expected landing height, and then using it for accurate blocking vs rocks while on logs
+        float candidateLandingY = transform.position.y;
+        Vector3 probeStart = destination + Vector3.up * 5f;
+        if (Physics.Raycast(probeStart, Vector3.down, out var probeHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            candidateLandingY = probeHit.point.y;
+        }
+
+        //pre hop check to avoid false positives from nearby solid obstacles
+        Vector3 overlapCenter = new Vector3(destination.x, candidateLandingY + 0.6f, destination.z);
+        Collider[] hits = Physics.OverlapBox(overlapCenter, blockCastHalfExtents, Quaternion.identity, blockingMask, QueryTriggerInteraction.Ignore);
+        //prehop box check with boxcast to catch walls and boundaries reliably
+        if (hits != null && hits.Length > 0)
+        {
+            return;
+        }
         StartCoroutine(HopCoroutine(destination));
-    
+        transform.SetParent(null);
+
         if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
         {
             forwardPosZ = (int)destination.z;
@@ -181,41 +206,52 @@ public class PlayerController : MonoBehaviour
         } 
     }
 
-    private IEnumerator HopCoroutine(Vector3 destination)
+    private IEnumerator HopCoroutine(Vector3 destinationXZ)
     {
         isMoving = true;
-        Vector3 startPos = transform.position;
+        float landingY = transform.position.y;
+
+        Vector3 rayStart = destinationXZ + Vector3.up * 5f;
+        if (Physics.Raycast(rayStart, Vector3.down, out var groundHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            landingY = groundHit.point.y;
+        }
+
+        Vector3 startPos = playerRb.position;
+        Vector3 destination = new Vector3(destinationXZ.x, landingY, destinationXZ.z);
         float elapsedTime = 0f;
 
         while (elapsedTime < hopDuration)
         {
-            Vector3 newPosition = Vector3.Lerp(startPos, destination, (elapsedTime / hopDuration)); //lerp is to handel the movement start -> finish 
-
-            //to make the player jump and come down
-            float offsetY = hopHeight * 4 * (elapsedTime/hopDuration) * ( 1 - (elapsedTime/hopDuration)); //claculates the height using a simple parabola eq
-            playerRb.MovePosition(newPosition + new Vector3(0, offsetY, 0));
-
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            elapsedTime += Time.fixedDeltaTime;
+            float a = Mathf.Clamp01(elapsedTime / hopDuration);
+            float arc = Mathf.Sin(a * Mathf.PI) * hopHeight;
+            Vector3 pos = Vector3.Lerp(startPos, destination, a);
+            pos.y += arc;
+            playerRb.MovePosition(pos);
+            yield return new WaitForFixedUpdate();
         }
-        RaycastHit landinghit;
+        //RaycastHit landinghit;
+        //Physics.Raycast(transform.position, Vector3.down, out landinghit, 1f);
+
         playerRb.MovePosition(destination);
-        Physics.Raycast(transform.position, Vector3.down, out landinghit, 1f);
         //if we landed on a log
-        if (Physics.Raycast(transform.position, Vector3.down, out landinghit, 2f)) // Increased distance to be safe
+        if (Physics.Raycast(destination + Vector3.up * 0.5f, Vector3.down, out var landinghit, 1.5f, groundMask, QueryTriggerInteraction.Ignore))
         {
-            Debug.Log("Landed on: " + landinghit.collider.name + " | Tag: " + landinghit.collider.tag);
             if (landinghit.collider.CompareTag("Platform"))
             {
-                // We landed safely on a log. Parent to it.
                 transform.SetParent(landinghit.transform);
             }
             else if (landinghit.collider.CompareTag("Water"))
             {
-                // The first thing our ray hit was water. Game Over.
                 GameOver(true);
             }
+            else
+            {
+                transform.SetParent(null);
+            }
         }
+        cameraFollow.Shake(0.15f); //camera shake at the end of an hop
         isMoving = false;
     }
 
@@ -224,7 +260,6 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
-
         Debug.Log("Game Over!");
 
         if (UIManager.Instance != null)
@@ -239,6 +274,10 @@ public class PlayerController : MonoBehaviour
                 cameraFollow.enabled = false;
             }
             StartCoroutine(DrownCoroutine());
+        }
+        else
+        {
+            ScatterIntoBlocks();
         }
     }
 
@@ -306,5 +345,28 @@ public class PlayerController : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
+    }
+
+    private void ScatterIntoBlocks()
+    {
+        if (hasScattered) return;
+        hasScattered = true;
+
+        // disable visuals and interaction of the player
+        var renderers = GetComponentsInChildren<Renderer>();
+        foreach (var r in renderers) r.enabled = false;
+        var colliders = GetComponentsInChildren<Collider>();
+        foreach (var c in colliders) c.enabled = false;
+
+        if (cameraFollow != null)
+        {
+            cameraFollow.Shake(0.6f);
+        }
+
+        ParticleSystem ps = Instantiate(scatterParticleSystem, transform.position, transform.rotation);
+        var main = ps.main;
+        ps.Play();
+        Destroy(ps.gameObject, main.duration + main.startLifetime.constantMax + 0.5f);
+
     }
 }
