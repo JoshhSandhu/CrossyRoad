@@ -53,7 +53,7 @@ public class ObstacleSpawner : MonoBehaviour
 
             GameObject obstaclePrefab = laneType.obstaclePrefab[Random.Range(0, laneType.obstaclePrefab.Length)];
 
-            if (signal != null)
+            if (signal != null && signal.gameObject.activeInHierarchy)
             {
                 float warningDuration = 2.5f; //duration of the warning signal
 

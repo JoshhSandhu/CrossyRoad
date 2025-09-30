@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.AppUI.UI;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -39,13 +40,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private ParticleSystem scatterParticleSystem;
 
+    [Header("Rotation")]
+    //[SerializeField]
+    //private bool smoothTurn = true;
+    [SerializeField]
+    private float turnSpeed = 20f;
+
     //private feilds
     private Rigidbody playerRb;
     private bool isMoving = false;  //to check if the player is moving
     private int forwardPosZ = 0;    //to track the forward position of the player
     private bool isDead = false;    //to keep track if the player is alive or dead
     private bool hasScattered = false;
-
+    private Quaternion targetRotation; //to store the rotation of the player
     private Vector2 touchStartPos;      //for the new input system var
     private float minSwipeDist = 50f;   //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
@@ -195,8 +202,11 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        StartCoroutine(HopCoroutine(destination));
+
+        //function to turn the player the ideration we are moving
         transform.SetParent(null);
+        FaceDirection(direction);
+        StartCoroutine(HopCoroutine(destination));
 
         if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
         {
@@ -229,12 +239,13 @@ public class PlayerController : MonoBehaviour
             Vector3 pos = Vector3.Lerp(startPos, destination, a);
             pos.y += arc;
             playerRb.MovePosition(pos);
+            //if (smoothTurn) { transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime); }
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
-        //RaycastHit landinghit;
-        //Physics.Raycast(transform.position, Vector3.down, out landinghit, 1f);
 
         playerRb.MovePosition(destination);
+        transform.rotation = targetRotation;
         //if we landed on a log
         if (Physics.Raycast(destination + Vector3.up * 0.5f, Vector3.down, out var landinghit, 1.5f, groundMask, QueryTriggerInteraction.Ignore))
         {
@@ -368,5 +379,27 @@ public class PlayerController : MonoBehaviour
         ps.Play();
         Destroy(ps.gameObject, main.duration + main.startLifetime.constantMax + 0.5f);
 
+    }
+
+    private void FaceDirection(Vector3 dir)
+    {
+        Vector3 flat = new Vector3(dir.x, 0f, dir.z);
+        if (dir == Vector3.zero)
+        {
+            return;
+        }
+        Quaternion rawTarget = Quaternion.LookRotation(flat, Vector3.up);
+        float yaw = rawTarget.eulerAngles.y;
+        float snappedYaw = Mathf.Round(yaw / 90f) * 90f;
+        targetRotation = Quaternion.Euler(0f, snappedYaw, 0f);
+        //if (smoothTurn)
+        //{
+        //    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        //}
+        //else
+        //{
+        //    transform.rotation = targetRotation;
+        //}
+        transform.rotation = targetRotation;
     }
 }
