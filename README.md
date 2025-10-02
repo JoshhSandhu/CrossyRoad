@@ -1,22 +1,20 @@
-# Solana Crossy Road - Unity Demo
+# Crossy Road - Unity Game
 
-This project is a "Crossy Road" style game developed in Unity, designed to showcase the integration and transaction speeds of the Solana blockchain using the Solana.Unity-SDK. The game serves as a functional demonstration of web3 features within a mobile game context.
+This project is a "Crossy Road" style game developed in Unity, featuring classic endless runner gameplay with procedural world generation and object pooling for optimal performance.
 
 ## 🎮 Key Features
 
-* **Classic Gameplay**: Familiar "Crossy Road" mechanics with grid-based movement and endless procedural world generation.
-* **Solana Integration**: Built using the Solana.Unity-SDK to connect to the Solana Devnet.
-* **On-Chain Transactions**: Features a simple in-game shop where players can purchase a new character skin. This action triggers a real SOL transfer on the Devnet, providing a clear demonstration of transaction speed and finality.
-* **Advanced Architecture**: Coded using scalable design patterns, including the Singleton pattern for managers, Object Pooling for performance, and an event-driven design for decoupled logic.
+* **Classic Gameplay**: Familiar "Crossy Road" mechanics with grid-based movement and endless procedural world generation
+* **Performance Optimization**: Advanced architecture using Singleton patterns, Object Pooling, and event-driven design
+* **Procedural World**: Dynamic lane generation with multiple lane types (road, water, train tracks, grass)
+* **Scalable Design**: Clean separation of concerns with interface-based architecture
 
 ## 🛠️ Tech Stack
 
-* **Game Engine**: Unity 2021.3 LTS (or newer);
-
+* **Game Engine**: Unity 2021.3 LTS (or newer)
 * **Language**: C#
-* **Blockchain**: Solana Devnet
-* **SDK**: Solana.Unity-SDK
-* **Frontend/Web**: React + TypeScript (for web3 integration)
+* **Architecture**: Clean Architecture with Interfaces
+* **Design Patterns**: Singleton, Object Pooling, Observer Pattern
 
 ## 📁 Project Structure
 
@@ -44,17 +42,13 @@ Scripts/
     └── WaterFoamController.cs
 ```
 
-### Web3 Projects
+### Additional Rust Projects
 
-The repository also includes multiple web3 integration approaches:
+The repository also includes Rust-based implementations:
 
-* **`pacman-dapp/`**: A direct Solana dApp implementation
-* **`pacman-privy/`**: An enhanced version using Privy for wallet management and UX
-
-Each contains:
-* **Frontend**: React + TypeScript + Vite
-* **Smart Contract**: Anchor framework + Rust
-* **SDK**: Solana.Unity-SDK integration
+* **`pacman-terminal/`**: A terminal-based Pacman game
+* **`pacman-GUI/`**: A graphical Pacman game using macroquad
+* **`pacman-dapp/`** and **`pacman-privy/`**: Web3 implementations (separate from Unity game)
 
 ## 🚀 Getting Started
 
@@ -70,31 +64,18 @@ To run this project locally, follow these steps:
    * Open the project folder in Unity 2021.3 LTS (or newer)
    * Unity will import all necessary packages automatically
 
-3. **Test the Solana Feature:**
-   * Press **Play** in the Unity Editor.
-   * The game uses a temporary, in-memory wallet. The first time you run it, the wallet's public key will be printed to the console.
-   * Copy this public key.
-   * Go to a Solana faucet like [solfaucet.com](https://solfaucet.com), switch to the **Devnet**, and airdrop 1 or 2 SOL to the copied address.
-   * You can now use the in-game shop to purchase the skin and see the transaction happen in real-time.
-
-4. **For Web3 Projects** (optional):
-   ```bash
-   # Navigate to frontend
-   cd pacman-privy/frontend
-   
-   # Install dependencies
-   npm install
-   
-   # Start development server
-   npm run dev
-   ```
+3. **Run the Game:**
+   * Press **Play** in the Unity Editor
+   * Use arrow keys or WASD to navigate the character
+   * Avoid obstacles and cross as many lanes as possible
+   * The game features procedural world generation with different lane types
 
 ## 🎮 How to Play
 
 * **Objective**: Navigate across lanes without hitting obstacles
 * **Movement**: Use arrow keys or WASD to move in any direction
 * **Strategy**: Time your movements to avoid oncoming obstacles
-* **Shop**: Collect coins and purchase new skins using SOL transactions
+* **Collectibles**: Gather coins and power-ups while avoiding obstacles
 
 ## 🛠️ Core Game Systems
 
@@ -105,11 +86,12 @@ To run this project locally, follow these steps:
 
 ## 📝 Future Goals
 
-* **NFT Minting**: Evolve the skin shop to mint character skins as NFTs on-chain
 * **More Content**: Add a wider variety of obstacles, lane types, and character models
-* **On-Chain Leaderboard**: Implement a system to store high scores on a custom Solana program
+* **Score System**: Implement high score tracking and leaderboards
+* **Power-ups**: Add special abilities and temporary invincibility
 * **Mobile Optimization**: Enhance performance for mobile platforms
-* **Multiplayer**: Add real-time multiplayer functionality using Solana's speed
+* **Sound Effects**: Add audio feedback and background music
+* **Level Progression**: Create increasing difficulty patterns
 
 ## 🤝 Contributing
 
