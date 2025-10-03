@@ -461,6 +461,7 @@ MonoBehaviour:
     m_Bits: 784
   blockCastHalfExtents: {x: 0.35, y: 0.5, z: 0.35}
   scatterParticleSystem: {fileID: 0}
+  turnSpeed: 20
 --- !u!1 &699360874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1254,7 +1255,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0.49999997, z: 0.5, w: 0.50000006}
   m_LocalPosition: {x: 5.5, y: 2.4999998, z: 5.5000005}
-  m_LocalScale: {x: 6, y: 20, z: 1}
+  m_LocalScale: {x: 10, y: 30, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 747859901}
@@ -1502,7 +1503,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.5, y: -0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: -5.5, y: 2.5, z: 5.5000005}
-  m_LocalScale: {x: 6, y: 20, z: 1}
+  m_LocalScale: {x: 10, y: 30, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 747859901}
@@ -2231,6 +2232,7 @@ MonoBehaviour:
     m_Bits: 784
   blockCastHalfExtents: {x: 0.35, y: 0.5, z: 0.35}
   scatterParticleSystem: {fileID: 4285566406749816854, guid: f78764236105ad44e909dda7ef4e799c, type: 3}
+  turnSpeed: 20
 --- !u!54 &1880769471
 Rigidbody:
   m_ObjectHideFlags: 0
