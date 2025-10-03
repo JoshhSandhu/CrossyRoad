@@ -138,4 +138,33 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
             obstacleSpawner.TrySpawningObstacles(lane, laneType);
         }
     }
+
+    public void ResetWorld()
+    {
+        Debug.Log("Restarting the game world...");
+
+        if (obstacleSpawner != null)
+        {
+            obstacleSpawner.StopAllSpawnCoroutines();
+        }
+
+        //clearing the previous lanes
+        if (laneManager != null)
+        {
+            laneManager.ClearAllLanes();
+        }
+
+        currentZPos = 3;
+
+        //clearing the spawn area
+        if (spawnAreaInstance != null) 
+        {
+            Destroy(spawnAreaInstance);
+            spawnAreaInstance = null;
+        }
+
+        InitializeWorld();
+
+        Debug.Log("Wrold Reset Complete");
+    }
 }

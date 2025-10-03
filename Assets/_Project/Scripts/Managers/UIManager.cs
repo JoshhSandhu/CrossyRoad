@@ -32,12 +32,14 @@ public class UIManager : MonoBehaviour
     {
         PlayerController.OnScoreChanged += UpdateScoreText;
         GameManager.OnCoinsChanged += UpdateCoinsText;
+        GameManager.OnGameReset += OnGameReset;
     }
 
     private void OnDisable()
     {
         PlayerController.OnScoreChanged -= UpdateScoreText;
         GameManager.OnCoinsChanged -= UpdateCoinsText;
+        GameManager.OnGameReset -= OnGameReset;
     }
 
     private void Start()
@@ -64,6 +66,27 @@ public class UIManager : MonoBehaviour
 
     public void RestartGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestartGame();
+        }
+    }
+
+    private void OnGameReset()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
+        UpdateScoreText(0);
+        UpdateCoinsText(0);
+    }
+
+    public void HideGameOver()
+    {
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
     }
 }

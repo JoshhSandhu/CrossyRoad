@@ -100,22 +100,22 @@ public class PlayerController : MonoBehaviour
         //vertical movement takes priority over horizontal movement
         if (Mathf.Abs(inputDirection.y) > Mathf.Abs(inputDirection.x))
         {
-            if(inputDirection.y > 0)
+            if (inputDirection.y > 0)
             {
                 movePlayer(Vector3.forward);
             }
-            else if(inputDirection.y < 0)
+            else if (inputDirection.y < 0)
             {
                 movePlayer(Vector3.back);
             }
         }
-        else if(Mathf.Abs(inputDirection.x) > Mathf.Abs(inputDirection.y))  //remove this condition to allow diagonal movement
+        else if (Mathf.Abs(inputDirection.x) > Mathf.Abs(inputDirection.y))  //remove this condition to allow diagonal movement
         {
-            if(inputDirection.x > 0)
+            if (inputDirection.x > 0)
             {
                 movePlayer(Vector3.right);
             }
-            else if(inputDirection.x < 0)
+            else if (inputDirection.x < 0)
             {
                 movePlayer(Vector3.left);
             }
@@ -173,6 +173,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (StartScreenManager.Instance != null && !StartScreenManager.Instance.IsGameStarted())
+        {
+            StartScreenManager.Instance.StartGame();
+            return;
+        }
+
         Vector3 snappedPos = new Vector3(
             Mathf.Round(transform.position.x),
             transform.position.y + 0.5f,
@@ -181,7 +187,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 destination = snappedPos + direction;
 
-        if(Mathf.Abs(destination.x) > xBoundary)
+        if (Mathf.Abs(destination.x) > xBoundary)
         {
             return;
         }
@@ -213,7 +219,7 @@ public class PlayerController : MonoBehaviour
             forwardPosZ = (int)destination.z;
             OnPlayerMovedForward?.Invoke();
             OnScoreChanged?.Invoke(forwardPosZ);
-        } 
+        }
     }
 
     private IEnumerator HopCoroutine(Vector3 destinationXZ)
@@ -278,9 +284,10 @@ public class PlayerController : MonoBehaviour
             UIManager.Instance.ShowGameOver();
         }
 
-        if (isDrowning) {
+        if (isDrowning)
+        {
             transform.SetParent(null); //detach from the log if we are attched to it
-            if (cameraFollow != null) 
+            if (cameraFollow != null)
             {
                 cameraFollow.enabled = false;
             }
@@ -311,10 +318,10 @@ public class PlayerController : MonoBehaviour
     private void CheckForOutOfBounds()
     {
         //check if we are parented to the log or not
-        if(transform.parent != null && transform.parent.CompareTag("Platform"))
+        if (transform.parent != null && transform.parent.CompareTag("Platform"))
         {
             //when the player's X pos exceeds the XBoundary value
-            if(Mathf.Abs(transform.position.x) > xBoundary)
+            if (Mathf.Abs(transform.position.x) > xBoundary)
             {
                 //then its game over for the player
                 GameOver(true);
@@ -401,5 +408,46 @@ public class PlayerController : MonoBehaviour
         //    transform.rotation = targetRotation;
         //}
         transform.rotation = targetRotation;
+    }
+
+    public void ResetPlayer()
+    {
+        Debug.Log("Resetting player state...");
+
+        // Reset death state
+        isDead = false;
+        hasScattered = false;
+        isMoving = false;
+        forwardPosZ = 0;
+
+        // Reset position
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        transform.SetParent(null);
+
+        // Re-enable camera follow
+        if (cameraFollow != null)
+        {
+            cameraFollow.enabled = true;
+            cameraFollow.ResetCamera();
+        }
+
+        // Re-enable renderers and colliders (in case they were disabled by scatter)
+        var renderers = GetComponentsInChildren<Renderer>();
+        foreach (var r in renderers) r.enabled = true;
+        var colliders = GetComponentsInChildren<Collider>();
+        foreach (var c in colliders) c.enabled = true;
+
+        // Reset rigidbody
+        if (playerRb != null)
+        {
+            if (!playerRb.isKinematic)
+            {
+                playerRb.linearVelocity = Vector3.zero;
+                playerRb.angularVelocity = Vector3.zero;
+            }
+        }
+
+        Debug.Log("Player reset complete!");
     }
 }

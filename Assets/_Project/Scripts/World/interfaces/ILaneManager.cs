@@ -5,4 +5,6 @@ public interface ILaneManager
     void AddLane(GameObject lane);
     void RemoveOldestLane();
     bool ShouldRemoveLane();
+
+    void ClearAllLanes();
 }
