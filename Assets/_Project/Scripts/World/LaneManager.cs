@@ -26,6 +26,7 @@ public class LaneManager : MonoBehaviour, ILaneManager
         if (activeLanes.Count > 0)
         {
             GameObject oldLane = activeLanes.Dequeue();
+            ClearLaneChild(oldLane);
             oldLane.SetActive(false);
         }
     }
@@ -47,10 +48,62 @@ public class LaneManager : MonoBehaviour, ILaneManager
             GameObject lanetoremove = activeLanes.Dequeue();
             if (lanetoremove != null)
             {
+                ClearLaneChild(lanetoremove);
                 lanetoremove.SetActive(false);
             }
         }
 
         Debug.Log("All lanes removed");
+    }
+
+    public void ClearLaneChild(GameObject Lane)
+    {
+        if(Lane == null)
+        {
+            return;
+        }
+        List<GameObject> childrenToDestroy = new List<GameObject>();
+
+        for (int i = 0; i < Lane.transform.childCount; i++) 
+        {
+            Transform child = Lane.transform.GetChild(i);
+            if(child != null && child.gameObject != null)
+            {
+                childrenToDestroy.Add(child.gameObject);
+            }
+        }
+
+        foreach (GameObject child in childrenToDestroy) 
+        {
+            if(child != null)
+            {
+                DestroyAllChildren(child);
+                DestroyImmediate(child);
+            }
+        }
+    }
+
+    private void DestroyAllChildren(GameObject parent)
+    {
+        if (parent != null) return;
+
+        List<GameObject> children = new List<GameObject>();
+        for(int i= 0;  i < parent.transform.childCount; i++)
+        {
+            Transform child = parent.transform.GetChild(i);
+            if(child != null && child.gameObject != null)
+            {
+                children.Add(child.gameObject);
+            }
+        }
+
+        foreach(GameObject child in children)
+        {
+            if( child != null)
+            {
+                DestroyAllChildren(child);
+                DestroyImmediate(child);
+            }
+        }
     }
 }

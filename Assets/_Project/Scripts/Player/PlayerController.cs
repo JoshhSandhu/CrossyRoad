@@ -43,8 +43,8 @@ public class PlayerController : MonoBehaviour
     [Header("Rotation")]
     //[SerializeField]
     //private bool smoothTurn = true;
-    [SerializeField]
-    private float turnSpeed = 20f;
+    //[SerializeField]
+    //private float turnSpeed = 20f;
 
     //private feilds
     private Rigidbody playerRb;
@@ -95,7 +95,9 @@ public class PlayerController : MonoBehaviour
     private void OnMove(InputAction.CallbackContext context)
     {
         Vector2 inputDirection = context.ReadValue<Vector2>();
-
+        float deadZone = 0.1f;
+        if (Mathf.Abs(inputDirection.x) < deadZone) inputDirection.x = 0;
+        if (Mathf.Abs(inputDirection.y) < deadZone) inputDirection.y = 0;
 
         //vertical movement takes priority over horizontal movement
         if (Mathf.Abs(inputDirection.y) > Mathf.Abs(inputDirection.x))
@@ -119,6 +121,10 @@ public class PlayerController : MonoBehaviour
             {
                 movePlayer(Vector3.left);
             }
+        }
+        else
+        {
+            Debug.Log("no clear direction the input is ignored");
         }
     }
 
@@ -168,6 +174,7 @@ public class PlayerController : MonoBehaviour
 
     private void movePlayer(Vector3 direction)
     {
+
         if (isMoving || isDead)
         {
             return;
@@ -189,6 +196,7 @@ public class PlayerController : MonoBehaviour
 
         if (Mathf.Abs(destination.x) > xBoundary)
         {
+            Debug.Log($"movement is blocked ({destination.x}) exceeds boundary ({xBoundary})");
             return;
         }
 
@@ -206,6 +214,7 @@ public class PlayerController : MonoBehaviour
         //prehop box check with boxcast to catch walls and boundaries reliably
         if (hits != null && hits.Length > 0)
         {
+            Debug.Log($"movement blocked by {destination}. hit object: {string.Join(", ", System.Array.ConvertAll(hits, hit => hit.name))}");
             return;
         }
 
@@ -224,8 +233,10 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator HopCoroutine(Vector3 destinationXZ)
     {
+        //Debug.Log($"HopCoroutine started for destination: {destinationXZ}");
         isMoving = true;
-        float landingY = transform.position.y;
+        transform.SetParent(null);
+        float landingY = destinationXZ.y;
 
         Vector3 rayStart = destinationXZ + Vector3.up * 5f;
         if (Physics.Raycast(rayStart, Vector3.down, out var groundHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
@@ -236,7 +247,7 @@ public class PlayerController : MonoBehaviour
         Vector3 startPos = playerRb.position;
         Vector3 destination = new Vector3(destinationXZ.x, landingY, destinationXZ.z);
         float elapsedTime = 0f;
-
+        Debug.Log($"HopCoroutine: startPos={startPos}, destination={destination}, parent={transform.parent?.name ?? "null"}, rotation={transform.rotation.eulerAngles}");
         while (elapsedTime < hopDuration)
         {
             elapsedTime += Time.fixedDeltaTime;
@@ -246,7 +257,7 @@ public class PlayerController : MonoBehaviour
             pos.y += arc;
             playerRb.MovePosition(pos);
             //if (smoothTurn) { transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime); }
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
 
@@ -270,6 +281,7 @@ public class PlayerController : MonoBehaviour
         }
         cameraFollow.Shake(0.15f); //camera shake at the end of an hop
         isMoving = false;
+        //Debug.Log($"HopCoroutine completed, isMoving set to false");
     }
 
     //game over logic
@@ -399,6 +411,7 @@ public class PlayerController : MonoBehaviour
         float yaw = rawTarget.eulerAngles.y;
         float snappedYaw = Mathf.Round(yaw / 90f) * 90f;
         targetRotation = Quaternion.Euler(0f, snappedYaw, 0f);
+        //Debug.Log($"FaceDirection: dir={dir}, yaw={yaw}, snappedYaw={snappedYaw}, targetRotation={targetRotation.eulerAngles}");
         //if (smoothTurn)
         //{
         //    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
@@ -408,6 +421,7 @@ public class PlayerController : MonoBehaviour
         //    transform.rotation = targetRotation;
         //}
         transform.rotation = targetRotation;
+        //Debug.Log($"FaceDirection: Set rotation to {transform.rotation.eulerAngles}");
     }
 
     public void ResetPlayer()

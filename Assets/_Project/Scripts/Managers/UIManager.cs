@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField]
     private GameObject gameOverPanel;
+    [SerializeField]
+    private GameObject fadeTransition;
 
     [SerializeField]
     private TextMeshProUGUI scoreText;
@@ -51,12 +53,12 @@ public class UIManager : MonoBehaviour
 
     private void UpdateScoreText(int newScore)
     {
-        scoreText.text = "Score: " + newScore.ToString();
+        scoreText.text = newScore.ToString();
     }
 
     private void UpdateCoinsText(int newCoins)
     {
-        coinText.text = "Coins: " + newCoins.ToString();
+        coinText.text = newCoins.ToString();
     }
 
     public void ShowGameOver()
