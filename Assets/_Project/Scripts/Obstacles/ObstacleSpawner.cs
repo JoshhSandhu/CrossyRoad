@@ -81,7 +81,7 @@ public class ObstacleSpawner : MonoBehaviour
                 log.SlowSpeed = baseSpeed;
                 log.fastSpeed = baseSpeed * 3f;
 
-                if(Random.value <= coinSpawnChance)
+                if (Random.value <= coinSpawnChance)
                 {
                     Vector3 coinPos = spawnedObstacle.transform.position + new Vector3(0, -0.2f, 0);
                     Instantiate(coinPrefab, coinPos, Quaternion.identity, spawnedObstacle.transform);
@@ -110,5 +110,11 @@ public class ObstacleSpawner : MonoBehaviour
             return trainHeightOffset;
         }
         return carHeightOffset;
+    }
+
+    public void StopAllSpawnCoroutines()
+    {
+        StopAllCoroutines();
+        Debug.Log("All obstacle spawn coroutines stopped");
     }
 }

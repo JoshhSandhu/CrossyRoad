@@ -34,6 +34,23 @@ public class LaneManager : MonoBehaviour, ILaneManager
     public bool ShouldRemoveLane()
     {
         //true if the lane needs to be removed
-        return activeLanes.Count > maxLanesInScene; 
+        return activeLanes.Count > maxLanesInScene;
+    }
+
+    //clears all the active lanes
+    public void ClearAllLanes()
+    {
+        Debug.Log($"cleaing {activeLanes} active lanes");
+
+        while (activeLanes.Count > 0)
+        {
+            GameObject lanetoremove = activeLanes.Dequeue();
+            if (lanetoremove != null)
+            {
+                lanetoremove.SetActive(false);
+            }
+        }
+
+        Debug.Log("All lanes removed");
     }
 }

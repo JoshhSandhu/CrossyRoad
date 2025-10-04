@@ -20,16 +20,16 @@ public class CamFollow : MonoBehaviour
     [Tooltip("clamping the x movement on the X axis")]
     public float Xfollowclamp = 1f;
     [Tooltip("world center to keep centered")]
-    [Range(0f,1f)] public float Xworldcentere = 0f;
+    [Range(0f, 1f)] public float Xworldcentere = 0f;
     [Tooltip("0 = center only, 1=follow player")]
     [Range(0f, 1f)] public float XfollowWeight = 0.6f;
 
     [Header("Screen Shake")]
-    [Tooltip("how fast shake fades per second")] 
+    [Tooltip("how fast shake fades per second")]
     public float traumaDecay = 1.5f;
-    [Tooltip("max positional shake offset in world units")] 
+    [Tooltip("max positional shake offset in world units")]
     public float maxShakeOffset = 0.2f;
-    [Tooltip("max rotational shake in degrees")] 
+    [Tooltip("max rotational shake in degrees")]
     public float maxShakeAngle = 2f;
     private float trauma = 0f;
     public bool CameraShake = true;
@@ -62,11 +62,11 @@ public class CamFollow : MonoBehaviour
         maxZ = Mathf.Max(maxZ, player.position.z);
 
         //the target Z includes a lil look back and the look ahead
-        float targetZ = maxZ + offset.z +Zlookahead;
-        float newZ = Mathf.Lerp(transform.position.z, targetZ, Time.deltaTime*Zdamping);
+        float targetZ = maxZ + offset.z + Zlookahead;
+        float newZ = Mathf.Lerp(transform.position.z, targetZ, Time.deltaTime * Zdamping);
 
         //to never move the cam back on the Z pos
-        if (newZ < transform.position.z) 
+        if (newZ < transform.position.z)
         {
             newZ = transform.position.z;
         }
@@ -77,19 +77,19 @@ public class CamFollow : MonoBehaviour
         float centertargetX = Xworldcentere + offset.x;
         float playertargetX = player.position.x + offset.x;
         float targX = Mathf.Lerp(centertargetX, playertargetX, XfollowWeight);
-        if(Xfollowclamp > 0f)
+        if (Xfollowclamp > 0f)
         {
             float baseX = offset.x;
             float playerRelativeX = player.position.x + baseX;
             targetX = Mathf.Clamp(targetX, centertargetX - Xfollowclamp, centertargetX + Xfollowclamp);
         }
-        
-        float newX = Mathf.Lerp(transform.position.x, targetX, Time.deltaTime*Xdamping);
+
+        float newX = Mathf.Lerp(transform.position.x, targetX, Time.deltaTime * Xdamping);
         Vector3 finalPos = new Vector3(newX, initialY, newZ);
 
         if (CameraShake)
         {
-            if(trauma > 0f)
+            if (trauma > 0f)
             {
                 float t = trauma * trauma;
                 Vector3 offsetShake = new Vector3(
@@ -121,5 +121,25 @@ public class CamFollow : MonoBehaviour
     public void Shake(float amount = 0.5f)
     {
         trauma = Mathf.Clamp01(trauma + amount);
+    }
+
+    public void ResetCamera()
+    {
+        Debug.Log("Resetting camera state...");
+
+        maxZ = player != null ? player.position.z : 0f;
+
+        if (player != null)
+        {
+            Vector3 resetPosition = player.position + offset;
+            resetPosition.y = initialY;
+            transform.position = resetPosition;
+        }
+
+        transform.rotation = baseRotation;
+
+        trauma = 0f;
+
+        Debug.Log("Camera reset complete!");
     }
 }
