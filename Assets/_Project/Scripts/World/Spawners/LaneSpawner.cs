@@ -38,7 +38,6 @@ public class LaneSpawner : MonoBehaviour
             Debug.LogError("no lane types assigned in LaneSpawner!");
             return;
         }
-        Debug.Log($"Creating pools for {laneTypes.Count} lane types:");
         //end
 
         foreach (var lanes in laneTypes)
@@ -78,8 +77,6 @@ public class LaneSpawner : MonoBehaviour
 
         float spawnZ = zPos ?? 0f;
 
-        Debug.Log($"Attempting to spawn lane: {selectedLaneType.laneName} at Z position {spawnZ}");
-
         GameObject lane = objectPooler.SpawnFromPool(
             selectedLaneType.laneName,
             new Vector3(0, laneSpawnHeight, spawnZ),
@@ -88,7 +85,6 @@ public class LaneSpawner : MonoBehaviour
 
         if (lane != null) 
         {
-            Debug.Log($"Successfully spawned lane: {selectedLaneType.laneName} - GameObject: {lane.name}");
             currentLaneType = selectedLaneType;
             previousLaneType = selectedLaneType;
         }
