@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// main world generator class that orchestrates the creation and management of game lanes.
@@ -94,7 +95,6 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
             {
                 Destroy(spawnAreaInstance);
                 spawnAreaInstance = null;
-                Debug.Log("Spawn area despawned - player moved significantly forward");
             }
         }
         //spawn a new lane
@@ -148,6 +148,9 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
             obstacleSpawner.StopAllSpawnCoroutines();
         }
 
+        cleanRemainingCoins();
+        cleanUpObstacles();
+
         //clearing the previous lanes
         if (laneManager != null)
         {
@@ -166,5 +169,33 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
         InitializeWorld();
 
         Debug.Log("Wrold Reset Complete");
+    }
+
+    public void cleanRemainingCoins()
+    {
+        GameObject[] coins = GameObject.FindGameObjectsWithTag("Coin");
+        int coinsDestroyed = 0;
+        foreach (GameObject co in coins)
+        {
+            if(co != null)
+            {
+                DestroyImmediate(co);
+                coinsDestroyed++;
+            }
+        }
+    }
+
+    public void cleanUpObstacles()
+    {
+        GameObject[] Obstacle = GameObject.FindGameObjectsWithTag("Obstacle");
+        int obstacleDestroyed = 0;
+        foreach (GameObject obstacle in Obstacle)
+        {
+            if(obstacle != null)
+            {
+                DestroyImmediate(obstacle);
+                obstacleDestroyed++;
+            }
+        }
     }
 }

@@ -81,7 +81,6 @@ public class GameManager : MonoBehaviour
         {
             UIManager.Instance.HideGameOver();
         }
-
         //fade screen then the player is returned to the start screen
         if (FadeTransition.Instance != null)
         {

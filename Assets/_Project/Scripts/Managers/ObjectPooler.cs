@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 public class ObjectPooler : MonoBehaviour
@@ -55,6 +56,13 @@ public class ObjectPooler : MonoBehaviour
         }
 
         GameObject objtoSpawn = poolDict[tag].Dequeue(); //getting the first obj from the queue
+        if (objtoSpawn == null)
+        {
+            Debug.LogError($"Pool {tag} returned null object!");
+            return null;
+        }
+
+        Debug.Log($"Spawning from pool {tag}: {objtoSpawn.name} at position {pos}");
 
         objtoSpawn.SetActive(true);
         objtoSpawn.transform.position = pos;

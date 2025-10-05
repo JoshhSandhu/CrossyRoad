@@ -38,7 +38,6 @@ public class LaneSpawner : MonoBehaviour
             Debug.LogError("no lane types assigned in LaneSpawner!");
             return;
         }
-        Debug.Log($"Creating pools for {laneTypes.Count} lane types:");
         //end
 
         foreach (var lanes in laneTypes)
@@ -63,13 +62,21 @@ public class LaneSpawner : MonoBehaviour
         int randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
         LaneType selectedLaneType = laneTypes[randIndex];
 
-        if (previousLaneType != null && previousLaneType.name == "LillyWatePadData" && selectedLaneType.name == "LillyWatePadData")
+        if (previousLaneType != null && 
+            (previousLaneType.name == "LillyWaterPadData" || previousLaneType.name == "WaterData") &&
+            (selectedLaneType.name == "LillyWaterPadData" || selectedLaneType.name == "WaterData"))
         {
-            randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
-            selectedLaneType = laneTypes[randIndex];
+            int attempts = 0;
+            do
+            {
+                randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
+                selectedLaneType = laneTypes[randIndex];
+            }
+            while ((selectedLaneType.name == "LillyWaterPadData" || selectedLaneType.name == "WaterData") && attempts < 10);
         }
 
         float spawnZ = zPos ?? 0f;
+
         GameObject lane = objectPooler.SpawnFromPool(
             selectedLaneType.laneName,
             new Vector3(0, laneSpawnHeight, spawnZ),
@@ -80,7 +87,11 @@ public class LaneSpawner : MonoBehaviour
         {
             currentLaneType = selectedLaneType;
             previousLaneType = selectedLaneType;
-        } 
+        }
+        else
+        {
+            Debug.LogError($"Failed to spawn lane: {selectedLaneType.laneName} - ObjectPooler returned null!");
+        }
 
         return lane;
     }

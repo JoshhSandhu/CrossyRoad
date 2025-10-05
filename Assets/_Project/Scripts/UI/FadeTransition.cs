@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,13 +55,13 @@ public class FadeTransition : MonoBehaviour
         FadeInOut(cyanColor, onComplete);
     }
 
-    public void FadeTo(Color targetColor, System.Action onComplete = null)
-    {
-        if (isTransitioning) return;
+    //public void FadeTo(Color targetColor, System.Action onComplete = null)
+    //{
+    //    if (isTransitioning) return;
 
-        onFadeComplete = onComplete;
-        StartCoroutine(FadeToCoroutine(targetColor));
-    }
+    //    onFadeComplete = onComplete;
+    //    StartCoroutine(FadeToCoroutine(targetColor));
+    //}
 
     private IEnumerator FadeInOutCoroutine(Color fadecolor)
     {
