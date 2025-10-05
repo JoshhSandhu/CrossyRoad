@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.VisualScripting.Metadata;
 
 /// <summary>
 /// this script manages the queue of active lanes in the scene
@@ -41,7 +42,7 @@ public class LaneManager : MonoBehaviour, ILaneManager
     //clears all the active lanes
     public void ClearAllLanes()
     {
-        Debug.Log($"cleaing {activeLanes} active lanes");
+        Debug.Log($"cleaing {activeLanes.Count} active lanes");
 
         while (activeLanes.Count > 0)
         {
@@ -63,20 +64,35 @@ public class LaneManager : MonoBehaviour, ILaneManager
             return;
         }
         List<GameObject> childrenToDestroy = new List<GameObject>();
-
+        //Debug.Log($"Cleaning up lane children for: {Lane.name}");
         for (int i = 0; i < Lane.transform.childCount; i++) 
         {
             Transform child = Lane.transform.GetChild(i);
             if(child != null && child.gameObject != null)
             {
-                childrenToDestroy.Add(child.gameObject);
+                bool shouldCleanUp = false;
+                if(HasTag(child.gameObject, "Obstacle") || HasTag(child.gameObject, "Coin"))
+                {
+                    shouldCleanUp = true;
+                }
+                if (child.gameObject.GetComponent<Car>() != null ||
+                    child.gameObject.GetComponent<Log>() != null ||
+                    child.gameObject.GetComponent<Train>() != null)
+                {
+                    shouldCleanUp = true;
+                }
+                if (shouldCleanUp)
+                {
+                    childrenToDestroy.Add(child.gameObject);
+                }
             }
         }
-
+        //Debug.Log($"Found {childrenToDestroy.Count} child objects to clean up from {Lane.name}");
         foreach (GameObject child in childrenToDestroy) 
         {
             if(child != null)
             {
+                //Debug.Log($"Destroying child object: {child.name}");
                 DestroyAllChildren(child);
                 DestroyImmediate(child);
             }
@@ -86,7 +102,7 @@ public class LaneManager : MonoBehaviour, ILaneManager
     private void DestroyAllChildren(GameObject parent)
     {
         if (parent != null) return;
-
+        
         List<GameObject> children = new List<GameObject>();
         for(int i= 0;  i < parent.transform.childCount; i++)
         {
@@ -104,6 +120,18 @@ public class LaneManager : MonoBehaviour, ILaneManager
                 DestroyAllChildren(child);
                 DestroyImmediate(child);
             }
+        }
+    }
+
+    private bool HasTag(GameObject obj, string tag)
+    {
+        try
+        {
+            return obj.CompareTag(tag);
+        }
+        catch (System.Exception)
+        {
+            return false;
         }
     }
 }

@@ -95,7 +95,6 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
             {
                 Destroy(spawnAreaInstance);
                 spawnAreaInstance = null;
-                Debug.Log("Spawn area despawned - player moved significantly forward");
             }
         }
         //spawn a new lane
@@ -184,7 +183,6 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
                 coinsDestroyed++;
             }
         }
-        Debug.Log($"Cleaned up {coinsDestroyed} remaining coins");
     }
 
     public void cleanUpObstacles()
@@ -199,6 +197,5 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
                 obstacleDestroyed++;
             }
         }
-        Debug.Log($"Cleaned up {obstacleDestroyed} remaining coins");
     }
 }

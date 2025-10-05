@@ -247,7 +247,7 @@ public class PlayerController : MonoBehaviour
         Vector3 startPos = playerRb.position;
         Vector3 destination = new Vector3(destinationXZ.x, landingY, destinationXZ.z);
         float elapsedTime = 0f;
-        Debug.Log($"HopCoroutine: startPos={startPos}, destination={destination}, parent={transform.parent?.name ?? "null"}, rotation={transform.rotation.eulerAngles}");
+        //Debug.Log($"HopCoroutine: startPos={startPos}, destination={destination}, parent={transform.parent?.name ?? "null"}, rotation={transform.rotation.eulerAngles}");
         while (elapsedTime < hopDuration)
         {
             elapsedTime += Time.fixedDeltaTime;

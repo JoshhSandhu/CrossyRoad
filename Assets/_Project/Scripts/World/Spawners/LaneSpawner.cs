@@ -63,13 +63,23 @@ public class LaneSpawner : MonoBehaviour
         int randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
         LaneType selectedLaneType = laneTypes[randIndex];
 
-        if (previousLaneType != null && previousLaneType.name == "LillyWatePadData" && selectedLaneType.name == "LillyWatePadData")
+        if (previousLaneType != null && 
+            (previousLaneType.name == "LillyWaterPadData" || previousLaneType.name == "WaterData") &&
+            (selectedLaneType.name == "LillyWaterPadData" || selectedLaneType.name == "WaterData"))
         {
-            randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
-            selectedLaneType = laneTypes[randIndex];
+            int attempts = 0;
+            do
+            {
+                randIndex = (index == -1) ? Random.Range(0, laneTypes.Count) : index;
+                selectedLaneType = laneTypes[randIndex];
+            }
+            while ((selectedLaneType.name == "LillyWaterPadData" || selectedLaneType.name == "WaterData") && attempts < 10);
         }
 
         float spawnZ = zPos ?? 0f;
+
+        Debug.Log($"Attempting to spawn lane: {selectedLaneType.laneName} at Z position {spawnZ}");
+
         GameObject lane = objectPooler.SpawnFromPool(
             selectedLaneType.laneName,
             new Vector3(0, laneSpawnHeight, spawnZ),
@@ -78,9 +88,14 @@ public class LaneSpawner : MonoBehaviour
 
         if (lane != null) 
         {
+            Debug.Log($"Successfully spawned lane: {selectedLaneType.laneName} - GameObject: {lane.name}");
             currentLaneType = selectedLaneType;
             previousLaneType = selectedLaneType;
-        } 
+        }
+        else
+        {
+            Debug.LogError($"Failed to spawn lane: {selectedLaneType.laneName} - ObjectPooler returned null!");
+        }
 
         return lane;
     }
