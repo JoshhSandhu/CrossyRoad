@@ -19,6 +19,10 @@ MonoBehaviour:
   decorationsPrefab:
   - {fileID: 3752434929520548167, guid: 50f4be66aac98424197b8b6b54919209, type: 3}
   - {fileID: 829794919042656244, guid: b2b63f5862ee9f64e9ec07dbdf6d8016, type: 3}
+  - {fileID: 6596059249872080515, guid: 8ac16e7bbbf3d5348a8d5069055d867c, type: 3}
+  - {fileID: 6471549912215742592, guid: b230d6f1def281243a1756d1cf6c2e46, type: 3}
+  - {fileID: 4151354903798751167, guid: c302f9dba3388014fa7d31965742f31d, type: 3}
+  - {fileID: 1272930221854483031, guid: 597db1305aad86c43b8c6063b0c2c370, type: 3}
   minSpawnTime: 2
   maxSpawnTime: 5
   warningSignalPrefab: {fileID: 0}

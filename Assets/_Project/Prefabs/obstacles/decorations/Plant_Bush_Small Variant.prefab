@@ -65,6 +65,10 @@ PrefabInstance:
       value: Plant_Bush_Small Variant
       objectReference: {fileID: 0}
     - target: {fileID: 1790983982216273817, guid: c412d7d7ed7458f49a9c1a30b776ade4, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1790983982216273817, guid: c412d7d7ed7458f49a9c1a30b776ade4, type: 3}
       propertyPath: m_TagString
       value: SolidObstacles
       objectReference: {fileID: 0}

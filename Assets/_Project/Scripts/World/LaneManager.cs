@@ -15,6 +15,14 @@ public class LaneManager : MonoBehaviour, ILaneManager
     //tracking the saned lanes in order of their spawns
     private Queue<GameObject> activeLanes = new Queue<GameObject>();
 
+    //ref to the decoration spawner for cleanup
+    private DecorationSpawner decorationSpawner;
+
+    private void Start()
+    {
+        decorationSpawner = FindFirstObjectByType<DecorationSpawner>();
+    }
+
     //adds a new lane to the active lanes queue
     public void AddLane(GameObject lane)
     {
@@ -27,6 +35,10 @@ public class LaneManager : MonoBehaviour, ILaneManager
         if (activeLanes.Count > 0)
         {
             GameObject oldLane = activeLanes.Dequeue();
+            if (decorationSpawner != null)
+            {
+                decorationSpawner.CleanupLaneDecorations(oldLane);
+            }
             ClearLaneChild(oldLane);
             oldLane.SetActive(false);
         }
@@ -49,6 +61,10 @@ public class LaneManager : MonoBehaviour, ILaneManager
             GameObject lanetoremove = activeLanes.Dequeue();
             if (lanetoremove != null)
             {
+                if (decorationSpawner != null)
+                {
+                    decorationSpawner.CleanupLaneDecorations(lanetoremove);
+                }
                 ClearLaneChild(lanetoremove);
                 lanetoremove.SetActive(false);
             }
