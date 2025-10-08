@@ -67,7 +67,7 @@ To run this project locally, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/JoshhSandhu/Rust-Pacman.git
+   [git clone https://github.com/JoshhSandhu/CrossyToad.git](https://github.com/JoshhSandhu/CrossyRoad.git)
    ```
 
 2. **Open in Unity:**
