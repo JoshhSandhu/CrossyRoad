@@ -91,4 +91,25 @@ public class UIManager : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
     }
+
+    //shop functioality
+    public void OpenShop()
+    {
+        if (ShopManager.Instance != null)
+        {
+            ShopManager.Instance.OpenShop();
+        }
+        else
+        {
+            Debug.LogWarning("shop manager not found!");
+        }
+    }
+
+    public void CloseShop()
+    {
+        if (ShopManager.Instance != null)
+        {
+            ShopManager.Instance.CloseShop();
+        }
+    }
 }

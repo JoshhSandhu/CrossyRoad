@@ -210,7 +210,69 @@ public class StartScreenManager : MonoBehaviour
 
         StartCoroutine(WaitForPlayerMovement());
     }
+    public void SlideButtonsBackIn()
+    {
+        Debug.Log("SlideButtonsBackIn() called");
+        if (startScreenPanel != null)
+        {
+            startScreenPanel.SetActive(true);
+            Debug.Log("StartScreenPanel re-enabled for slide-in animation");
+        }
+        StartCoroutine(SlideButtonsIn());
+    }
 
+    private IEnumerator SlideButtonsIn()
+    {
+        Debug.Log("SlideButtonsIn coroutine started");
+        Vector3[] leftCurrentPositions = new Vector3[leftButtons.Length];
+        Vector3[] rightCurrentPositions = new Vector3[rightButtons.Length];
+
+        // Store current positions
+        for (int i = 0; i < leftButtons.Length; i++)
+        {
+            leftCurrentPositions[i] = leftButtons[i].transform.localPosition;
+        }
+
+        for (int i = 0; i < rightButtons.Length; i++)
+        {
+            rightCurrentPositions[i] = rightButtons[i].transform.localPosition;
+        }
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < slideDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / slideDuration;
+            float easedProgress = slideCurve.Evaluate(progress);
+
+            for (int i = 0; i < leftButtons.Length; i++)
+            {
+                leftButtons[i].transform.localPosition = Vector3.Lerp(
+                    leftCurrentPositions[i],
+                    leftbuttonsStartPos[i],
+                    easedProgress
+                );
+            }
+
+            for (int i = 0; i < rightButtons.Length; i++)
+            {
+                rightButtons[i].transform.localPosition = Vector3.Lerp(
+                    rightCurrentPositions[i],
+                    rightbuttonsStartPos[i],
+                    easedProgress
+                );
+            }
+
+            yield return null;
+        }
+        hasGameStarted = false;
+        ResetButtonPos();
+        if (!hasGameStarted)
+        {
+            StartCoroutine(WaitForPlayerMovement());
+        }
+    }
     public bool IsGameStarted()
     {
         return hasGameStarted;
