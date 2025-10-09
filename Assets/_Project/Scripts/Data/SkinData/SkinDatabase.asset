@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: SkinDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::SkinDatabase
+  skins:
+  - skinId: eskimo
+    skinName: Eskimo
+    description: cold people
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 0.1
+    isOwned: 1
+    isEquipped: 1
+    category: 0
+    rarity: 1
+  - skinId: frog
+    skinName: Frog
+    description: Crok Crok
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 0.2
+    isOwned: 0
+    isEquipped: 0
+    category: 2
+    rarity: 0
+  - skinId: cow
+    skinName: Cow
+    description: MOOOOO
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 0.3
+    isOwned: 0
+    isEquipped: 0
+    category: 2
+    rarity: 1
+  - skinId: duck
+    skinName: Duck
+    description: Quack
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 0.5
+    isOwned: 0
+    isEquipped: 0
+    category: 2
+    rarity: 2
+  - skinId: golden_chicken
+    skinName: Golden Chicken
+    description: chicken sounds
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 1
+    isOwned: 0
+    isEquipped: 0
+    category: 2
+    rarity: 3
+  - skinId: t rex
+    skinName: T Rex
+    description: prehistoric stuff
+    skinIcon: {fileID: 0}
+    skinPrefab: {fileID: 0}
+    priceInSolana: 1
+    isOwned: 0
+    isEquipped: 0
+    category: 2
+    rarity: 3
