@@ -51,7 +51,7 @@ public class CategoryDetailPanel : MonoBehaviour
         if (gridLayoutGroup != null)
         {
             gridLayoutGroup.cellSize = new Vector2(200, 250);
-            gridLayoutGroup.spacing = new Vector2(20, 20);
+            //gridLayoutGroup.spacing = new Vector2(20, 20);
             gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             gridLayoutGroup.constraintCount = 2; //2 columns for mobile
         }

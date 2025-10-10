@@ -77,10 +77,16 @@ public class ShopManager : MonoBehaviour
     {
         if (gridLayoutGroup != null)
         {
-            gridLayoutGroup.cellSize = new Vector2(200, 250);
-            gridLayoutGroup.spacing = new Vector2(20, 20);
+            //gridLayoutGroup.cellSize = new Vector2(200, 250);
+            //gridLayoutGroup.spacing = new Vector2(20, 20);
             gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gridLayoutGroup.constraintCount = 3;  //3 columns
+            //gridLayoutGroup.constraintCount = 3;  //3 columns
+
+            gridLayoutGroup.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            gridLayoutGroup.startAxis = GridLayoutGroup.Axis.Horizontal;
+            gridLayoutGroup.childAlignment = TextAnchor.UpperLeft;
+
+            //gridLayoutGroup.padding = new RectOffset(20, 20, 100, 20);
         }
     }
 
