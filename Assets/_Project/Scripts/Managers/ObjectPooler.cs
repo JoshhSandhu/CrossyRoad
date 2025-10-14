@@ -26,7 +26,7 @@ public class ObjectPooler : MonoBehaviour
     
     public void CreatePool(string tag, GameObject prefab, int size)
     {
-        Debug.Log($"ObjectPooler.CreatePool called: tag={tag}, prefab={prefab?.name}, size={size}");
+        //Debug.Log($"ObjectPooler.CreatePool called: tag={tag}, prefab={prefab?.name}, size={size}");
         if (poolDict.ContainsKey(tag))
         {
             Debug.LogWarning("Pool with tag " + tag + " already exists.");
@@ -44,7 +44,7 @@ public class ObjectPooler : MonoBehaviour
         }
 
         poolDict.Add(tag, objpool); //adding the queue to the dictionary
-        Debug.Log($"Successfully created pool '{tag}' with {size} objects");
+        //Debug.Log($"Successfully created pool '{tag}' with {size} objects");
     }
 
     public GameObject SpawnFromPool(string tag, Vector3 pos, Quaternion rot)
@@ -62,7 +62,7 @@ public class ObjectPooler : MonoBehaviour
             return null;
         }
 
-        Debug.Log($"Spawning from pool {tag}: {objtoSpawn.name} at position {pos}");
+        //Debug.Log($"Spawning from pool {tag}: {objtoSpawn.name} at position {pos}");
 
         objtoSpawn.SetActive(true);
         objtoSpawn.transform.position = pos;
