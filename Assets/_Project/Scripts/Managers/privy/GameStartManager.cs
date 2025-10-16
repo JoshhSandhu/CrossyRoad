@@ -25,35 +25,44 @@ public class GameStartManager : MonoBehaviour
 
     private void CheckAuthenticationStatus()
     {
-        if(PrivyAuthManager.Instance != null)
+        Debug.Log("GameStartManager: Checking authentication status...");
+
+        if (PrivyAuthManager.Instance != null)
         {
+            Debug.Log($"GameStartManager: PrivyAuthManager found. IsAuthenticated: {PrivyAuthManager.Instance.IsAuthenticated}");
+
             if (PrivyAuthManager.Instance.IsAuthenticated)
             {
-               ShowMainMenu();
+                Debug.Log("GameStartManager: User is authenticated, showing main menu");
+                ShowMainMenu();
             }
             else
             {
+                Debug.Log("GameStartManager: User not authenticated, showing auth flow");
                 ShowAuthenticationFlow();
             }
         }
         else
         {
-            Debug.LogError("PrivyAuthManager instance not found!");
+            Debug.LogError("GameStartManager: PrivyAuthManager instance not found!");
             ShowMainMenu();
         }
     }
 
     private void ShowAuthenticationFlow()
     {
+        Debug.Log("GameStartManager: Showing authentication flow");
         //hide the main menu panel
         if (mainMenuPanel != null)
         {
+            Debug.Log("GameStartManager: Hiding main menu panel");
             mainMenuPanel.SetActive(false);
         }
 
         //show the auth panel
         if(PrivyAuthManager.Instance != null)
         {
+            Debug.Log("GameStartManager: Showing auth panel");
             PrivyAuthManager.Instance.ShowAuthPanel();
         }
 
@@ -63,15 +72,19 @@ public class GameStartManager : MonoBehaviour
 
     private void ShowMainMenu()
     {
+        Debug.Log("GameStartManager: Showing main menu");
+
         //hide auth panel
         if (PrivyAuthManager.Instance != null)
         {
+            Debug.Log("GameStartManager: Hiding auth panel");
             PrivyAuthManager.Instance.HideAuthPanel();
         }
 
         //show main menu
         if (mainMenuPanel != null)
         {
+            Debug.Log("GameStartManager: Activating main menu panel");
             mainMenuPanel.SetActive(true);
         }
     }

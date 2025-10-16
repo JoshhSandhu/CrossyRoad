@@ -336,7 +336,7 @@ public class PrivyAuthManager : MonoBehaviour
         }
     }
 
-    private void OnUserAuthenticated()
+    private async void OnUserAuthenticated()
     {
         if (privyInstance?.User == null)
         {
@@ -355,7 +355,8 @@ public class PrivyAuthManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No embedded wallet found for authenticated user");
+            Debug.LogWarning("No embedded wallet found for authenticated user, creating one automatically");
+            await CreateEmbeddedWalletForUser();
         }
 
         //getting user info
@@ -508,27 +509,21 @@ public class PrivyAuthManager : MonoBehaviour
     }
 
     //creating a new embedded wallet for the user
-    public async Task<bool> CreateEmbeddedWallet()
+    private async Task CreateEmbeddedWalletForUser()
     {
-        if (!isAuthenticated || privyInstance?.User == null)
-        {
-            Debug.LogError("Cannot create wallet: User not authenticated");
-            return false;
-        }
-
         try
         {
+            Debug.Log("Creating embedded wallet for authenticated user...");
             var newWallet = await privyInstance.User.CreateWallet();
-            Debug.Log($"Created new embedded wallet: {newWallet.Address}");
-            return true;
+            walletAddress = newWallet.Address;
+            Debug.Log($"Successfully created embedded wallet: {walletAddress}");
         }
         catch (Exception e)
         {
             Debug.LogError($"Failed to create embedded wallet: {e.Message}");
-            return false;
+            // Continue without wallet - user can still use the app
         }
     }
-
     private void OnDestroy()
     {
         //cleanup if needed

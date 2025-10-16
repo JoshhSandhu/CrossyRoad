@@ -1499,7 +1499,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 216140024}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: ConnectWallet
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &216140024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1937,7 +1949,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 326066557}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: SendOTPCode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &326066557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4334,7 +4358,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 776518890}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: ShowEmailLoginPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &776518890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4527,7 +4563,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &817277031
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5106,7 +5142,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 854941024}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: ShowAuthPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &854941024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5227,7 +5275,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 860181116}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1712069009}
+        m_TargetAssemblyTypeName: GameStartManager, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &860181116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6150,7 +6210,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1073919020}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: VerifyOTPCode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1073919020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6421,7 +6493,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1080943378}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: Logout
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1080943378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6720,7 +6804,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1122880059}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1712069009}
+        m_TargetAssemblyTypeName: GameStartManager, Assembly-CSharp
+        m_MethodName: OpenShop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1122880059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7770,7 +7866,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1246567942}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1712069009}
+        m_TargetAssemblyTypeName: GameStartManager, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1246567942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10601,6 +10709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PrivyAuthManager
   privyAppId: cmgodao4u00c7l50caof1nhau
+  privyClientId: client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz
   logLevel: 2
   authPanel: {fileID: 817277030}
   connectWalletButton: {fileID: 216140023}
@@ -13135,7 +13244,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1946450232}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1627459852}
+        m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
+        m_MethodName: ShowEmailLoginPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1946450232
 MonoBehaviour:
   m_ObjectHideFlags: 0
