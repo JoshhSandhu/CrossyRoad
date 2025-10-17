@@ -1364,7 +1364,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: ConnectWallet
         m_Mode: 1
@@ -1814,7 +1814,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: SendOTPCode
         m_Mode: 1
@@ -4087,7 +4087,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: ShowEmailLoginPanel
         m_Mode: 1
@@ -4343,10 +4343,8 @@ MonoBehaviour:
   loadingProgressBar: {fileID: 917697840}
   panelTransitionDuration: 0.5
   transitionCurve:
-    serializedVersion: 2
     m_Curve:
-    - serializedVersion: 3
-      time: 0
+    - time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -4354,8 +4352,7 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0
       outWeight: 0
-    - serializedVersion: 3
-      time: 1
+    - time: 1
       value: 1
       inSlope: 0
       outSlope: 0
@@ -4366,6 +4363,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  authCanvasGroup: {fileID: 0}
+  welcomeCanvasGroup: {fileID: 0}
+  loadingCanvasGroup: {fileID: 0}
 --- !u!1 &817478626
 GameObject:
   m_ObjectHideFlags: 0
@@ -4870,7 +4870,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: ShowAuthPanel
         m_Mode: 1
@@ -5805,7 +5805,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: VerifyOTPCode
         m_Mode: 1
@@ -6088,7 +6088,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: Logout
         m_Mode: 1
@@ -9734,67 +9734,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1615407002}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1627459851
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1627459853}
-  - component: {fileID: 1627459852}
-  m_Layer: 0
-  m_Name: PrivyAuthManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1627459852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627459851}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e9aa2051eb218a45bc09125562e1c21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PrivyAuthManager
-  privyAppId: cmgodao4u00c7l50caof1nhau
-  privyClientId: client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz
-  logLevel: 2
-  authPanel: {fileID: 817277030}
-  connectWalletButton: {fileID: 216140023}
-  loginButton: {fileID: 1946450231}
-  logoutButton: {fileID: 1080943377}
-  walletStatusText: {fileID: 817478628}
-  walletAddressText: {fileID: 752856633}
-  userInfoText: {fileID: 1866837807}
-  loadingIndicator: {fileID: 0}
-  emailInputField: {fileID: 1118281173}
-  otpCodeInputField: {fileID: 850654171}
-  sendCodeButton: {fileID: 326066556}
-  verifyCodeButton: {fileID: 1073919019}
-  emailLoginPanel: {fileID: 1491533109}
-  otpVerificationPanel: {fileID: 1314413020}
---- !u!4 &1627459853
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627459851}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 434.55856, y: 0, z: 8792.861}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1639497527
 GameObject:
   m_ObjectHideFlags: 0
@@ -11701,7 +11640,6 @@ MonoBehaviour:
   emailLoginPanel: {fileID: 1491533109}
   otpVerificationPanel: {fileID: 1314413020}
   welcomePanel: {fileID: 526603105}
-  loadingPanel: {fileID: 1893663042}
   connectWalletButton: {fileID: 216140023}
   loginEmailButton: {fileID: 1946450231}
   authTitleText: {fileID: 1489743772}
@@ -11717,8 +11655,6 @@ MonoBehaviour:
   userInfoText: {fileID: 1866837807}
   logoutButton: {fileID: 1080943377}
   playGameButton: {fileID: 1689583033}
-  loadingText: {fileID: 1941979767}
-  loadingProgressBar: {fileID: 917697840}
 --- !u!1 &1893663042
 GameObject:
   m_ObjectHideFlags: 0
@@ -12247,7 +12183,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1627459852}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PrivyAuthManager, Assembly-CSharp
         m_MethodName: ShowEmailLoginPanel
         m_Mode: 1
@@ -13304,4 +13240,3 @@ SceneRoots:
   - {fileID: 1056753027}
   - {fileID: 1880769464}
   - {fileID: 1333395232}
-  - {fileID: 1627459853}

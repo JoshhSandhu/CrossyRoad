@@ -61,8 +61,8 @@ public class ShopManager : MonoBehaviour
         UpdateWalletStatus();
 
         //subscribe to Privy authentication events
-        PrivyAuthManager.OnAuthenticationStateChanged += OnWalletConnectionChanged;
-        PrivyAuthManager.OnWalletAddressChanged += OnWalletAddressChanged;
+        AuthenticationFlowManager.OnAuthenticationStateChanged += OnWalletConnectionChanged;
+        AuthenticationFlowManager.OnWalletAddressChanged += OnWalletAddressChanged;
     }
 
     public void InitializeShop()
@@ -118,8 +118,8 @@ public class ShopManager : MonoBehaviour
     private void OnDestroy()
     {
         // Unsubscribe from Privy authentication events
-        PrivyAuthManager.OnAuthenticationStateChanged -= OnWalletConnectionChanged;
-        PrivyAuthManager.OnWalletAddressChanged -= OnWalletAddressChanged;
+        AuthenticationFlowManager.OnAuthenticationStateChanged -= OnWalletConnectionChanged;
+        AuthenticationFlowManager.OnWalletAddressChanged -= OnWalletAddressChanged;
     }
 
     private void SetupCategoryButtons()
@@ -289,8 +289,8 @@ public class ShopManager : MonoBehaviour
     private void UpdateWalletStatus()
     {
         // Get actual wallet status from Privy
-        bool isConnected = PrivyAuthManager.Instance != null && PrivyAuthManager.Instance.IsAuthenticated;
-        string walletAddress = PrivyAuthManager.Instance != null ? PrivyAuthManager.Instance.WalletAddress : "";
+        bool isConnected = AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsAuthenticated;
+        string walletAddress = AuthenticationFlowManager.Instance != null ? AuthenticationFlowManager.Instance.WalletAddress : "";
 
         if (walletStatusText != null)
         {
@@ -330,9 +330,9 @@ public class ShopManager : MonoBehaviour
     private void ConnectWallet()
     {
         // Use Privy authentication
-        if (PrivyAuthManager.Instance != null)
+        if (AuthenticationFlowManager.Instance != null)
         {
-            PrivyAuthManager.Instance.ShowAuthPanel();
+            //AuthenticationFlowManager.Instance.ShowAuthPanel();
         }
         else
         {

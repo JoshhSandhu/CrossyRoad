@@ -178,14 +178,26 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        //check if authentication flow is active and game is not ready
         if (AuthenticationFlowManager.Instance != null && !AuthenticationFlowManager.Instance.IsGameReady())
         {
             Debug.Log("Authentication not complete, ignoring movement");
             return;
         }
+        //if authentication is complete but game hasn't started yet, start the game
         if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
         {
             AuthenticationFlowManager.Instance.StartGame();
+            return;
+        }
+        //if no authentication flow but game is not active, start the game
+        if (AuthenticationFlowManager.Instance == null && !GameManager.Instance.IsGameActive())
+        {
+            Debug.Log("No authentication flow, starting game via movement input");
+            if (StartScreenManager.Instance != null)
+            {
+                StartScreenManager.Instance.StartGame();
+            }
             return;
         }
 
