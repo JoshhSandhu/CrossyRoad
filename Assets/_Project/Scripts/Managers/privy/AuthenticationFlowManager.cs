@@ -91,13 +91,13 @@ public class AuthenticationFlowManager : MonoBehaviour
             Debug.Log($"Initializing Privy with App ID: {privyAppId}");
             Debug.Log($"Initializing Privy with Client ID: {privyClientId}");
 
-            if (string.IsNullOrEmpty(privyAppId) || privyAppId == "your-app-id")
+            if (string.IsNullOrEmpty(privyAppId) || privyAppId == "your-app-id" || privyAppId.Length < 10)
             {
                 Debug.LogError("Privy App ID is not set!");
                 return;
             }
 
-            if (string.IsNullOrEmpty(privyClientId) || privyClientId == "your-client-id")
+            if (string.IsNullOrEmpty(privyClientId) || privyClientId == "your-client-id" || privyClientId.Length < 10)
             {
                 Debug.LogError("Privy Client ID is not set!");
                 return;
@@ -271,7 +271,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         HideAllPanels();
         if (welcomePanel != null) welcomePanel.SetActive(true);
         UpdateWelcomePanel();
-        isGameReady = true;
+        isGameReady = false;
         Debug.Log("Showing Welcome Panel");
     }
 
@@ -488,12 +488,13 @@ public class AuthenticationFlowManager : MonoBehaviour
     public void StartGame()
     {
         Debug.Log("Starting game...");
+        isGameReady = true;
         //ShowLoadingPanel();
         HideAllPanels();
-        if (StartScreenManager.Instance != null)
-        {
-            StartScreenManager.Instance.StartGame();
-        }
+        //if (StartScreenManager.Instance != null)
+        //{
+        //    StartScreenManager.Instance.StartGame();
+        //}
         // Start the actual game
         if (GameManager.Instance != null)
         {
