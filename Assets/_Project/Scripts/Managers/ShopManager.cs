@@ -59,6 +59,10 @@ public class ShopManager : MonoBehaviour
         SetupGridLayout();
         LoadSkinsForCategory(currentCategory);
         UpdateWalletStatus();
+
+        //subscribe to Privy authentication events
+        PrivyAuthManager.OnAuthenticationStateChanged += OnWalletConnectionChanged;
+        PrivyAuthManager.OnWalletAddressChanged += OnWalletAddressChanged;
     }
 
     public void InitializeShop()
@@ -82,6 +86,7 @@ public class ShopManager : MonoBehaviour
             gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             //gridLayoutGroup.constraintCount = 3;  //3 columns
 
+            //configure grid to start from top-left and fill downward
             gridLayoutGroup.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayoutGroup.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayoutGroup.childAlignment = TextAnchor.UpperLeft;
@@ -112,8 +117,9 @@ public class ShopManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        //unsub from the events
-        //unsubscribe from the solana events stated in the event listeners method
+        // Unsubscribe from Privy authentication events
+        PrivyAuthManager.OnAuthenticationStateChanged -= OnWalletConnectionChanged;
+        PrivyAuthManager.OnWalletAddressChanged -= OnWalletAddressChanged;
     }
 
     private void SetupCategoryButtons()
@@ -133,15 +139,16 @@ public class ShopManager : MonoBehaviour
     private void OnCategoryButtonClicked(int categoryIndex)
     {
         currentCategory = (SkinCategory)categoryIndex;
-        if (categoryDetailPanel != null)
-        {
-            categoryDetailPanel.ShowCategory(currentCategory);
-        }
-        else
-        {
-            LoadSkinsForCategory(currentCategory);
-            UpdateCategoryTitle();
-        }
+
+        // Always load skins directly in the main shop area (red zone)
+        LoadSkinsForCategory(currentCategory);
+        UpdateCategoryTitle();
+
+        // Optional: You can still use the detail panel for a different view if needed
+        // if (categoryDetailPanel != null)
+        // {
+        //     categoryDetailPanel.ShowCategory(currentCategory);
+        // }
     }
 
     private void LoadSkinsForCategory(SkinCategory category)
@@ -274,25 +281,41 @@ public class ShopManager : MonoBehaviour
         UpdateWalletStatus();
     }
 
+    private void OnWalletAddressChanged(string address)
+    {
+        UpdateWalletStatus();
+    }
+
     private void UpdateWalletStatus()
     {
-        //this needs to be replaced with the actual solana wallet status
-        bool isConnected = false;
+        // Get actual wallet status from Privy
+        bool isConnected = PrivyAuthManager.Instance != null && PrivyAuthManager.Instance.IsAuthenticated;
+        string walletAddress = PrivyAuthManager.Instance != null ? PrivyAuthManager.Instance.WalletAddress : "";
 
-        if (walletStatusText != null) 
+        if (walletStatusText != null)
         {
             walletStatusText.text = isConnected ? "Connected" : "Not Connected";
             walletStatusText.color = isConnected ? Color.green : Color.red;
         }
 
-        if (walletAddressText != null) 
+        if (walletAddressText != null)
         {
-            walletAddressText.text = isConnected ? "Wallet connected" : " no wallet connected";
+            if (isConnected && !string.IsNullOrEmpty(walletAddress))
+            {
+                string shortAddress = walletAddress.Length > 12 ?
+                    $"{walletAddress.Substring(0, 6)}...{walletAddress.Substring(walletAddress.Length - 6)}" :
+                    walletAddress;
+                walletAddressText.text = $"Wallet: {shortAddress}";
+            }
+            else
+            {
+                walletAddressText.text = "No wallet connected";
+            }
         }
 
-        if (connectWalletButton != null) 
+        if (connectWalletButton != null)
         {
-            connectWalletButton.gameObject.SetActive(isConnected);
+            connectWalletButton.gameObject.SetActive(!isConnected);
         }
     }
 
@@ -306,8 +329,15 @@ public class ShopManager : MonoBehaviour
 
     private void ConnectWallet()
     {
-        //placeholder for wallet connection
-        Debug.Log("connecting to solana wallet");
+        // Use Privy authentication
+        if (PrivyAuthManager.Instance != null)
+        {
+            PrivyAuthManager.Instance.ShowAuthPanel();
+        }
+        else
+        {
+            Debug.LogError("PrivyAuthManager not found!");
+        }
     }
 
     public void OpenShop()

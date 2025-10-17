@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -50,10 +49,14 @@ public class GameManager : MonoBehaviour
         PlayerController.OnPlayerMovedForward -= OnPlayerMovedForward;
     }
 
-    private void StartGame()
+    public void StartGame()
     {
         gameActive = true;
         ResetGameState();
+    }
+    public bool IsGameActive()
+    {
+        return gameActive;
     }
 
     private void OnPlayerMovedForward()
@@ -132,11 +135,6 @@ public class GameManager : MonoBehaviour
         Coins = 0;
         Score = 0;
         OnCoinsChanged?.Invoke(Coins);
-    }
-
-    private bool IsGameActive()
-    {
-        return gameActive;
     }
 
     //resetting the world during the fade transition

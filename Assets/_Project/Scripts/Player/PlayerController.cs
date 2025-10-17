@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using Unity.AppUI.UI;
 using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -180,9 +178,14 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (StartScreenManager.Instance != null && !StartScreenManager.Instance.IsGameStarted())
+        if (AuthenticationFlowManager.Instance != null && !AuthenticationFlowManager.Instance.IsGameReady())
         {
-            StartScreenManager.Instance.StartGame();
+            Debug.Log("Authentication not complete, ignoring movement");
+            return;
+        }
+        if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
+        {
+            AuthenticationFlowManager.Instance.StartGame();
             return;
         }
 

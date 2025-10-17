@@ -38,7 +38,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
     {
         if (ObjectPooler.Instance != null) 
         {
-            Debug.LogError("Object pooler instance not found");
+            //Debug.LogError("Object pooler instance not found");
             return;
         }
 

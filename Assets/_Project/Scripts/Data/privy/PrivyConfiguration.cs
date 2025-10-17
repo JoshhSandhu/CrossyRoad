@@ -41,7 +41,7 @@ public class PrivyConfiguration : ScriptableObject
         Mainnet
     }
 
-    // Validation
+    //Validation
     private void OnValidate()
     {
         if (string.IsNullOrEmpty(appId) || appId == "cmgodao4u00c7l50caof1nhau")

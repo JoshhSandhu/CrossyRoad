@@ -1,6 +1,7 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Collections;
 
 public class AuthUIController : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class AuthUIController : MonoBehaviour
 
     [Header("wlecome panel elements")]
     [SerializeField] private TextMeshProUGUI welcomeTitleText;
-    [SerializeField] private TextMeshProUGUI walletAddresText;
+    [SerializeField] private TextMeshProUGUI walletAddressText;
     [SerializeField] private TextMeshProUGUI userInfoText;
     [SerializeField] private Button logoutButton;
     [SerializeField] private Button playGameButton;
@@ -83,5 +84,147 @@ public class AuthUIController : MonoBehaviour
         PrivyAuthManager.OnAuthenticationStateChanged += OnAuthenticationStateChanged;
         PrivyAuthManager.OnWalletAddressChanged += OnWalletAddressChanged;
         PrivyAuthManager.OnUserInfoChanged += OnUserInfoChanged;
+    }
+
+    //Unsubscribe from events
+    private void OnDestroy()
+    {
+        PrivyAuthManager.OnAuthenticationStateChanged -= OnAuthenticationStateChanged;
+        PrivyAuthManager.OnWalletAddressChanged -= OnWalletAddressChanged;
+        PrivyAuthManager.OnUserInfoChanged -= OnUserInfoChanged;
+    }
+
+    private void OnConnectWalletClicked()
+    {
+        Debug.Log("Connect wallet button clicked");
+        if (PrivyAuthManager.Instance != null)
+        {
+            PrivyAuthManager.Instance.ConnectWallet();
+        }
+    }
+
+    private void OnLoginWithEmailClicked()
+    {
+        Debug.Log("login with email button clicked");
+        if(PrivyAuthManager.Instance != null)
+        {
+            PrivyAuthManager.Instance.ShowEmailLoginPanel();
+        }
+    }
+    private void OnLogoutClicked()
+    {
+        Debug.Log("Logout button clicked");
+        if (PrivyAuthManager.Instance != null)
+        {
+            PrivyAuthManager.Instance.Logout();
+        }
+    }
+
+    private void OnPlayGameClicked()
+    {
+        Debug.Log("Play game button clicked");
+        //hide the welcome panel and start the game
+        HideWelcomePanel();
+
+        //trigger game start
+        if (GameManager.Instance != null)
+        {
+            //GameManager.Instance.StartGame();
+        }
+    }
+
+    private void OnAuthenticationStateChanged(bool isAuthenticated)
+    {
+        if (isAuthenticated)
+        {
+            ShowWelcomePanel();
+        }
+        else
+        {
+            ShowAuthPanel();
+        }
+    }
+
+    private void OnWalletAddressChanged(string address)
+    {
+        if (walletAddressText != null && !string.IsNullOrEmpty(address))
+        {
+            string shortAddress = address.Length > 12 ?
+                $"{address.Substring(0, 6)}...{address.Substring(address.Length - 6)}" :
+                address;
+            walletAddressText.text = $"Wallet: {shortAddress}";
+        }
+    }
+    private void OnUserInfoChanged(string userInfo)
+    {
+        if (userInfoText != null)
+        {
+            userInfoText.text = userInfo;
+        }
+    }
+
+    public void ShowAuthPanel()
+    {
+        StartCoroutine(TransitionToPanel(authPanel, authCanvasGroup));
+    }
+
+    public void ShowWelcomePanel()
+    {
+        StartCoroutine(TransitionToPanel(welcomePanel, welcomeCanvasGroup));
+    }
+    public void ShowLoadingPanel(string message = "Connecting...")
+    {
+        if (loadingText != null)
+        {
+            loadingText.text = message;
+        }
+        StartCoroutine(TransitionToPanel(loadingPanel, loadingCanvasGroup));
+    }
+
+    public void HideWelcomePanel()
+    {
+        if (welcomePanel != null)
+        {
+            welcomePanel.SetActive(false);
+        }
+    }
+
+    private IEnumerator TransitionToPanel(GameObject targetPanel, CanvasGroup targetCanvasGroup)
+    {
+        //hide all panels first
+        if (authPanel != null) authPanel.SetActive(false);
+        if (welcomePanel != null) welcomePanel.SetActive(false);
+        if (loadingPanel != null) loadingPanel.SetActive(false);
+
+        //show target panel
+        if (targetPanel != null)
+        {
+            targetPanel.SetActive(true);
+
+            if (targetCanvasGroup != null)
+            {
+                targetCanvasGroup.alpha = 0f;
+
+                // Fade in
+                float elapsedTime = 0f;
+                while (elapsedTime < panelTransitionDuration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float progress = elapsedTime / panelTransitionDuration;
+                    targetCanvasGroup.alpha = transitionCurve.Evaluate(progress);
+                    yield return null;
+                }
+
+                targetCanvasGroup.alpha = 1f;
+            }
+        }
+    }
+
+    public void HideLoadingPanel()
+    {
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(false);
+        }
     }
 }
