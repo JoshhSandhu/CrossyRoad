@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static Unity.VisualScripting.Metadata;
 
 /// <summary>
 /// this script manages the queue of active lanes in the scene

@@ -82,6 +82,12 @@ public class StartScreenManager : MonoBehaviour
     {
         while (!hasGameStarted)
         {
+            if (AuthenticationFlowManager.Instance != null)
+            {
+                Debug.Log("Authentication flow active - StartScreenManager bypassed");
+                yield return null;
+                continue;
+            }
             Vector2 moveInput = playerInputActions.Player.Move.ReadValue<Vector2>();
             bool hasMoveInput = Mathf.Abs(moveInput.x) > 0.1f || Mathf.Abs(moveInput.y) > 0.1f;
 
