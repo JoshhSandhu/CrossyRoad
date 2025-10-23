@@ -113,6 +113,15 @@ public class AuthenticationFlowManager : MonoBehaviour
             //init privy sdk
             privyInstance = PrivyManager.Initialize(config);
 
+            try
+            {
+                var solanaWallet = await PrivyManager.Instance.User.CreateSolanaWallet();
+                Debug.Log("New Solana wallet created with address: " + solanaWallet.Address);
+            }
+            catch
+            {
+                Debug.Log("Error creating embedded wallet.");
+            }
             //waiting for init
             await PrivyManager.AwaitReady();
 

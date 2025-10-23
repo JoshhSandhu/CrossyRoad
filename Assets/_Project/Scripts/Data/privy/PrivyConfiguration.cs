@@ -29,7 +29,7 @@ public class PrivyConfiguration : ScriptableObject
 
     [Header("Solana Settings")]
     [Tooltip("Solana RPC URL *leave empty to use Privy's default")]
-    public string solanaRpcUrl = "";
+    public string solanaRpcUrl = "https://api.devnet.solana.com";
 
     [Tooltip("Solana network")]
     public SolanaNetwork solanaNetwork = SolanaNetwork.Devnet;

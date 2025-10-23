@@ -1,12 +1,13 @@
 using System;
-using System.Collections.Generic;
 
 namespace Privy
 {
     internal static class PrivyEnvironment
     {
-        private static readonly string[] _internalAppIds = {
+        private static readonly string[] _internalAppIds =
+        {
             "clpijy3tw0001kz0g6ixs9z15",
+            "cla06f34x0001mh08l8nsr496"
         };
 
         private static bool _isProduction = true; // Default to true, incase initialize is not called

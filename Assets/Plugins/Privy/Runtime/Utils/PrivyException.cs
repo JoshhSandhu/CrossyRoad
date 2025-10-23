@@ -62,6 +62,8 @@ namespace Privy
         CreateFailed,
         CreateAdditionalFailed,
         RecoverFailed,
-        RpcRequestFailed
+        RpcRequestFailed,
+        UserSignerRequestFailed,
+        MaxWalletsCreated,
     }
 }

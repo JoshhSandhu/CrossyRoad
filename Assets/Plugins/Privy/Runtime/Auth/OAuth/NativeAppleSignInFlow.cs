@@ -11,7 +11,8 @@ namespace Privy
             {
                 if (error != null && error.Code != 0)
                 {
-                    taskSource.SetException(new PrivyException.AuthenticationException(error.Message, AuthenticationError.OAuthVerificationFailed));
+                    taskSource.SetException(new PrivyException.AuthenticationException(error.Message,
+                        AuthenticationError.OAuthVerificationFailed));
                     return;
                 }
 

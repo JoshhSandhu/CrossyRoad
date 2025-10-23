@@ -1,9 +1,7 @@
 using System;
 using Newtonsoft.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Privy
 {
@@ -11,13 +9,16 @@ namespace Privy
     {
         private readonly IWebViewHandler _webViewHandler;
         private TaskCompletionSource<bool> readyTcs = new TaskCompletionSource<bool>();
-        private readonly Dictionary<string, TaskCompletionSource<string>> requestResponseMap = new Dictionary<string, TaskCompletionSource<string>>();
 
-        public WebViewManager(PrivyConfig privyConfig, WebViewManagerBridge bridge)
+        private readonly Dictionary<string, TaskCompletionSource<string>> requestResponseMap =
+            new Dictionary<string, TaskCompletionSource<string>>();
+
+        public WebViewManager(PrivyConfig privyConfig)
         {
-            _webViewHandler = IWebViewHandler.GetPlatformWebViewHandler(this, privyConfig, bridge);
+            _webViewHandler = IWebViewHandler.GetPlatformWebViewHandler(this, privyConfig);
 
-            _webViewHandler.LoadUrl($"{PrivyEnvironment.BASE_URL}/apps/{privyConfig.AppId}/embedded-wallets?client_id={privyConfig.ClientId}");
+            _webViewHandler.LoadUrl(
+                $"{PrivyEnvironment.BASE_URL}/apps/{privyConfig.AppId}/embedded-wallets?client_id={privyConfig.ClientId}");
         }
 
         internal void OnWebViewReady()
@@ -34,7 +35,6 @@ namespace Privy
         // Handle messages received from the WebView
         internal void OnMessageReceived(string message)
         {
-
             //Here we take a message, deserialize it into an IFrame Response and then parse the relevant fields
 
             PrivyLogger.Debug("Message from WebView: " + message);
@@ -45,7 +45,7 @@ namespace Privy
             {
                 message = Uri.UnescapeDataString(message);
                 PrivyLogger.Debug("Decoded message from WebView: " + message);
-            }                
+            }
 
             //Generic Response Parsing, for the event and ID
             var messageResponse = JsonConvert.DeserializeObject<IframeResponse>(message);
@@ -63,11 +63,11 @@ namespace Privy
             {
                 //This would happen if the request times out, and the response is received after
                 PrivyLogger.Error($"No matching task found for ID: {id}");
-            }        
+            }
         }
 
 
-        private async Task<IframeResponse> SendRequest<T>(IframeRequest<T> request, double seconds = 15)
+        private async Task<IframeResponse> SendRequest<T>(IframeRequest<T> request, double seconds = 30)
         {
             if (request.Event != PrivyEventType.Ready)
             {
@@ -85,7 +85,12 @@ namespace Privy
             //On cancellation we can throw the error
             //cancellation would only happen if timeout finishes, AND the task isn't currently complete        
 
-            string serializedRequest = JsonConvert.SerializeObject(request); //This could throw an error, however is less risky especially since we control the request
+            string
+                serializedRequest =
+                    JsonConvert.SerializeObject(
+                        request); //This could throw an error, however is less risky especially since we control the request
+
+            PrivyLogger.Debug("Message to WebView: " + serializedRequest);
 
             _webViewHandler.SendMessage(serializedRequest); //Sends message based on if it's the iframe or the webview
 
@@ -100,15 +105,18 @@ namespace Privy
                 {
                     Id = request.Id,
                     Event = request.Event,
-                    Error = new ErrorDetails{
-                        Type="timeout_error",
-                        Message="The request timed out."
+                    Error = new ErrorDetails
+                    {
+                        Type = "timeout_error",
+                        Message = "The request timed out."
                     },
                 } as IframeResponse;
             }
 
             string responseString = await tcs.Task;
-            var baseResponse = JsonConvert.DeserializeObject<IframeResponse>(responseString); //This could throw an error as well, however we may not need a custom exception here
+            var baseResponse =
+                JsonConvert.DeserializeObject<IframeResponse>(
+                    responseString); //This could throw an error as well, however we may not need a custom exception here
 
             if (responseString.Contains("error"))
             {
@@ -123,20 +131,32 @@ namespace Privy
                 case PrivyEventType.Ready:
                     return JsonConvert.DeserializeObject<IframeResponseSuccess<ReadyResponseData>>(responseString);
 
-                case PrivyEventType.Create:
-                    return JsonConvert.DeserializeObject<IframeResponseSuccess<CreateWalletResponseData>>(responseString);
+                case PrivyEventType.CreateEthereumWallet:
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<CreateEthereumWalletResponseData>>(
+                        responseString);
+
+                case PrivyEventType.CreateSolanaWallet:
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<CreateSolanaWalletResponseData>>(
+                        responseString);
 
                 case PrivyEventType.CreateAdditional:
-                    return JsonConvert.DeserializeObject<IframeResponseSuccess<CreateAdditionalWalletResponseData>>(responseString);
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<CreateAdditionalWalletResponseData>>(
+                        responseString);
 
                 case PrivyEventType.Connect:
-                    return JsonConvert.DeserializeObject<IframeResponseSuccess<ConnectWalletResponseData>>(responseString);                
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<ConnectWalletResponseData>>(
+                        responseString);
 
                 case PrivyEventType.Recover:
-                    return JsonConvert.DeserializeObject<IframeResponseSuccess<RecoverWalletResponseData>>(responseString);                                
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<RecoverWalletResponseData>>(
+                        responseString);
 
                 case PrivyEventType.Rpc:
-                    return JsonConvert.DeserializeObject<IframeResponseSuccess<RpcResponseData>>(responseString);                
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<RpcResponseData>>(responseString);
+
+                case PrivyEventType.SignWithUserSigner:
+                    return JsonConvert.DeserializeObject<IframeResponseSuccess<UserSignerSignResponseData>>(
+                        responseString);
 
                 case "error":
                     return JsonConvert.DeserializeObject<IframeResponseError>(responseString);
@@ -147,9 +167,10 @@ namespace Privy
                     {
                         Id = request.Id,
                         Event = request.Event,
-                        Error = new ErrorDetails{
-                            Type="unknown_response",
-                            Message="received an unknown response type"
+                        Error = new ErrorDetails
+                        {
+                            Type = "unknown_response",
+                            Message = "received an unknown response type"
                         },
                     } as IframeResponse;
             }
@@ -174,7 +195,8 @@ namespace Privy
                 PrivyLogger.Debug("NOT COMPLETED");
                 // Send a message to the WebView to check if it's ready
 
-                try {
+                try
+                {
                     //We've added functionality to have PingReady return Error Responses, which we don't need to handle, since the loop will re-trigger
                     //However Ping Ready could potentially throw an error if there is an error in serialization, so we can rap it in a try catch, because this wouldn't be caught
                     //So we wrap in a try catch for that example, although unlikely
@@ -187,19 +209,19 @@ namespace Privy
                         PrivyLogger.Debug("Success Response Received: WebView is ready.");
                         readyTcs.TrySetResult(true); //No effect if this is called multiple times, due to the "try"
                     }
-                } catch (Exception e){
+                }
+                catch (Exception e)
+                {
                     //Fail silently, to have loop continue
                     PrivyLogger.Debug("Success response not received, pinging again");
                 }
             }
 
             PrivyLogger.Debug("Task completed");
-
         }
 
         private async Task<IframeResponse> PingReady()
         {
-
             var readyRequest = new IframeRequest<ReadyRequestData>
             {
                 Id = Guid.NewGuid().ToString().ToLower(),
@@ -214,11 +236,13 @@ namespace Privy
             {
                 return successResponse;
             }
-            else if ( res is IframeResponseError errorResponse)
+            else if (res is IframeResponseError errorResponse)
             {
                 //This will get triggered if there's any timeouts, or webview returns an error response
                 return errorResponse;
-            } else {
+            }
+            else
+            {
                 //Fail silently if we receive an error from webview we don't know how to handle
                 //This will trigger another ping
                 //Throwing an exception here won't be caught, and there's nothing to send back to the developer, so makes sense to do this
@@ -237,47 +261,85 @@ namespace Privy
             //Enhancement: Add timeout here, in case the ready state never updates - to prevent indefinite requests
             // You can perform additional async operations here if needed
             await readyTcs.Task;
-        }    
+        }
 
 
         //Wallet Methods
         //TBD
-        internal async Task<IframeResponse> CreateWallet(string accessToken)
+        internal async Task<IframeResponse> CreateEthereumWallet(string accessToken, string solanaAddress = null)
         {
-            var data = new CreateWalletRequestData
+            var data = new CreateEthereumWalletRequestData
             {
-                AccessToken = accessToken
+                AccessToken = accessToken,
+                SolanaAddress = solanaAddress
             };
 
-            var createWalletRequest = new IframeRequest<CreateWalletRequestData>
+            var createWalletRequest = new IframeRequest<CreateEthereumWalletRequestData>
             {
                 Id = Guid.NewGuid().ToString().ToLower(),
-                Event = PrivyEventType.Create,
+                Event = PrivyEventType.CreateEthereumWallet,
                 Data = data
             };
 
-            var res = await SendRequest<CreateWalletRequestData>(createWalletRequest, 15);
+            var res = await SendRequest<CreateEthereumWalletRequestData>(createWalletRequest, 60);
 
-            if (res is IframeResponseSuccess<CreateWalletResponseData> successResponse)
+            if (res is IframeResponseSuccess<CreateEthereumWalletResponseData> successResponse)
             {
                 return successResponse;
             }
-            else if ( res is IframeResponseError errorResponse)
+            else if (res is IframeResponseError errorResponse)
             {
                 return errorResponse;
-            } else {
-                throw new PrivyException.EmbeddedWalletException($"Failed to create wallet", EmbeddedWalletError.CreateFailed ); //This bubbles up to top level
+            }
+            else
+            {
+                throw new PrivyException.EmbeddedWalletException($"Failed to create wallet",
+                    EmbeddedWalletError.CreateFailed); //This bubbles up to top level
             }
         }
 
+        internal async Task<IframeResponse> CreateSolanaWallet(string accessToken, string ethereumAddress = null)
+        {
+            var data = new CreateSolanaWalletRequestData
+            {
+                AccessToken = accessToken,
+                EthereumAddress = ethereumAddress
+            };
 
-        internal async Task<IframeResponse> CreateAdditionalWallet(string accessToken, string primaryWalletAddress, int hdWalletIndex)
+            var createWalletRequest = new IframeRequest<CreateSolanaWalletRequestData>
+            {
+                Id = Guid.NewGuid().ToString().ToLower(),
+                Event = PrivyEventType.CreateSolanaWallet,
+                Data = data
+            };
+
+            var res = await SendRequest(createWalletRequest, 60);
+
+            if (res is IframeResponseSuccess<CreateSolanaWalletResponseData> successResponse)
+            {
+                return successResponse;
+            }
+            else if (res is IframeResponseError errorResponse)
+            {
+                return errorResponse;
+            }
+            else
+            {
+                throw new PrivyException.EmbeddedWalletException($"Failed to create wallet",
+                    EmbeddedWalletError.CreateFailed); //This bubbles up to top level
+            }
+        }
+
+        internal async Task<IframeResponse> CreateAdditionalWallet(string accessToken, WalletEntropy walletEntropy,
+            ChainType chainType, int hdWalletIndex)
         {
             var data = new CreateAdditionalWalletRequestData
             {
                 AccessToken = accessToken,
-                PrimaryWalletAddress = primaryWalletAddress,
-                HdWalletIndex = hdWalletIndex
+                ChainType = chainType,
+                EntropyId = walletEntropy.Id,
+                EntropyIdVerifier = walletEntropy.Verifier.ToVerifierName(),
+                WalletIndex = hdWalletIndex
             };
 
             var createWalletRequest = new IframeRequest<CreateAdditionalWalletRequestData>
@@ -287,27 +349,32 @@ namespace Privy
                 Data = data
             };
 
-            var res = await SendRequest<CreateAdditionalWalletRequestData>(createWalletRequest, 15);
+            var res = await SendRequest<CreateAdditionalWalletRequestData>(createWalletRequest, 60);
 
             if (res is IframeResponseSuccess<CreateAdditionalWalletResponseData> successResponse)
             {
                 return successResponse;
             }
-            else if ( res is IframeResponseError errorResponse)
+            else if (res is IframeResponseError errorResponse)
             {
                 return errorResponse;
-            } else {
-                throw new PrivyException.EmbeddedWalletException($"Failed to create additional wallet", EmbeddedWalletError.CreateAdditionalFailed ); //This bubbles up to top level
+            }
+            else
+            {
+                throw new PrivyException.EmbeddedWalletException($"Failed to create additional wallet",
+                    EmbeddedWalletError.CreateAdditionalFailed); //This bubbles up to top level
             }
         }
 
 
-        internal async Task<IframeResponse> ConnectWallet(string accessToken, string address)
+        internal async Task<IframeResponse> ConnectWallet(string accessToken, WalletEntropy walletEntropy)
         {
             var data = new ConnectWalletRequestData
             {
                 AccessToken = accessToken,
-                Address = address
+                ChainType = ChainType.Ethereum,
+                EntropyId = walletEntropy.Id,
+                EntropyIdVerifier = walletEntropy.Verifier.ToVerifierName()
             };
 
             var connectWalletRequest = new IframeRequest<ConnectWalletRequestData>
@@ -315,28 +382,32 @@ namespace Privy
                 Id = Guid.NewGuid().ToString().ToLower(),
                 Event = PrivyEventType.Connect,
                 Data = data
-            };        
+            };
 
-            var res = await SendRequest<ConnectWalletRequestData>(connectWalletRequest, 15);
+            var res = await SendRequest<ConnectWalletRequestData>(connectWalletRequest);
 
             if (res is IframeResponseSuccess<ConnectWalletResponseData> successResponse)
             {
                 return successResponse;
             }
-            else if ( res is IframeResponseError errorResponse)
+            else if (res is IframeResponseError errorResponse)
             {
                 return errorResponse;
-            } else {
-                throw new PrivyException.EmbeddedWalletException($"Failed to connect wallet", EmbeddedWalletError.ConnectionFailed );
             }
-        }    
+            else
+            {
+                throw new PrivyException.EmbeddedWalletException($"Failed to connect wallet",
+                    EmbeddedWalletError.ConnectionFailed);
+            }
+        }
 
-        internal async Task<IframeResponse> RecoverWallet(string accessToken, string address)
+        internal async Task<IframeResponse> RecoverWallet(string accessToken, WalletEntropy walletEntropy)
         {
             var data = new RecoverWalletRequestData
             {
                 AccessToken = accessToken,
-                Address = address
+                EntropyId = walletEntropy.Id,
+                EntropyIdVerifier = walletEntropy.Verifier.ToVerifierName()
             };
 
             var recoverWalletRequest = new IframeRequest<RecoverWalletRequestData>
@@ -346,7 +417,7 @@ namespace Privy
                 Data = data
             };
 
-            var res = await SendRequest<RecoverWalletRequestData>(recoverWalletRequest, 15);
+            var res = await SendRequest<RecoverWalletRequestData>(recoverWalletRequest);
 
             if (res is IframeResponseSuccess<RecoverWalletResponseData> successResponse)
             {
@@ -358,22 +429,22 @@ namespace Privy
             }
             else
             {
-                throw new PrivyException.EmbeddedWalletException($"Failed to recover wallet", EmbeddedWalletError.RecoverFailed );
+                throw new PrivyException.EmbeddedWalletException($"Failed to recover wallet",
+                    EmbeddedWalletError.RecoverFailed);
             }
         }
 
-        internal async Task<IframeResponse> Request(string accessToken, string primaryWalletAddress, int hdWalletIndex, RpcRequest request)
+        internal async Task<IframeResponse> Request(string accessToken, WalletEntropy walletEntropy,
+            ChainType chainType, int hdWalletIndex, RpcRequestData.IRpcRequestDetails request)
         {
             var data = new RpcRequestData
             {
                 AccessToken = accessToken,
-                Address = primaryWalletAddress, //The message just requires the "address" key yet we're sending the primary address
-                HdWalletIndex = hdWalletIndex,
-                Request = new RpcRequestData.RequestDetails
-                {
-                    Method = request.Method, //the Method is capitalized as we expect the developer to send us params in PascalCase - yet internally we are using camelCase for better consistency with our messages
-                    Params = request.Params
-                }
+                ChainType = chainType,
+                EntropyId = walletEntropy.Id,
+                EntropyIdVerifier = walletEntropy.Verifier.ToVerifierName(),
+                WalletIndex = hdWalletIndex,
+                Request = request
             };
 
             var rpcRequest = new IframeRequest<RpcRequestData>
@@ -383,7 +454,7 @@ namespace Privy
                 Data = data
             };
 
-            var res = await SendRequest<RpcRequestData>(rpcRequest, 15);
+            var res = await SendRequest<RpcRequestData>(rpcRequest);
 
             if (res is IframeResponseSuccess<RpcResponseData> successResponse)
             {
@@ -395,10 +466,40 @@ namespace Privy
             }
             else
             {
-                throw new PrivyException.EmbeddedWalletException($"Failed to execute request", EmbeddedWalletError.RpcRequestFailed );
+                throw new PrivyException.EmbeddedWalletException($"Failed to execute request",
+                    EmbeddedWalletError.RpcRequestFailed);
             }
         }
 
+        internal async Task<IframeResponse> SignWithUserSigner(string accessToken, byte[] message)
+        {
+            var data = new UserSignerSignRequestData
+            {
+                AccessToken = accessToken,
+                Message = Convert.ToBase64String(message)
+            };
 
+            var userSignerSignRequest = new IframeRequest<UserSignerSignRequestData>
+            {
+                Id = Guid.NewGuid().ToString().ToLower(),
+                Event = PrivyEventType.SignWithUserSigner,
+                Data = data
+            };
+
+            var res = await SendRequest(userSignerSignRequest);
+
+            if (res is IframeResponseSuccess<UserSignerSignResponseData> successResponse)
+            {
+                return successResponse;
+            }
+
+            if (res is IframeResponseError errorResponse)
+            {
+                return errorResponse;
+            }
+
+            throw new PrivyException.EmbeddedWalletException($"Failed to sign with the user's authorization key",
+                EmbeddedWalletError.UserSignerRequestFailed);
+        }
     }
 }

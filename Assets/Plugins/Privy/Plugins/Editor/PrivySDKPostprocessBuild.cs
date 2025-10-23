@@ -8,6 +8,7 @@ public class PrivySDKPostprocessBuild
     [PostProcessBuild]
     public static void OnPostprocessBuild(BuildTarget buildTarget, string path)
     {
+#if UNITY_IOS
         if (buildTarget == BuildTarget.iOS)
         {
             var projPath = PBXProject.GetPBXProjectPath(path);
@@ -26,5 +27,6 @@ public class PrivySDKPostprocessBuild
             capabilitiesManager.AddSignInWithApple();
             capabilitiesManager.WriteToFile();
         }
+#endif
     }
 }

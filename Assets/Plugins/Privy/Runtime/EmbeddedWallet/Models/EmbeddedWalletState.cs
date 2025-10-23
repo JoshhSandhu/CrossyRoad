@@ -9,7 +9,9 @@ namespace Privy
         public sealed class Disconnected : EmbeddedWalletState
         {
             // Provide a public constructor so you can instantiate this class
-            public Disconnected() { }
+            public Disconnected()
+            {
+            }
         }
 
         public sealed class Connected : EmbeddedWalletState

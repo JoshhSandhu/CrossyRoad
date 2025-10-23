@@ -4327,45 +4327,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dae3d76d0bef1642a8f32c1dc4ca445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthUIController
-  authPanel: {fileID: 817277030}
-  welcomePanel: {fileID: 526603105}
-  loadingPanel: {fileID: 1893663042}
-  connectionWalletButton: {fileID: 216140023}
-  loginWithEmailButton: {fileID: 1946450231}
-  authTitleText: {fileID: 1489743772}
-  authDescriptionText: {fileID: 1156751955}
-  welcomeTitleText: {fileID: 817478628}
-  walletAddressText: {fileID: 752856633}
-  userInfoText: {fileID: 1866837807}
-  logoutButton: {fileID: 1080943377}
-  playGameButton: {fileID: 1689583033}
-  loadingText: {fileID: 1941979767}
-  loadingProgressBar: {fileID: 917697840}
-  panelTransitionDuration: 0.5
-  transitionCurve:
-    m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  authCanvasGroup: {fileID: 0}
-  welcomeCanvasGroup: {fileID: 0}
-  loadingCanvasGroup: {fileID: 0}
 --- !u!1 &817478626
 GameObject:
   m_ObjectHideFlags: 0

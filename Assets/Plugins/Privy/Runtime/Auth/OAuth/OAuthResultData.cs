@@ -1,11 +1,15 @@
 using System;
 using System.Web;
+using Newtonsoft.Json;
 
 namespace Privy
 {
     internal class OAuthResultData
     {
+        [JsonProperty("authorizationCode")]
         public string OAuthCode;
+
+        [JsonProperty("stateCode")]
         public string OAuthState;
 
         public static OAuthResultData parseFromUri(Uri uri)

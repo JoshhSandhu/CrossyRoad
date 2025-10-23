@@ -4,19 +4,19 @@ using System.Text;
 
 namespace Privy
 {
-  /// <summary>
-  ///     Provides a randomly generating PKCE code verifier and it's corresponding code challenge.
-  /// </summary>
-  public static class PKCE
+    /// <summary>
+    ///     Provides a randomly generating PKCE code verifier and it's corresponding code challenge.
+    /// </summary>
+    public static class PKCE
     {
-      /// <summary>
-      ///     Generates a code_verifier and the corresponding code_challenge, as specified in the rfc-7636.
-      /// </summary>
-      /// <remarks>
-      ///     See https://datatracker.ietf.org/doc/html/rfc7636#section-4.1 and
-      ///     https://datatracker.ietf.org/doc/html/rfc7636#section-4.2
-      /// </remarks>
-      public static (string code_challenge, string verifier) Generate(int size = 32)
+        /// <summary>
+        ///     Generates a code_verifier and the corresponding code_challenge, as specified in the rfc-7636.
+        /// </summary>
+        /// <remarks>
+        ///     See https://datatracker.ietf.org/doc/html/rfc7636#section-4.1 and
+        ///     https://datatracker.ietf.org/doc/html/rfc7636#section-4.2
+        /// </remarks>
+        public static (string code_challenge, string verifier) Generate(int size = 32)
         {
             var verifier = GenerateCodeVerifier(size);
             var challenge = GenerateCodeChallenge(verifier);

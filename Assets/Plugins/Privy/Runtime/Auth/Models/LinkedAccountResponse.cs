@@ -21,6 +21,9 @@ namespace Privy
 
     internal class WalletAccountResponse : LinkedAccountResponse
     {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
         [JsonProperty("address")]
         public string Address { get; set; }
 
@@ -57,29 +60,44 @@ namespace Privy
         [JsonProperty("address")]
         public string Address { get; set; }
     }
-    
+
     internal class GoogleOAuthAccountResponse : LinkedAccountResponse
     {
         [JsonProperty("subject")]
         public string Subject { get; set; }
-        
+
         [JsonProperty("email")]
         public string Email { get; set; }
-        
+
         [JsonProperty("name")]
         public string Name { get; set; }
     }
-    
+
     internal class DiscordOAuthAccountResponse : LinkedAccountResponse
     {
         [JsonProperty("subject")]
         public string Subject { get; set; }
-        
+
         [JsonProperty("email")]
         public string Email { get; set; }
-        
+
         [JsonProperty("username")]
         public string UserName { get; set; }
+    }
+
+    internal class TwitterOAuthAccountResponse : LinkedAccountResponse
+    {
+        [JsonProperty("subject")]
+        public string Subject { get; set; }
+
+        [JsonProperty("username")]
+        public string UserName { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("profile_picture_url")]
+        public string ProfilePictureUrl { get; set; }
     }
 
     internal class AppleOAuthAccountResponse : LinkedAccountResponse

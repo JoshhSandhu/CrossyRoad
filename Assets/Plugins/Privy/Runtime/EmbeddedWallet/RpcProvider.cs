@@ -1,20 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Privy
 {
     internal class RpcProvider : IRpcProvider
     {
-        public string PrimaryWalletAddress { get; }
-        public int HdWalletIndex { get; }
-
-        private EmbeddedWalletManager _embeddedWalletManager;
+        private readonly IRpcExecutor _rpcExecutor;
 
         private static readonly HashSet<string> _allowedMethods = new HashSet<string>
         {
             "eth_sign",
+            "secp256k1_sign",
             "personal_sign",
             "eth_populateTransactionRequest",
             "eth_signTypedData_v4",
@@ -22,23 +18,42 @@ namespace Privy
             "eth_sendTransaction"
         };
 
-        public RpcProvider(string primaryWalletAddress, int hdWalletIndex, EmbeddedWalletManager embeddedWalletManager)
+        public RpcProvider(IRpcExecutor rpcExecutor)
         {
-            this.PrimaryWalletAddress = primaryWalletAddress;
-            this.HdWalletIndex = hdWalletIndex;
-            _embeddedWalletManager = embeddedWalletManager;
+            _rpcExecutor = rpcExecutor;
         }
 
         public async Task<RpcResponse> Request(RpcRequest request)
         {
-            if (_allowedMethods.Contains(request.Method)) {
-                return await _embeddedWalletManager.Request(PrimaryWalletAddress, HdWalletIndex, request);
-            } else {
+            if (_allowedMethods.Contains(request.Method))
+            {
+                var requestDetails = new RpcRequestData.EthereumRpcRequestDetails
+                {
+                    Method = request.Method,
+                    Params = request.Params
+                };
+                var responseDetails = await _rpcExecutor.Evaluate(requestDetails);
+
+                if (responseDetails is RpcResponseData.EthereumRpcResponseDetails response)
+                {
+                    return new RpcResponse
+                    {
+                        Method = response.Method,
+                        Data = response.Data
+                    };
+                }
+
+                throw new PrivyException.EmbeddedWalletException($"Failed to execute RPC Request",
+                    EmbeddedWalletError.RpcRequestFailed);
+            }
+            else
+            {
                 return await HandleJsonRpc(request);
             }
         }
 
-        private async Task<RpcResponse> HandleJsonRpc(RpcRequest request) {
+        private async Task<RpcResponse> HandleJsonRpc(RpcRequest request)
+        {
             PrivyLogger.Debug("Unsupported rpc request type");
             return null;
         }

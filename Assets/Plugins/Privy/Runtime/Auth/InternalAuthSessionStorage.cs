@@ -13,7 +13,9 @@ namespace Privy
 
         internal InternalAuthSession RetrieveInternalAuthSessionFromStorage()
         {
-            string persistedSession = _playerPrefsDataManager.LoadData<InternalAuthSession>(Constants.INTERNAL_AUTH_SESSION_KEY); //key should be a constant
+            string persistedSession =
+                _playerPrefsDataManager.LoadData<InternalAuthSession>(Constants
+                    .INTERNAL_AUTH_SESSION_KEY); //key should be a constant
 
             if (string.IsNullOrEmpty(persistedSession))
             {
@@ -36,6 +38,6 @@ namespace Privy
         internal void ClearInternalAuthSessionInStorage()
         {
             _playerPrefsDataManager.DeleteData(Constants.INTERNAL_AUTH_SESSION_KEY);
-        }    
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Privy
 {
     internal class WebViewHandler : IWebViewHandler
     {
-        private readonly WebViewObject webViewObject;
+        private readonly NativeWebViewObject webViewObject;
         private readonly WebViewManager _webViewManager;
 
         internal WebViewHandler(WebViewManager webViewManager)
@@ -18,11 +18,10 @@ namespace Privy
             _webViewManager = webViewManager;
 
             // Create a GameObject to host the WebViewObject
-            GameObject webViewGameObject = new GameObject("WebViewObject");
-            webViewObject = webViewGameObject.AddComponent<WebViewObject>();
+            webViewObject = GameObject.FindObjectOfType<NativeWebViewObject>();
 
             // Initialize the WebViewObject
-            webViewObject.Init(
+            webViewObject.Wrapped.Init(
                 cb: (msg) => _webViewManager.OnMessageReceived(msg),
                 err: (msg) => PrivyLogger.Error($"Error from WebView: {msg}"),
                 httpErr: (msg) => PrivyLogger.Error($"HTTP error from WebView: {msg}"),
@@ -35,7 +34,7 @@ namespace Privy
         {
             if (webViewObject != null)
             {
-                webViewObject.LoadURL(url);
+                webViewObject.Wrapped.LoadURL(url);
             }
         }
 
@@ -58,18 +57,18 @@ namespace Privy
         ";
 
 
-            webViewObject.EvaluateJS(js); //Initialize Handlers
+            webViewObject.Wrapped.EvaluateJS(js); //Initialize Handlers
             PrivyLogger.Debug("Injected JavaScript into WebView.");
 
             _webViewManager.PingReadyUntilSuccessful();
-        }    
+        }
 
         public void SendMessage(string message)
         {
             string jsDispatchEvent = $@"
             window.dispatchEvent(new MessageEvent('message', {{ data: {message} }}));
         ";
-            webViewObject.EvaluateJS(jsDispatchEvent);
+            webViewObject.Wrapped.EvaluateJS(jsDispatchEvent);
         }
     }
 }
