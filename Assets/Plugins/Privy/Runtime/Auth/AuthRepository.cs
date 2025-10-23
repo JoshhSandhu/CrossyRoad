@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using UnityEngine;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -38,7 +36,8 @@ namespace Privy
             }
             catch (Exception ex)
             {
-                throw new PrivyException.AuthenticationException($"Failed to send email code: {ex.Message}", AuthenticationError.SendCodeFailed);
+                throw new PrivyException.AuthenticationException($"Failed to send email code: {ex.Message}",
+                    AuthenticationError.SendCodeFailed);
             }
         }
 
@@ -49,7 +48,7 @@ namespace Privy
             {
                 Email = email,
                 Code = code
-            }; ;
+            };
 
             string path = "passwordless/authenticate";
 
@@ -74,13 +73,13 @@ namespace Privy
             catch (Exception ex)
             {
                 //This catches request failures
-                throw new PrivyException.AuthenticationException($"Failed to login with email code: {ex.Message}", AuthenticationError.WrongOtpCode);
+                throw new PrivyException.AuthenticationException($"Failed to login with email code: {ex.Message}",
+                    AuthenticationError.WrongOtpCode);
             }
-
-
         }
 
-        public async Task<InitiateOAuthFlowResponse> InitiateOAuthFlow(OAuthProvider provider, string codeChallenge, string redirectUri, string stateCode)
+        public async Task<InitiateOAuthFlowResponse> InitiateOAuthFlow(OAuthProvider provider, string codeChallenge,
+            string redirectUri, string stateCode)
         {
             var requestData = new InitiateOAuthFlowRequestData
             {
@@ -98,17 +97,20 @@ namespace Privy
             {
                 string jsonResponse = await _httpRequestHandler.SendRequestAsync(path, serializedRequest);
 
-                InitiateOAuthFlowResponse initOauthResponse = JsonConvert.DeserializeObject<InitiateOAuthFlowResponse>(jsonResponse);
+                InitiateOAuthFlowResponse initOauthResponse =
+                    JsonConvert.DeserializeObject<InitiateOAuthFlowResponse>(jsonResponse);
 
                 return initOauthResponse;
             }
             catch (Exception ex)
             {
-                throw new PrivyException.AuthenticationException($"Failed to initiate OAuth: {ex.Message}", AuthenticationError.OAuthInitFailed);
+                throw new PrivyException.AuthenticationException($"Failed to initiate OAuth: {ex.Message}",
+                    AuthenticationError.OAuthInitFailed);
             }
         }
 
-        public async Task<InternalAuthSession> AuthenticateOAuthFlow(string authorizationCode, string codeVerifier, string stateCode, bool isRawFlow = false)
+        public async Task<InternalAuthSession> AuthenticateOAuthFlow(string authorizationCode, string codeVerifier,
+            string stateCode, bool isRawFlow = false)
         {
             var requestData = new AuthenticateOAuthFlowRequestData
             {
@@ -133,7 +135,8 @@ namespace Privy
             }
             catch (Exception ex)
             {
-                throw new PrivyException.AuthenticationException($"Failed to authenticate with OAuth: {ex.Message}", AuthenticationError.OAuthAuthenticateFailed);
+                throw new PrivyException.AuthenticationException($"Failed to authenticate with OAuth: {ex.Message}",
+                    AuthenticationError.OAuthAuthenticateFailed);
             }
         }
 
@@ -152,7 +155,7 @@ namespace Privy
 
             var headers = new Dictionary<string, string>
             {
-                { "Authorization", "Bearer " + accessToken}
+                { "Authorization", "Bearer " + accessToken }
             };
 
             //Serialize the request data
@@ -173,7 +176,8 @@ namespace Privy
             }
             catch (Exception ex)
             {
-                throw new PrivyException.AuthenticationException($"Failed to refresh session: {ex.Message}", AuthenticationError.RefreshFailed);
+                throw new PrivyException.AuthenticationException($"Failed to refresh session: {ex.Message}",
+                    AuthenticationError.RefreshFailed);
             }
         }
 
@@ -185,7 +189,8 @@ namespace Privy
                 Converters = new List<JsonConverter> { new LinkedAccountConverter() }
             };
 
-            ValidSessionResponse authResponse = JsonConvert.DeserializeObject<ValidSessionResponse>(jsonResponse, settings);
+            ValidSessionResponse authResponse =
+                JsonConvert.DeserializeObject<ValidSessionResponse>(jsonResponse, settings);
             return authResponse;
         }
     }

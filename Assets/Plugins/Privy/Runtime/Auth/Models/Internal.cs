@@ -8,13 +8,12 @@ namespace Privy
         public PrivyLinkedAccount[] LinkedAccounts;
         public Dictionary<string, string> CustomMetadata;
     }
-    
+
     internal class InternalAuthSession
     {
         public InternalPrivyUser User;
         public string AccessToken;
         public string RefreshToken;
-        public string SessionUpdateAction;    
+        public string SessionUpdateAction;
     }
 }
-

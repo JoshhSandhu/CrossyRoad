@@ -61,37 +61,58 @@ public class PlayerController : MonoBehaviour
         playerRb.interpolation = RigidbodyInterpolation.Interpolate;
         playerRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         playerRb.freezeRotation = true;
+        TouchSimulation.Enable();
     }
 
     //subscribe the events
     private void OnEnable()
     {
+        Debug.Log("PlayerController OnEnable called.");
         if (playerInputActions == null)
         {
             playerInputActions = new PlayerInputActions();
-            playerInputActions.Player.Move.performed += OnMove;
-            playerInputActions.Player.PrimaryTouch.started += ctx => OnTouchStart(ctx);
-            playerInputActions.Player.PrimaryTouch.canceled += ctx => OnTouchEnd(ctx);
         }
+        playerInputActions.Player.Move.performed += OnMove;
+        playerInputActions.Player.PrimaryTouch.started += OnTouchStart;
+        playerInputActions.Player.PrimaryTouch.canceled += OnTouchEnd;
         playerInputActions.Enable();
+        Debug.Log("PlayerController enabled and input actions subscribed.");
+        Debug.Log($"PrimaryTouch action enabled: {playerInputActions.Player.PrimaryTouch.enabled}");
+        Debug.Log($"PrimaryContact action enabled: {playerInputActions.Player.PrimaryContact.enabled}");
+        foreach (var binding in playerInputActions.Player.PrimaryTouch.bindings)
+        {
+            Debug.Log($"PrimaryTouch binding: {binding.path}");
+        }
     }
 
     //unsubscribe the events
     private void OnDisable()
     {
+        Debug.Log("PlayerController OnDisable called.");
         playerInputActions.Player.Move.performed -= OnMove;
         playerInputActions.Player.PrimaryTouch.started -= OnTouchStart;
         playerInputActions.Player.PrimaryTouch.canceled -= OnTouchEnd;
         playerInputActions.Player.Disable();
+        Debug.Log("PlayerController disabled and input actions unsubscribed.");
     }
 
     private void Update()
     {
+        InputSystem.Update();
+        if (playerInputActions.Player.PrimaryTouch.WasPressedThisFrame())
+        {
+            Debug.Log("PrimaryTouch was pressed this frame!");
+        }
+        if (playerInputActions.Player.PrimaryTouch.IsPressed())
+        {
+            Debug.Log("PrimaryTouch is currently pressed!");
+        }
         CheckForOutOfBounds();
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
+        Debug.Log("OnMove called.");
         Vector2 inputDirection = context.ReadValue<Vector2>();
         float deadZone = 0.1f;
         if (Mathf.Abs(inputDirection.x) < deadZone) inputDirection.x = 0;
@@ -128,12 +149,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnTouchStart(InputAction.CallbackContext context)
     {
+        Debug.Log("Touch started");
         touchStartPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
+        Debug.Log($"Touch started at: {touchStartPos}");
     }
 
     private void OnTouchEnd(InputAction.CallbackContext context)
     {
+        Debug.Log("Touch ended");
         Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
+        Debug.Log($"Touch ended at: {touchEndPos}");
         ProcessSwipe(touchEndPos);
     }
 
@@ -142,18 +167,23 @@ public class PlayerController : MonoBehaviour
         float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
         float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
 
+        Debug.Log($"Swipe distance - X: {swipeDistX}, Y: {swipeDistY}, Min required: {minSwipeDist}");
+
         if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
         {
+            Debug.Log("Swipe too short, ignoring");
             return;
         }
         if (swipeDistX > swipeDistY)
         {
             if (TouchendPos.x > touchStartPos.x)
             {
+                Debug.Log("Swipe RIGHT detected");
                 movePlayer(Vector3.right);
             }
             else
             {
+                Debug.Log("Swipe LEFT detected");
                 movePlayer(Vector3.left);
             }
         }
@@ -161,10 +191,12 @@ public class PlayerController : MonoBehaviour
         {
             if (TouchendPos.y > touchStartPos.y)
             {
+                Debug.Log("Swipe UP detected");
                 movePlayer(Vector3.forward);
             }
             else
             {
+                Debug.Log("Swipe DOWN detected");
                 movePlayer(Vector3.back);
             }
         }
@@ -172,9 +204,11 @@ public class PlayerController : MonoBehaviour
 
     private void movePlayer(Vector3 direction)
     {
+        Debug.Log($"movePlayer called with direction: {direction}");
 
         if (isMoving || isDead)
         {
+            Debug.Log("Player is moving or dead, ignoring movement");
             return;
         }
 
@@ -187,6 +221,7 @@ public class PlayerController : MonoBehaviour
         //if authentication is complete but game hasn't started yet, start the game
         if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
         {
+            Debug.Log("Game ready but not active, starting game via movement input");
             AuthenticationFlowManager.Instance.StartGame();
             return;
         }

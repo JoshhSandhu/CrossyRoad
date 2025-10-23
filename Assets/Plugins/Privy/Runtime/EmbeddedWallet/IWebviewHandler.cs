@@ -14,11 +14,11 @@ namespace Privy
         void LoadUrl(string url);
         void SendMessage(string message);
 
-        internal static IWebViewHandler GetPlatformWebViewHandler(WebViewManager webViewManager, PrivyConfig privyConfig, WebViewManagerBridge bridge)
+        internal static IWebViewHandler GetPlatformWebViewHandler(WebViewManager webViewManager,
+            PrivyConfig privyConfig)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            bridge.Initialize(webViewManager); //Initialize bridge, with this class - so bridge can communicate with this class
-            return new IframeHandler(webViewManager);
+            return new BrowserDomIframeHandler(webViewManager);
 #elif UNITY_IOS || UNITY_ANDROID || UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
             return new WebViewHandler(webViewManager);
 #else

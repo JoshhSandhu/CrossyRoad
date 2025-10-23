@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace Privy
 {
     internal static class LinkedAccountResponseMapper
@@ -8,13 +5,32 @@ namespace Privy
         public static PrivyLinkedAccount MapToPublic(LinkedAccountResponse response)
         {
             PrivyLogger.Debug($"Mapping response type: {response.GetType().Name}");
-        
+
             if (response is WalletAccountResponse walletResponse)
             {
-                if (walletResponse.WalletClientType == "privy" && walletResponse.ConnectorType == "embedded")
+                var isEmbeddedWallet = walletResponse.WalletClientType == "privy" &&
+                                       walletResponse.ConnectorType == "embedded";
+
+                if (!isEmbeddedWallet)
                 {
-                    return new PrivyEmbeddedWalletAccount
+                    return new ExternalWalletAccount
                     {
+                        Type = walletResponse.Type,
+                        Address = walletResponse.Address,
+                        VerifiedAt = walletResponse.VerifiedAt,
+                        FirstVerifiedAt = walletResponse.FirstVerifiedAt,
+                        LatestVerifiedAt = walletResponse.LatestVerifiedAt,
+                        ChainType = walletResponse.ChainType,
+                        WalletClientType = walletResponse.WalletClientType,
+                        ConnectorType = walletResponse.ConnectorType
+                    };
+                }
+
+                if (walletResponse.ChainType == "solana")
+                {
+                    return new PrivyEmbeddedSolanaWalletAccount
+                    {
+                        Id = walletResponse.Id,
                         Type = walletResponse.Type,
                         Address = walletResponse.Address,
                         VerifiedAt = walletResponse.VerifiedAt,
@@ -22,20 +38,28 @@ namespace Privy
                         LatestVerifiedAt = walletResponse.LatestVerifiedAt,
                         Imported = walletResponse.Imported,
                         WalletIndex = walletResponse.WalletIndex,
-                        ChainId = walletResponse.ChainId,
-                        ChainType = walletResponse.ChainType,
-                        WalletClient = walletResponse.WalletClient,
-                        WalletClientType = walletResponse.WalletClientType,
-                        ConnectorType = walletResponse.ConnectorType,
-                        PublicKey = walletResponse.PublicKey,
                         RecoveryMethod = walletResponse.RecoveryMethod
                     };
                 }
-                else
+
+                return new PrivyEmbeddedWalletAccount
                 {
-                    // This is an external privy wallet
-                    return null;
-                }
+                    Id = walletResponse.Id,
+                    Type = walletResponse.Type,
+                    Address = walletResponse.Address,
+                    VerifiedAt = walletResponse.VerifiedAt,
+                    FirstVerifiedAt = walletResponse.FirstVerifiedAt,
+                    LatestVerifiedAt = walletResponse.LatestVerifiedAt,
+                    Imported = walletResponse.Imported,
+                    WalletIndex = walletResponse.WalletIndex,
+                    ChainId = walletResponse.ChainId,
+                    ChainType = walletResponse.ChainType,
+                    WalletClient = walletResponse.WalletClient,
+                    WalletClientType = walletResponse.WalletClientType,
+                    ConnectorType = walletResponse.ConnectorType,
+                    PublicKey = walletResponse.PublicKey,
+                    RecoveryMethod = walletResponse.RecoveryMethod
+                };
             }
             else if (response is EmailAccountResponse emailResponse)
             {
@@ -50,7 +74,7 @@ namespace Privy
             }
             else if (response is GoogleOAuthAccountResponse googleOAuthAccountResponse)
             {
-                return new GoogleAccount 
+                return new GoogleAccount
                 {
                     Subject = googleOAuthAccountResponse.Subject,
                     Email = googleOAuthAccountResponse.Email,
@@ -72,6 +96,20 @@ namespace Privy
                     VerifiedAt = discordOAuthAccountResponse.VerifiedAt,
                     FirstVerifiedAt = discordOAuthAccountResponse.FirstVerifiedAt,
                     LatestVerifiedAt = discordOAuthAccountResponse.LatestVerifiedAt
+                };
+            }
+            else if (response is TwitterOAuthAccountResponse twitterOAuthAccountResponse)
+            {
+                return new TwitterAccount
+                {
+                    Subject = twitterOAuthAccountResponse.Subject,
+                    UserName = twitterOAuthAccountResponse.UserName,
+                    Name = twitterOAuthAccountResponse.Name,
+                    ProfilePictureUrl = twitterOAuthAccountResponse.ProfilePictureUrl,
+                    Type = twitterOAuthAccountResponse.Type,
+                    VerifiedAt = twitterOAuthAccountResponse.VerifiedAt,
+                    FirstVerifiedAt = twitterOAuthAccountResponse.FirstVerifiedAt,
+                    LatestVerifiedAt = twitterOAuthAccountResponse.LatestVerifiedAt
                 };
             }
             else if (response is AppleOAuthAccountResponse appleOAuthAccountResponse)

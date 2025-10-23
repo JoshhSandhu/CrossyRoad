@@ -10,10 +10,12 @@ namespace Privy
 
         private static readonly List<string> _internalAppIds = new List<string>
         {
-            "clyyj8pea001mq5zqm11zkdl5"
+            "clyyj8pea001mq5zqm11zkdl5",
+            "clpijy3tw0001kz0g6ixs9z15",
+            "cla06f34x0001mh08l8nsr496"
         };
 
-        private static bool _printInternalLogs = _internalAppIds.Contains(_appId);
+        private static bool _printInternalLogs;
 
         public static void Configure(PrivyConfig config)
         {
@@ -58,10 +60,7 @@ namespace Privy
         {
             if (_printInternalLogs)
             {
-                if (_level == PrivyLogLevel.ERROR || _level == PrivyLogLevel.VERBOSE)
-                {
-                    PrintMessage(message);
-                }
+                PrintMessage(message);
             }
         }
 

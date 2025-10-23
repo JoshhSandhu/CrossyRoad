@@ -1,20 +1,19 @@
 using System;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Privy
 {
     internal class PrivyImpl : IPrivy
     {
-
-        private HttpRequestHandler _httpRequestHandler;
+        private IHttpRequestHandler _httpRequestHandler;
 
         private PlayerPrefsDataManager _playerPrefsDataManager;
 
         private AuthRepository _authRepository;
+        private AppConfigRepository _appConfigRepository;
 
         private AuthDelegator _authDelegator;
-    
+
         private InternalAuthSessionStorage _internalAuthSessionStorage;
         //References to other layers
 
@@ -24,12 +23,21 @@ namespace Privy
         private WebViewManager _webViewManager;
         private EmbeddedWalletManager _embeddedWalletManager;
 
-        public bool IsReady => _authDelegator.CurrentAuthState != AuthState.NotReady; //Initialization is as Not Ready, the asynchronous methods update this state to be either authenticated or unauthenticated
+        // Analytics
+        private IClientAnalyticsIdRepository _clientAnalyticsIdRepository;
+        private IAnalyticsRepository _analyticsRepository;
+        private IAnalyticsManager _analyticsManager;
+
+        public bool IsReady =>
+            _authDelegator.CurrentAuthState !=
+            AuthState.NotReady; //Initialization is as Not Ready, the asynchronous methods update this state to be either authenticated or unauthenticated
+
         public ILoginWithEmail Email { get; }
         public ILoginWithOAuth OAuth { get; }
 
         private PrivyUser _user;
 
+        [Obsolete("Use privy.GetUser() instead, which handles awaiting ready under the hood.")]
         public PrivyUser User
         {
             get
@@ -38,16 +46,31 @@ namespace Privy
                 {
                     return null;
                 }
+
                 return _user;
             }
         }
 
-        public AuthState AuthState 
+        public async Task<PrivyUser> GetUser()
         {
-            get 
+            return await GetAuthState() switch
             {
-                return _authDelegator.CurrentAuthState;
-            }
+                AuthState.Authenticated => _user,
+                _ => null
+            };
+        }
+
+        [Obsolete("Use privy.GetAuthState() instead, which handles awaiting ready under the hood.")]
+        public AuthState AuthState
+        {
+            get { return _authDelegator.CurrentAuthState; }
+        }
+
+        public async Task<AuthState> GetAuthState()
+        {
+            await InitializationTask;
+
+            return _authDelegator.CurrentAuthState;
         }
 
 
@@ -56,27 +79,29 @@ namespace Privy
             // Synchronous parts of the initialization
             PrivyEnvironment.Initialize(config);
             PrivyLogger.Configure(config);
-        
-            _httpRequestHandler = new HttpRequestHandler(config);
 
-
-            //This bridge allows javascript to talk to a unity game object
-            var bridge = GameObject.FindObjectOfType<WebViewManagerBridge>();
-
-            _webViewManager = new WebViewManager(config, bridge);
+            _webViewManager = new WebViewManager(config);
 
             _playerPrefsDataManager = new PlayerPrefsDataManager();
+            _clientAnalyticsIdRepository = new ClientAnalyticsIdRepository(_playerPrefsDataManager);
+            _httpRequestHandler = new HttpRequestHandler(config, _clientAnalyticsIdRepository);
 
             //Dependency Injection
             _internalAuthSessionStorage = new InternalAuthSessionStorage(_playerPrefsDataManager);
+            _appConfigRepository = new AppConfigRepository(config, _httpRequestHandler);
             _authRepository = new AuthRepository(_httpRequestHandler);
             _authDelegator = new AuthDelegator(_authRepository, _internalAuthSessionStorage);
             _embeddedWalletManager = new EmbeddedWalletManager(_webViewManager, _authDelegator);
-
+            _analyticsRepository = new AnalyticsRepository(_httpRequestHandler, _clientAnalyticsIdRepository);
+            _analyticsManager = new AnalyticsManager(_analyticsRepository);
+            var authorizationKey = new IframeBackedUserAuthorizationKey(_embeddedWalletManager, _authDelegator);
+            var walletApiRepository = new WalletApiRepository(config, _httpRequestHandler, authorizationKey);
+            var walletApiWalletCreator = new WalletApiWalletCreator(_authDelegator, walletApiRepository);
 
             Email = new LoginWithEmail(_authDelegator);
             OAuth = new LoginWithOAuth(_authDelegator);
-            _user = new PrivyUser(_authDelegator, _embeddedWalletManager);
+            _user = new PrivyUser(_authDelegator, _embeddedWalletManager, _appConfigRepository, walletApiWalletCreator,
+                walletApiRepository);
         }
 
         internal async Task InitializeAsync()
@@ -86,7 +111,10 @@ namespace Privy
 
             // Mark initialization as complete
             _initializationCompletionSource.SetResult(true);
-        }    
+
+            // Fire initialize analytics event
+            await _analyticsManager.LogEvent(AnalyticsEvent.SdkInitialize);
+        }
 
 
         public void SetAuthStateChangeCallback(Action<AuthState> callback)
@@ -97,6 +125,7 @@ namespace Privy
         public void Logout()
         {
             _authDelegator.Logout();
+            _clientAnalyticsIdRepository.ResetClientId();
         }
     }
 }

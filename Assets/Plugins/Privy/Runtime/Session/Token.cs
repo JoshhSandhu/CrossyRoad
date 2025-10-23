@@ -46,10 +46,15 @@ namespace Privy
             switch (output.Length % 4)
             {
                 case 0: break;
-                case 2: output += "=="; break;
-                case 3: output += "="; break;
+                case 2:
+                    output += "==";
+                    break;
+                case 3:
+                    output += "=";
+                    break;
                 default: throw new FormatException("Illegal base64url string!");
             }
+
             return Convert.FromBase64String(output);
         }
 

@@ -1,16 +1,12 @@
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Converters;
 
 namespace Privy
 {
     //Request Models
-    
+
     //ideally would use record structs here but c# version limitation, still potentially room for improvement
     //immutable req/resp body data types, ex usage: new SendCodeRequestData('moiz@privy.io')
     internal class SendCodeRequestData
@@ -38,10 +34,13 @@ namespace Privy
     {
         [JsonProperty("provider")]
         public OAuthProvider ProviderName;
+
         [JsonProperty("redirect_to")]
         public string RedirectUri;
+
         [JsonProperty("code_challenge")]
         public string CodeChallenge;
+
         [JsonProperty("state_code")]
         public string StateCode;
     }
@@ -50,10 +49,13 @@ namespace Privy
     {
         [JsonProperty("authorization_code")]
         public string AuthorizationCode;
+
         [JsonProperty("code_verifier")]
         public string CodeVerifier;
+
         [JsonProperty("state_code")]
         public string StateCode;
+
         [JsonProperty("code_type", NullValueHandling = NullValueHandling.Ignore)]
         public AuthenticateOAuthFlowCodeType? CodeType;
     }
@@ -71,7 +73,7 @@ namespace Privy
         [JsonProperty("success")]
         public bool Success;
     }
-    
+
     internal class UserResponse
     {
         [JsonProperty("id")]

@@ -13,7 +13,8 @@ namespace Privy
             serializer.Serialize(writer, value);
         }
 
-        public override LinkedAccountResponse ReadJson(JsonReader reader, Type objectType, LinkedAccountResponse existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override LinkedAccountResponse ReadJson(JsonReader reader, Type objectType,
+            LinkedAccountResponse existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             JObject jo = JObject.Load(reader);
             string type = jo["type"].ToString();
@@ -33,6 +34,9 @@ namespace Privy
                     break;
                 case "discord_oauth":
                     account = new DiscordOAuthAccountResponse();
+                    break;
+                case "twitter_oauth":
+                    account = new TwitterOAuthAccountResponse();
                     break;
                 case "apple_oauth":
                     account = new AppleOAuthAccountResponse();

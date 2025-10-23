@@ -33,7 +33,9 @@ namespace Privy
         private async Task<OAuthResultData> PromptOAuthCredentials(OAuthProvider provider, string redirectUri,
             string codeChallenge, string stateCode)
         {
-            var oauthUrl = await authDelegator.InitiateOAuthFlow(provider, codeChallenge, redirectUri, stateCode);
+            var transformedRedirectUri = oAuthFlow.TransformRedirectUrl(redirectUri);
+            var oauthUrl =
+                await authDelegator.InitiateOAuthFlow(provider, codeChallenge, transformedRedirectUri, stateCode);
 
             if (IsNativeAppleFlow(provider))
                 return await new NativeAppleSignInFlow().PerformFlow(stateCode);

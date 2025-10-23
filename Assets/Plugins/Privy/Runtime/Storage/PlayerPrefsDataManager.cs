@@ -22,6 +22,7 @@ namespace Privy
                 string json = JsonConvert.SerializeObject(data, settings);
                 PlayerPrefs.SetString(key, json);
             }
+
             PlayerPrefs.Save();
         }
 

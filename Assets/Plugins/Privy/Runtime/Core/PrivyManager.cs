@@ -16,6 +16,7 @@ namespace Privy
                 {
                     throw new Exception("Call PrivyManager.Initialize before attempting to get the Privy instance.");
                 }
+
                 return _privyInstance;
             }
         }
@@ -27,11 +28,13 @@ namespace Privy
             {
                 _privyInstance = new PrivyImpl(config);
                 //This function is called from a static class, which lets us bypass the inability to call async functions in a constructor
-                _privyInstance.InitializeAsync();  // Start async initialization without awaiting
+                _ = _privyInstance.InitializeAsync(); // Start async initialization without awaiting
             }
-            return _privyInstance;  // Return the instance immediately
+
+            return _privyInstance; // Return the instance immediately
         }
 
+        [Obsolete("Use privy.GetAuthState() instead, which handles awaiting ready under the hood.")]
         public static async Task AwaitReady()
         {
             //Accesses _privyInstance, which is static

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Privy
@@ -17,12 +16,13 @@ namespace Privy
             if (CurrentAuthState != newState)
             {
                 CurrentAuthState = newState;
-                OnAuthStateChanged?.Invoke(CurrentAuthState);  // Trigger the callback
+                OnAuthStateChanged?.Invoke(CurrentAuthState); // Trigger the callback
             }
         }
 
 
         public delegate void AuthStateChangedHandler(AuthState newState);
+
         public event AuthStateChangedHandler OnAuthStateChanged;
 
         public AuthDelegator(IAuthRepository authRepository, InternalAuthSessionStorage internalAuthSessionStorage)
@@ -45,7 +45,8 @@ namespace Privy
             if (string.IsNullOrEmpty(email))
             {
                 //This check saves us from making a request we know will faill
-                throw new PrivyException.AuthenticationException("Email cannot be null or empty", AuthenticationError.EmailEmpty);
+                throw new PrivyException.AuthenticationException("Email cannot be null or empty",
+                    AuthenticationError.EmailEmpty);
             }
 
             bool successfullySentCode = await _authRepository.SendEmailCode(email);
@@ -59,12 +60,14 @@ namespace Privy
         {
             if (string.IsNullOrEmpty(email))
             {
-                throw new PrivyException.AuthenticationException("Email cannot be null or empty", AuthenticationError.EmailEmpty);
+                throw new PrivyException.AuthenticationException("Email cannot be null or empty",
+                    AuthenticationError.EmailEmpty);
             }
 
             if (string.IsNullOrEmpty(code))
             {
-                throw new PrivyException.AuthenticationException("Code cannot be null or empty", AuthenticationError.OtpEmpty);
+                throw new PrivyException.AuthenticationException("Code cannot be null or empty",
+                    AuthenticationError.OtpEmpty);
             }
 
             InternalAuthSession authSession = await _authRepository.LoginWithEmailCode(email, code);
@@ -74,12 +77,12 @@ namespace Privy
             {
                 UpdateAuthState(AuthState.Unauthenticated);
                 //This gets thrown if request is successful, but the internal auth session does not have accurate data
-                throw new PrivyException.AuthenticationException("Could not sign in, invalid OTP", AuthenticationError.WrongOtpCode);
+                throw new PrivyException.AuthenticationException("Could not sign in, invalid OTP",
+                    AuthenticationError.WrongOtpCode);
             }
 
             SetInternalAuthSession(authSession);
             return AuthState.Authenticated;
-
         }
 
         public async Task<string> InitiateOAuthFlow(OAuthProvider provider, string codeChallenge, string redirectUri,
@@ -93,43 +96,50 @@ namespace Privy
 
             if (string.IsNullOrEmpty(stateCode))
             {
-                throw new PrivyException.AuthenticationException("State Code cannot be null or empty", AuthenticationError.StateCodeEmpty);
+                throw new PrivyException.AuthenticationException("State Code cannot be null or empty",
+                    AuthenticationError.StateCodeEmpty);
             }
 
             if (string.IsNullOrEmpty(redirectUri))
             {
-                throw new PrivyException.AuthenticationException("Redirect URI cannot be null or empty", AuthenticationError.RedirectUriEmpty);
+                throw new PrivyException.AuthenticationException("Redirect URI cannot be null or empty",
+                    AuthenticationError.RedirectUriEmpty);
             }
 
             var response = await _authRepository.InitiateOAuthFlow(provider, codeChallenge, redirectUri, stateCode);
             return response.OAuthUrl;
-
         }
 
-        public async Task<AuthState> AuthenticateOAuthFlow(string authorizationCode, string codeVerifier, string stateCode, bool isRawFlow = false)
+        public async Task<AuthState> AuthenticateOAuthFlow(string authorizationCode, string codeVerifier,
+            string stateCode, bool isRawFlow = false)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
-                throw new PrivyException.AuthenticationException("Authorization Code cannot be null or empty", AuthenticationError.AuthorizationCodeEmpty);
+                throw new PrivyException.AuthenticationException("Authorization Code cannot be null or empty",
+                    AuthenticationError.AuthorizationCodeEmpty);
             }
 
             if (string.IsNullOrEmpty(codeVerifier))
             {
-                throw new PrivyException.AuthenticationException("Code Verifier cannot be null or empty", AuthenticationError.CodeVerifierEmpty);
+                throw new PrivyException.AuthenticationException("Code Verifier cannot be null or empty",
+                    AuthenticationError.CodeVerifierEmpty);
             }
 
             if (string.IsNullOrEmpty(stateCode))
             {
-                throw new PrivyException.AuthenticationException("State Code cannot be null or empty", AuthenticationError.StateCodeEmpty);
+                throw new PrivyException.AuthenticationException("State Code cannot be null or empty",
+                    AuthenticationError.StateCodeEmpty);
             }
 
-            var authSession = await _authRepository.AuthenticateOAuthFlow(authorizationCode, codeVerifier, stateCode, isRawFlow);
+            var authSession =
+                await _authRepository.AuthenticateOAuthFlow(authorizationCode, codeVerifier, stateCode, isRawFlow);
 
             //Check if auth session was successful
             if (authSession == null || authSession.User == null)
             {
                 UpdateAuthState(AuthState.Unauthenticated);
-                throw new PrivyException.AuthenticationException("Could not sign in, invalid OAuth result", AuthenticationError.InvalidOAuthResult);
+                throw new PrivyException.AuthenticationException("Could not sign in, invalid OAuth result",
+                    AuthenticationError.InvalidOAuthResult);
             }
 
             SetInternalAuthSession(authSession);
@@ -144,8 +154,10 @@ namespace Privy
             //For example the retrieval from storage, or the token parsing could be failing
             //Regardless, any errors should just lead to a logout, as we don't want to throw an exception for the dev to catch here, given that this is called on initialize
 
-            try {
-                InternalAuthSession persistedSession = _internalAuthSessionStorage.RetrieveInternalAuthSessionFromStorage();
+            try
+            {
+                InternalAuthSession persistedSession =
+                    _internalAuthSessionStorage.RetrieveInternalAuthSessionFromStorage();
 
 
                 if (persistedSession != null)
@@ -156,7 +168,8 @@ namespace Privy
 
                     if (jwt != null && jwt.IsExpired(Constants.DEFAULT_EXPIRATION_PADDING_IN_SECONDS))
                     {
-                        newSession = await _authRepository.RefreshSession(persistedSession.AccessToken, persistedSession.RefreshToken); //could be null if request fails
+                        newSession = await _authRepository.RefreshSession(persistedSession.AccessToken,
+                            persistedSession.RefreshToken); //could be null if request fails
                     }
 
                     SetInternalAuthSession(newSession, persistedSession);
@@ -165,7 +178,9 @@ namespace Privy
                 {
                     Logout();
                 }
-            } catch {
+            }
+            catch
+            {
                 Logout();
             }
         }
@@ -200,7 +215,8 @@ namespace Privy
         {
             // Check if a refresh is needed based on token validity or forceRefresh flag
             Token jwt = Token.Parse(_internalAuthSession.AccessToken);
-            bool needsRefresh = forceRefresh || (jwt != null && jwt.IsExpired(Constants.DEFAULT_EXPIRATION_PADDING_IN_SECONDS));
+            bool needsRefresh = forceRefresh ||
+                                (jwt != null && jwt.IsExpired(Constants.DEFAULT_EXPIRATION_PADDING_IN_SECONDS));
 
             if (!needsRefresh)
             {
@@ -209,27 +225,31 @@ namespace Privy
             }
 
             // Proceed with the refresh
-            var newSession = await _authRepository.RefreshSession(_internalAuthSession.AccessToken, _internalAuthSession.RefreshToken);
+            var newSession =
+                await _authRepository.RefreshSession(_internalAuthSession.AccessToken,
+                    _internalAuthSession.RefreshToken);
             SetInternalAuthSession(newSession);
         }
 
         internal async Task RefreshSessionIfNeeded()
         {
-
             if (_internalAuthSession == null || CurrentAuthState != AuthState.Authenticated)
             {
-                throw new PrivyException.AuthenticationException($"User is not authenticated", AuthenticationError.NotAuthenticated);
+                throw new PrivyException.AuthenticationException($"User is not authenticated",
+                    AuthenticationError.NotAuthenticated);
             }
+
             Token jwt = Token.Parse(_internalAuthSession.AccessToken);
 
             if (jwt != null && jwt.IsExpired(Constants.DEFAULT_EXPIRATION_PADDING_IN_SECONDS))
             {
                 await RefreshSession(); //will trigger refresh due to jwt being expired
             }
-        }    
+        }
 
         //Methods for in-memory storage
-        private void SetInternalAuthSession(InternalAuthSession authSession, InternalAuthSession persistedSession = null)
+        private void SetInternalAuthSession(InternalAuthSession authSession,
+            InternalAuthSession persistedSession = null)
         {
             //Either a new session, or a refreshed session
 
@@ -269,20 +289,20 @@ namespace Privy
 
         internal async Task<string> GetAccessToken()
         {
-
             await RefreshSessionIfNeeded(); //This could throw an error, which would bubble up to create/connect wallet
             //Session will be refreshed by now, new access token
             return _internalAuthSession.AccessToken;
         }
 
-        internal InternalAuthSession GetAuthSession() {
+        internal InternalAuthSession GetAuthSession()
+        {
             return _internalAuthSession;
         }
 
         public void Logout()
         {
             // Placeholder implementation
-            UpdateAuthState(AuthState.Unauthenticated); ;
+            UpdateAuthState(AuthState.Unauthenticated);
             _internalAuthSessionStorage.ClearInternalAuthSessionInStorage();
             _internalAuthSession = null;
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Privy
 {
@@ -27,12 +28,28 @@ namespace Privy
         /// <summary>
         /// Gets the authenticated user and provides access to their properties and methods.
         /// </summary>
+        [Obsolete("Use privy.GetUser() instead, which handles awaiting ready under the hood.")]
         PrivyUser User { get; }
+
+        /// <summary>
+        /// Gets the authenticated user and provides access to their properties and methods, after waiting for SDK
+        /// initialization to complete.
+        /// </summary>
+        /// <returns>The authenticated user if one exists, or null</returns>
+        [ItemCanBeNull]
+        Task<PrivyUser> GetUser();
 
         /// <summary>
         /// Gets the current authentication state of the user.
         /// </summary>
+        [Obsolete("Use privy.GetAuthState() instead, which handles awaiting ready under the hood.")]
         AuthState AuthState { get; }
+
+        /// <summary>
+        /// Gets the current authentication state of the user, after waiting for SDK initialization to complete.
+        /// </summary>
+        /// <returns>The authentication state</returns>
+        Task<AuthState> GetAuthState();
 
         /// <summary>
         /// Sets a callback method to be invoked when the authentication state changes.
