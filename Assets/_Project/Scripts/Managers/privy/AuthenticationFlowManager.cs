@@ -4,13 +4,13 @@ using TMPro;
 using System;
 using Privy;
 using System.Threading.Tasks;
+
 public class AuthenticationFlowManager : MonoBehaviour
 {
     public static AuthenticationFlowManager Instance { get; private set; }
 
     [Header("Privy Configuration")]
-    [SerializeField] private string privyAppId = "cmgodao4u00c7l50caof1nhau"; // Replace with your actual App ID
-    [SerializeField] private string privyClientId = "client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz"; // replace with your actual Client ID if needed
+    [SerializeField] private PrivyConfiguration privyConfig;
     [SerializeField] private PrivyLogLevel logLevel = PrivyLogLevel.INFO;
     [SerializeField] private bool isMobileApp = true; //set to true if building for mobile
 
@@ -49,7 +49,6 @@ public class AuthenticationFlowManager : MonoBehaviour
     //[SerializeField] private Slider loadingProgressBar;
 
     public static event Action<bool> OnAuthenticationStateChanged;
-    public static event Action<string> OnWalletAddressChanged;
 
     private IPrivy privyInstance;
     private bool isAuthenticated = false;
@@ -88,42 +87,41 @@ public class AuthenticationFlowManager : MonoBehaviour
     {
         try
         {
-            Debug.Log($"Initializing Privy with App ID: {privyAppId}");
-            Debug.Log($"Initializing Privy with Client ID: {privyClientId}");
+            if (privyConfig == null)
+            {
+                Debug.LogError("PrivyConfig is not assigned!");
+                return;
+            }
 
-            if (string.IsNullOrEmpty(privyAppId) || privyAppId == "your-app-id" || privyAppId.Length < 10)
+            Debug.Log($"Initializing Privy with App ID: {privyConfig.appId}");
+            Debug.Log($"Initializing Privy with Client ID: {privyConfig.clientId}");
+            Debug.Log($"Using Solana RPC URL: {privyConfig.solanaRpcUrl}");
+            Debug.Log($"Using Solana Network: {privyConfig.solanaNetwork}");
+            Debug.Log($"Solana Enabled: {privyConfig.enableSolana}");
+
+            if (string.IsNullOrEmpty(privyConfig.appId) || privyConfig.appId == "your-app-id" || privyConfig.appId.Length < 10)
             {
                 Debug.LogError("Privy App ID is not set!");
                 return;
             }
-
-            if (string.IsNullOrEmpty(privyClientId) || privyClientId == "your-client-id" || privyClientId.Length < 10)
+            if (string.IsNullOrEmpty(privyConfig.clientId) || privyConfig.clientId == "your-client-id" || privyConfig.clientId.Length < 10)
             {
                 Debug.LogError("Privy Client ID is not set!");
                 return;
             }
 
-            //crating a privy config
-            var config = new PrivyConfig
+            //creating a privy config
+            var config = new Privy.PrivyConfig
             {
-                AppId = privyAppId,
-                ClientId = privyClientId,
+                AppId = privyConfig.appId,
+                ClientId = privyConfig.clientId,
                 LogLevel = logLevel
             };
-            //init privy sdk
+
             privyInstance = PrivyManager.Initialize(config);
 
-            try
-            {
-                var solanaWallet = await PrivyManager.Instance.User.CreateSolanaWallet();
-                Debug.Log("New Solana wallet created with address: " + solanaWallet.Address);
-            }
-            catch
-            {
-                Debug.Log("Error creating embedded wallet.");
-            }
-            //waiting for init
-            await PrivyManager.AwaitReady();
+            //waiting for init using new method
+            var authState = await privyInstance.GetAuthState();
 
             //setup auth state change callback
             privyInstance.SetAuthStateChangeCallback(OnAuthStateChanged);
@@ -183,13 +181,14 @@ public class AuthenticationFlowManager : MonoBehaviour
     }
 
     //starting the auth flow
-    private void StartAuthenticationFlow()
+    private async void StartAuthenticationFlow()
     {
         Debug.Log("Starting authentication flow...");
 
-        if (privyInstance != null && privyInstance.IsReady)
+        if (privyInstance != null)
         {
-            if (privyInstance.AuthState == AuthState.Authenticated)
+            var authState = await privyInstance.GetAuthState();
+            if (authState == AuthState.Authenticated)
             {
                 Debug.Log("User is already authenticated, checking wallet status");
                 CheckWalletStatus();
@@ -208,14 +207,15 @@ public class AuthenticationFlowManager : MonoBehaviour
     }
 
     //checking the wallet ststus
-    private void CheckWalletStatus()
+    private async void CheckWalletStatus()
     {
-        if (privyInstance?.User == null)
+        var user = await privyInstance.GetUser();
+        if (user == null)
         {
             return;
         }
 
-        var embeddedWallets = privyInstance.User.EmbeddedWallets;
+        var embeddedWallets = user.EmbeddedWallets;
         if (embeddedWallets != null && embeddedWallets.Length > 0)
         {
             walletAddress = embeddedWallets[0].Address;
@@ -416,17 +416,18 @@ public class AuthenticationFlowManager : MonoBehaviour
     //checking if the user has a wallet after email login
     private async Task CheckWalletAfterEmailLogin()
     {
-        if (privyInstance?.User == null)
+        var user = await privyInstance.GetUser();
+        if (user == null)
         {
             Debug.LogError("Privy instance or User is null - cannot check wallet");
             return;
         }
 
-        Debug.Log($"Checking wallet for user: {privyInstance.User.Id}");
-        Debug.Log($"Auth state: {privyInstance.AuthState}");
-        Debug.Log($"Is ready: {privyInstance.IsReady}");
+        var authState = await privyInstance.GetAuthState();
+        Debug.Log($"Checking wallet for user: {user.Id}");
+        Debug.Log($"Auth state: {authState}");
 
-        var embeddedWallets = privyInstance.User.EmbeddedWallets;
+        var embeddedWallets = user.EmbeddedWallets;
         Debug.Log($"Found {embeddedWallets?.Length ?? 0} embedded wallets");
 
         if (embeddedWallets != null && embeddedWallets.Length > 0)
@@ -444,7 +445,7 @@ public class AuthenticationFlowManager : MonoBehaviour
             try
             {
                 Debug.Log("Creating embedded wallet for authenticated user...");
-                var createWalletTask = privyInstance.User.CreateWallet();
+                var createWalletTask = user.CreateWallet();
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30)); // 30 second timeout
 
                 var completedTask = await Task.WhenAny(createWalletTask, timeoutTask);
@@ -517,19 +518,28 @@ public class AuthenticationFlowManager : MonoBehaviour
 
 
     //updating the welcome panel with user info
-    private void UpdateWelcomePanel()
+    private async void UpdateWelcomePanel()
     {
-        if (walletAddressText != null && !string.IsNullOrEmpty(walletAddress))
+        if (walletAddressText != null)
         {
-            string shortAddress = walletAddress.Length > 12 ?
-                $"{walletAddress.Substring(0, 6)}...{walletAddress.Substring(walletAddress.Length - 6)}" :
-                walletAddress;
-            walletAddressText.text = $"Wallet: {shortAddress}";
+            string solanaAddress = await GetSolanaWalletAddress();
+            if (!string.IsNullOrEmpty(solanaAddress) && solanaAddress != "No Wallet")
+            {
+                string shortAddress = solanaAddress.Length > 12 ?
+                    $"{solanaAddress.Substring(0, 6)}...{solanaAddress.Substring(solanaAddress.Length - 6)}" :
+                    solanaAddress;
+                walletAddressText.text = $"Solana Wallet: {shortAddress}";
+            }
+            else
+            {
+                walletAddressText.text = "Solana Wallet: Wallet Not Created";
+            }
         }
 
         if (userInfoText != null)
         {
-            userInfoText.text = $"User ID: {privyInstance?.User?.Id ?? "Unknown"}";
+            var user = await privyInstance.GetUser();
+            userInfoText.text = $"User ID: {user?.Id ?? "Unknown"}";
         }
     }
 
@@ -546,6 +556,116 @@ public class AuthenticationFlowManager : MonoBehaviour
         if (welcomeTitleText != null)
             welcomeTitleText.text = "Ready to Play!";
     }
+
+    //this creates a solana wallet for the user if not already created
+    public async Task<IEmbeddedSolanaWallet> CreateSolanaWallet()
+    {
+        var user = await privyInstance.GetUser();
+        if (user == null)
+        {
+            Debug.LogError("User not authenticated");
+            return null;
+        }
+        try
+        {
+            var solanaWallet = await user.CreateSolanaWallet();
+            Debug.Log($"Solana wallet created: {solanaWallet.Address}");
+            return solanaWallet;
+        }
+        catch(Exception e)
+        {
+            Debug.LogError($"Failed to create Solana wallet: {e.Message}");
+            return null;
+        }
+    }
+
+    //gets all the solana wallet for the authenticated user
+    public async Task<IEmbeddedSolanaWallet[]> GetSolanaWallets()
+    {
+        Debug.Log("GetSolanaWallets called");
+        var user = await privyInstance.GetUser();
+        if (user == null)
+        {
+            Debug.LogError("User is null in GetSolanaWallets");
+            return new IEmbeddedSolanaWallet[0];
+        }
+
+        Debug.Log($"User ID: {user.Id}");
+        Debug.Log($"EmbeddedSolanaWallets count: {user.EmbeddedSolanaWallets?.Length ?? 0}");
+        return user.EmbeddedSolanaWallets;
+    }
+
+    //signs a message with the primary solana wallet
+    public async Task<string> SignSolanaMessage(string Message)
+    {
+        Debug.Log("SignSolanaMessage called with message: " + Message);
+        var solanaWallets = await GetSolanaWallets();
+        Debug.Log($"Found {solanaWallets.Length} Solana wallets");
+        if (solanaWallets.Length == 0)
+        {
+            Debug.LogError("No Solana wallets found");
+            return null;
+        }
+        var wallet = solanaWallets[0]; //using the primay wallet
+        Debug.Log($"Using wallet: {wallet.Address}");
+
+        try
+        {
+            //converting the message to base64
+            var messageBytes = System.Text.Encoding.UTF8.GetBytes(Message);
+            var base64Message = System.Convert.ToBase64String(messageBytes);
+            Debug.Log($"Base64 message: {base64Message}");
+
+            //sign the message 
+            //var signature = await wallet.EmbeddedSolanaWalletProvider.SignMessage(base64Message);
+            Debug.Log("About to call SignMessage on wallet...");
+
+            // Add timeout to prevent hanging
+            var signTask = wallet.EmbeddedSolanaWalletProvider.SignMessage(base64Message);
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10)); // 10 second timeout
+
+            var completedTask = await Task.WhenAny(signTask, timeoutTask);
+
+            if (completedTask == timeoutTask)
+            {
+                Debug.LogError("SignMessage timed out after 10 seconds!");
+                return null;
+            }
+
+            var signature = await signTask;
+            Debug.Log($"Message signed successfully: {signature}");
+            return signature;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to sign message: {ex.Message}");
+            Debug.LogError($"Exception type: {ex.GetType().Name}");
+            Debug.LogError($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
+    }
+
+    //this ensures the user has a solana wallet and if not then creates one
+    public async Task<bool> EnsureSolanaWallet()
+    {
+        var solanaWallets = await GetSolanaWallets();
+        if (solanaWallets.Length == 0)
+        {
+            Debug.Log("No Solana wallet found, creating one...");
+            var newWallet = await CreateSolanaWallet();
+            return newWallet != null;
+        }
+        Debug.Log($"Found {solanaWallets.Length} Solana wallet(s)");
+        return true;
+    }
+
+    //gets the primary solana wallet address
+    public async Task<string> GetSolanaWalletAddress()
+    {
+        var wallets = await GetSolanaWallets();
+        return wallets.Length > 0 ? wallets[0].Address : "No Wallet";
+    }
+
     private void OnDestroy()
     {
         // Cleanup

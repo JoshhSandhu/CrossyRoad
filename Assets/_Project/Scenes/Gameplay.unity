@@ -11593,8 +11593,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578fa908c0d5f794a8137664c4141ebd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthenticationFlowManager
-  privyAppId: cmgodao4u00c7l50caof1nhau
-  privyClientId: client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz
+  privyConfig: {fileID: 11400000, guid: 134e740e01e76dd489ff72adc4fc0b4d, type: 2}
   logLevel: 2
   isMobileApp: 1
   authPanel: {fileID: 817277030}

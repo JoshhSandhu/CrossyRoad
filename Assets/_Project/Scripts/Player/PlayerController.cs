@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -67,7 +68,6 @@ public class PlayerController : MonoBehaviour
     //subscribe the events
     private void OnEnable()
     {
-        Debug.Log("PlayerController OnEnable called.");
         if (playerInputActions == null)
         {
             playerInputActions = new PlayerInputActions();
@@ -76,43 +76,24 @@ public class PlayerController : MonoBehaviour
         playerInputActions.Player.PrimaryTouch.started += OnTouchStart;
         playerInputActions.Player.PrimaryTouch.canceled += OnTouchEnd;
         playerInputActions.Enable();
-        Debug.Log("PlayerController enabled and input actions subscribed.");
-        Debug.Log($"PrimaryTouch action enabled: {playerInputActions.Player.PrimaryTouch.enabled}");
-        Debug.Log($"PrimaryContact action enabled: {playerInputActions.Player.PrimaryContact.enabled}");
-        foreach (var binding in playerInputActions.Player.PrimaryTouch.bindings)
-        {
-            Debug.Log($"PrimaryTouch binding: {binding.path}");
-        }
     }
 
     //unsubscribe the events
     private void OnDisable()
     {
-        Debug.Log("PlayerController OnDisable called.");
         playerInputActions.Player.Move.performed -= OnMove;
         playerInputActions.Player.PrimaryTouch.started -= OnTouchStart;
         playerInputActions.Player.PrimaryTouch.canceled -= OnTouchEnd;
         playerInputActions.Player.Disable();
-        Debug.Log("PlayerController disabled and input actions unsubscribed.");
     }
 
     private void Update()
     {
-        InputSystem.Update();
-        if (playerInputActions.Player.PrimaryTouch.WasPressedThisFrame())
-        {
-            Debug.Log("PrimaryTouch was pressed this frame!");
-        }
-        if (playerInputActions.Player.PrimaryTouch.IsPressed())
-        {
-            Debug.Log("PrimaryTouch is currently pressed!");
-        }
         CheckForOutOfBounds();
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
-        Debug.Log("OnMove called.");
         Vector2 inputDirection = context.ReadValue<Vector2>();
         float deadZone = 0.1f;
         if (Mathf.Abs(inputDirection.x) < deadZone) inputDirection.x = 0;
@@ -141,24 +122,16 @@ public class PlayerController : MonoBehaviour
                 movePlayer(Vector3.left);
             }
         }
-        else
-        {
-            Debug.Log("no clear direction the input is ignored");
-        }
     }
 
     private void OnTouchStart(InputAction.CallbackContext context)
     {
-        Debug.Log("Touch started");
         touchStartPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch started at: {touchStartPos}");
     }
 
     private void OnTouchEnd(InputAction.CallbackContext context)
     {
-        Debug.Log("Touch ended");
         Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch ended at: {touchEndPos}");
         ProcessSwipe(touchEndPos);
     }
 
@@ -167,23 +140,18 @@ public class PlayerController : MonoBehaviour
         float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
         float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
 
-        Debug.Log($"Swipe distance - X: {swipeDistX}, Y: {swipeDistY}, Min required: {minSwipeDist}");
-
         if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
         {
-            Debug.Log("Swipe too short, ignoring");
             return;
         }
         if (swipeDistX > swipeDistY)
         {
             if (TouchendPos.x > touchStartPos.x)
             {
-                Debug.Log("Swipe RIGHT detected");
                 movePlayer(Vector3.right);
             }
             else
             {
-                Debug.Log("Swipe LEFT detected");
                 movePlayer(Vector3.left);
             }
         }
@@ -191,12 +159,10 @@ public class PlayerController : MonoBehaviour
         {
             if (TouchendPos.y > touchStartPos.y)
             {
-                Debug.Log("Swipe UP detected");
                 movePlayer(Vector3.forward);
             }
             else
             {
-                Debug.Log("Swipe DOWN detected");
                 movePlayer(Vector3.back);
             }
         }
@@ -204,31 +170,25 @@ public class PlayerController : MonoBehaviour
 
     private void movePlayer(Vector3 direction)
     {
-        Debug.Log($"movePlayer called with direction: {direction}");
-
         if (isMoving || isDead)
         {
-            Debug.Log("Player is moving or dead, ignoring movement");
             return;
         }
 
         //check if authentication flow is active and game is not ready
         if (AuthenticationFlowManager.Instance != null && !AuthenticationFlowManager.Instance.IsGameReady())
         {
-            Debug.Log("Authentication not complete, ignoring movement");
             return;
         }
         //if authentication is complete but game hasn't started yet, start the game
         if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
         {
-            Debug.Log("Game ready but not active, starting game via movement input");
             AuthenticationFlowManager.Instance.StartGame();
             return;
         }
         //if no authentication flow but game is not active, start the game
         if (AuthenticationFlowManager.Instance == null && !GameManager.Instance.IsGameActive())
         {
-            Debug.Log("No authentication flow, starting game via movement input");
             if (StartScreenManager.Instance != null)
             {
                 StartScreenManager.Instance.StartGame();
@@ -246,7 +206,6 @@ public class PlayerController : MonoBehaviour
 
         if (Mathf.Abs(destination.x) > xBoundary)
         {
-            Debug.Log($"movement is blocked ({destination.x}) exceeds boundary ({xBoundary})");
             return;
         }
 
@@ -264,7 +223,6 @@ public class PlayerController : MonoBehaviour
         //prehop box check with boxcast to catch walls and boundaries reliably
         if (hits != null && hits.Length > 0)
         {
-            Debug.Log($"movement blocked by {destination}. hit object: {string.Join(", ", System.Array.ConvertAll(hits, hit => hit.name))}");
             return;
         }
 
@@ -279,6 +237,9 @@ public class PlayerController : MonoBehaviour
             OnPlayerMovedForward?.Invoke();
             OnScoreChanged?.Invoke(forwardPosZ);
         }
+
+        // Send Solana transaction for player movement
+        SendMovementTransaction(direction);
     }
 
     private IEnumerator HopCoroutine(Vector3 destinationXZ)
@@ -476,8 +437,6 @@ public class PlayerController : MonoBehaviour
 
     public void ResetPlayer()
     {
-        Debug.Log("Resetting player state...");
-
         // Reset death state
         isDead = false;
         hasScattered = false;
@@ -511,7 +470,62 @@ public class PlayerController : MonoBehaviour
                 playerRb.angularVelocity = Vector3.zero;
             }
         }
+    }
 
-        Debug.Log("Player reset complete!");
+    //this sends a transaction for the player movement
+    private async void SendMovementTransaction(Vector3 direction)
+    {
+        Debug.Log("SendMovementTransaction called with direction: " + direction);
+        if (AuthenticationFlowManager.Instance == null)
+        {
+            Debug.LogWarning("AuthenticationFlowManager instance is null. Cannot send movement transaction.");
+            return;
+        }
+
+        try
+        {
+            Debug.Log("Checking if user has Solana wallet...");
+            //first ensure the user has a solana wallet
+            if (!await AuthenticationFlowManager.Instance.EnsureSolanaWallet())
+            {
+                Debug.LogWarning("No solana wallet avilable, skipping transaction");
+                return;
+            }
+            Debug.Log("Solana wallet check passed");
+            //create movement message
+            string directionText = GetDirectionText(direction);
+            string message = $"Crossy Road: Player moved {directionText} at {System.DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
+            Debug.Log($"Sending Solana transaction: {message}");
+
+            string walletAddress = await AuthenticationFlowManager.Instance.GetSolanaWalletAddress();
+            Debug.Log($"From Solana wallet: {walletAddress}");
+
+            Debug.Log("Attempting to sign message...");
+            var signature = await AuthenticationFlowManager.Instance.SignSolanaMessage(message);
+            Debug.Log($"SignSolanaMessage returned: {(string.IsNullOrEmpty(signature) ? "NULL/EMPTY" : "SUCCESS")}");
+
+            if (!string.IsNullOrEmpty(signature))
+            {
+                Debug.Log("Solana transaction sent successfully!");
+                Debug.Log($"View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster=devnet");
+            }
+            else
+            {
+                Debug.LogWarning("Failed to send Solana transaction");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error sending Solana transaction: {ex.Message}");
+        }
+    }
+
+    private string GetDirectionText(Vector3 direction)
+    {
+        if (direction == Vector3.forward) return "FORWARD";
+        if (direction == Vector3.back) return "BACKWARD";
+        if (direction == Vector3.left) return "LEFT";
+        if (direction == Vector3.right) return "RIGHT";
+        return "UNKNOWN";
     }
 }
