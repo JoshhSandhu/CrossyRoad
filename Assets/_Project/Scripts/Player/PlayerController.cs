@@ -127,11 +127,13 @@ public class PlayerController : MonoBehaviour
     private void OnTouchStart(InputAction.CallbackContext context)
     {
         touchStartPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
+        Debug.Log($"Touch started at: {touchStartPos}");
     }
 
     private void OnTouchEnd(InputAction.CallbackContext context)
     {
         Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
+        Debug.Log($"Touch ended at: {touchEndPos}");
         ProcessSwipe(touchEndPos);
     }
 
@@ -139,9 +141,12 @@ public class PlayerController : MonoBehaviour
     {
         float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
         float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
+        
+        Debug.Log($"Swipe processing: Start={touchStartPos}, End={TouchendPos}, DistX={swipeDistX}, DistY={swipeDistY}, MinDist={minSwipeDist}");
 
         if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
         {
+            Debug.Log("Swipe distance too small, ignoring");
             return;
         }
         if (swipeDistX > swipeDistY)
@@ -183,6 +188,7 @@ public class PlayerController : MonoBehaviour
         //if authentication is complete but game hasn't started yet, start the game
         if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
         {
+            Debug.Log("Authentication complete, starting game...");
             AuthenticationFlowManager.Instance.StartGame();
             return;
         }
@@ -191,6 +197,7 @@ public class PlayerController : MonoBehaviour
         {
             if (StartScreenManager.Instance != null)
             {
+                Debug.Log("No authentication flow, starting game from start screen...");
                 StartScreenManager.Instance.StartGame();
             }
             return;
@@ -475,7 +482,7 @@ public class PlayerController : MonoBehaviour
     //this sends a transaction for the player movement
     private async void SendMovementTransaction(Vector3 direction)
     {
-        Debug.Log("SendMovementTransaction called with direction: " + direction);
+        //Debug.Log("SendMovementTransaction called with direction: " + direction);
         if (AuthenticationFlowManager.Instance == null)
         {
             Debug.LogWarning("AuthenticationFlowManager instance is null. Cannot send movement transaction.");
@@ -484,30 +491,30 @@ public class PlayerController : MonoBehaviour
 
         try
         {
-            Debug.Log("Checking if user has Solana wallet...");
+            //Debug.Log("Checking if user has Solana wallet...");
             //first ensure the user has a solana wallet
             if (!await AuthenticationFlowManager.Instance.EnsureSolanaWallet())
             {
                 Debug.LogWarning("No solana wallet avilable, skipping transaction");
                 return;
             }
-            Debug.Log("Solana wallet check passed");
+            //Debug.Log("Solana wallet check passed");
             //create movement message
             string directionText = GetDirectionText(direction);
             string message = $"Crossy Road: Player moved {directionText} at {System.DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
-            Debug.Log($"Sending Solana transaction: {message}");
+            //Debug.Log($"Sending Solana transaction: {message}");
 
             string walletAddress = await AuthenticationFlowManager.Instance.GetSolanaWalletAddress();
-            Debug.Log($"From Solana wallet: {walletAddress}");
+            //Debug.Log($"From Solana wallet: {walletAddress}");
 
-            Debug.Log("Attempting to sign message...");
+            //Debug.Log("Attempting to sign message...");
             var signature = await AuthenticationFlowManager.Instance.SignSolanaMessage(message);
-            Debug.Log($"SignSolanaMessage returned: {(string.IsNullOrEmpty(signature) ? "NULL/EMPTY" : "SUCCESS")}");
+            //Debug.Log($"SignSolanaMessage returned: {(string.IsNullOrEmpty(signature) ? "NULL/EMPTY" : "SUCCESS")}");
 
             if (!string.IsNullOrEmpty(signature))
             {
-                Debug.Log("Solana transaction sent successfully!");
-                Debug.Log($"View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster=devnet");
+                //Debug.Log("Solana transaction sent successfully!");
+                //Debug.Log($"View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster=devnet");
             }
             else
             {

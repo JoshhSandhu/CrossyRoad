@@ -80,6 +80,7 @@ public class StartScreenManager : MonoBehaviour
 
     private IEnumerator WaitForPlayerMovement()
     {
+        Debug.Log($"hasGameStarted: {hasGameStarted}");
         while (!hasGameStarted)
         {
             //if (AuthenticationFlowManager.Instance != null)
@@ -94,7 +95,7 @@ public class StartScreenManager : MonoBehaviour
             //check for touch input
             bool hasTouchInput = Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed;
 
-            if (hasMoveInput || hasTouchInput)
+            if ((hasMoveInput || hasTouchInput) && GameManager.Instance.IsGameActive())
             {
                 StartGame();
                 yield break;
@@ -128,6 +129,7 @@ public class StartScreenManager : MonoBehaviour
 
     private void HideStartScreen()
     {
+        Debug.Log("Hiding Start Screen");
         StartCoroutine(SlideButtonsOut());
     }
 

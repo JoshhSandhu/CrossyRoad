@@ -45,7 +45,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
         LaneSpawner laneSpawner = FindFirstObjectByType<LaneSpawner>();
         if(laneSpawner != null)
         {
-            Debug.Log("creating decorations dynamically");
+            //Debug.Log("creating decorations dynamically");
         }
     }
 
@@ -61,7 +61,7 @@ public class DecorationSpawner : MonoBehaviour, IDecorationSpawner
         if (!ObjectPooler.Instance.poolDict.ContainsKey(poolTag))
         {
             ObjectPooler.Instance.CreatePool(poolTag, decorationPrefab, decorationPoolSize);
-            Debug.Log($"created decoration pool for {poolTag} with {decorationPoolSize} objects");
+            //Debug.Log($"created decoration pool for {poolTag} with {decorationPoolSize} objects");
         }
     }
 
