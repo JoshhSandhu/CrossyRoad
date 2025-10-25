@@ -105,7 +105,15 @@ public class PlayerController : MonoBehaviour
         {
             playerInputActions = new PlayerInputActions();
         }
+
+        // Subscribe to keyboard/gamepad movement
         playerInputActions.Player.Move.performed += OnMove;
+
+        // Subscribe to touch input
+        playerInputActions.Player.TouchTap.performed += OnTouchTap;
+        playerInputActions.Player.TouchSwipe.performed += OnTouchSwipe;
+        playerInputActions.Player.TouchPosition.performed += OnTouchPosition;
+
         playerInputActions.Enable();
     }
 
@@ -113,6 +121,9 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         playerInputActions.Player.Move.performed -= OnMove;
+        playerInputActions.Player.TouchTap.performed -= OnTouchTap;
+        playerInputActions.Player.TouchSwipe.performed -= OnTouchSwipe;
+        playerInputActions.Player.TouchPosition.performed -= OnTouchPosition;
         playerInputActions.Player.Disable();
     }
 
@@ -149,6 +160,109 @@ public class PlayerController : MonoBehaviour
             else if (inputDirection.x < 0)
             {
                 movePlayer(Vector3.left);
+            }
+        }
+    }
+
+    // Touch input handling for Crossy Road style movement
+    private Vector2 touchStartPosition;
+    private bool isTouching = false;
+    private float minSwipeDistance = 50f; // Minimum distance for a swipe to be registered
+
+    private void OnTouchTap(InputAction.CallbackContext context)
+    {
+        // For Crossy Road, a tap could move forward
+        if (context.performed)
+        {
+            Debug.Log("Touch tap detected - moving forward");
+            movePlayer(Vector3.forward);
+        }
+    }
+
+    private void OnTouchSwipe(InputAction.CallbackContext context)
+    {
+        Vector2 swipeDelta = context.ReadValue<Vector2>();
+
+        if (isTouching && swipeDelta.magnitude > 0.1f)
+        {
+            // Determine swipe direction
+            Vector3 moveDirection = GetSwipeDirection(swipeDelta);
+            if (moveDirection != Vector3.zero)
+            {
+                Debug.Log($"Touch swipe detected: {swipeDelta} -> {moveDirection}");
+                movePlayer(moveDirection);
+            }
+        }
+    }
+
+    private void OnTouchPosition(InputAction.CallbackContext context)
+    {
+        Vector2 touchPosition = context.ReadValue<Vector2>();
+
+        if (context.performed)
+        {
+            // Touch started
+            touchStartPosition = touchPosition;
+            isTouching = true;
+        }
+        else if (context.canceled)
+        {
+            // Touch ended - check if it was a swipe or tap
+            Vector2 touchEndPosition = touchPosition;
+            Vector2 swipeVector = touchEndPosition - touchStartPosition;
+
+            if (swipeVector.magnitude >= minSwipeDistance)
+            {
+                // It was a swipe
+                Vector3 moveDirection = GetSwipeDirection(swipeVector);
+                if (moveDirection != Vector3.zero)
+                {
+                    Debug.Log($"Touch swipe completed: {swipeVector} -> {moveDirection}");
+                    movePlayer(moveDirection);
+                }
+            }
+            else
+            {
+                // It was a tap - move forward
+                Debug.Log("Touch tap completed - moving forward");
+                movePlayer(Vector3.forward);
+            }
+
+            isTouching = false;
+        }
+    }
+
+    /// <summary>
+    /// Convert swipe vector to movement direction for Crossy Road style movement
+    /// </summary>
+    private Vector3 GetSwipeDirection(Vector2 swipeVector)
+    {
+        // Normalize the swipe vector
+        Vector2 normalizedSwipe = swipeVector.normalized;
+
+        // Determine primary direction (similar to keyboard input logic)
+        if (Mathf.Abs(normalizedSwipe.y) > Mathf.Abs(normalizedSwipe.x))
+        {
+            // Vertical swipe takes priority
+            if (normalizedSwipe.y > 0)
+            {
+                return Vector3.forward;  // Swipe up = move forward
+            }
+            else
+            {
+                return Vector3.back;      // Swipe down = move backward
+            }
+        }
+        else
+        {
+            // Horizontal swipe
+            if (normalizedSwipe.x > 0)
+            {
+                return Vector3.right;     // Swipe right = move right
+            }
+            else
+            {
+                return Vector3.left;      // Swipe left = move left
             }
         }
     }
