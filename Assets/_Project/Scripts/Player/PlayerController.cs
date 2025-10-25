@@ -56,6 +56,15 @@ public class PlayerController : MonoBehaviour
     private float minSwipeDist = 50f;   //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
 
+    // SOLID Principle Components - Dependency Injection
+    private IGameStateManager gameStateManager;
+    private IAuthenticationManager authenticationManager;
+    private IMovementValidator movementValidator;
+    private IMovementExecutor movementExecutor;
+    private ICollisionHandler collisionHandler;
+    private ITransactionService transactionService;
+    private ICameraController cameraController;
+
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody>();
@@ -63,6 +72,30 @@ public class PlayerController : MonoBehaviour
         playerRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         playerRb.freezeRotation = true;
         TouchSimulation.Enable();
+
+        // Initialize SOLID Principle Components
+        InitializeComponents();
+    }
+
+    /// <summary>
+    /// Initialize all SOLID principle components with dependency injection
+    /// </summary>
+    private void InitializeComponents()
+    {
+        // Initialize adapters for existing singleton managers
+        gameStateManager = new GameStateManagerAdapter();
+        authenticationManager = new AuthenticationManagerAdapter();
+        cameraController = new CameraControllerAdapter(cameraFollow);
+
+        // Initialize components with dependencies
+        movementValidator = new PlayerMovementValidator(transform, xBoundary, blockingMask, groundMask, blockCastHalfExtents);
+        movementExecutor = new PlayerMovementExecutor(transform, playerRb, hopHeight, hopDuration, groundMask);
+
+        // Initialize collision handler with callbacks
+        collisionHandler = new PlayerCollisionHandler(transform, xBoundary, GameOver, () => gameStateManager.AddCoins());
+
+        // Initialize transaction service with authentication manager
+        transactionService = new PlayerTransactionService(authenticationManager);
     }
 
     //subscribe the events
@@ -85,7 +118,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        CheckForOutOfBounds();
+        collisionHandler?.CheckForOutOfBounds();
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -128,25 +161,31 @@ public class PlayerController : MonoBehaviour
         }
 
         //check if authentication flow is active and game is not ready
-        if (AuthenticationFlowManager.Instance != null && !AuthenticationFlowManager.Instance.IsGameReady())
+        if (authenticationManager != null && !authenticationManager.IsGameReady())
         {
             return;
         }
         //if authentication is complete but game hasn't started yet, start the game
-        if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
+        if (authenticationManager != null && authenticationManager.IsGameReady() && !gameStateManager.IsGameActive())
         {
             Debug.Log("Authentication complete, starting game...");
-            AuthenticationFlowManager.Instance.StartGame();
+            authenticationManager.StartGame();
             return;
         }
         //if no authentication flow but game is not active, start the game
-        if (AuthenticationFlowManager.Instance == null && !GameManager.Instance.IsGameActive())
+        if (authenticationManager == null && !gameStateManager.IsGameActive())
         {
             if (StartScreenManager.Instance != null)
             {
                 Debug.Log("No authentication flow, starting game from start screen...");
                 StartScreenManager.Instance.StartGame();
             }
+            return;
+        }
+
+        // Use movement validator to check if movement is valid
+        if (!movementValidator.CanMove(direction))
+        {
             return;
         }
 
@@ -158,32 +197,10 @@ public class PlayerController : MonoBehaviour
 
         Vector3 destination = snappedPos + direction;
 
-        if (Mathf.Abs(destination.x) > xBoundary)
-        {
-            return;
-        }
-
-        //compute expected landing height, and then using it for accurate blocking vs rocks while on logs
-        float candidateLandingY = transform.position.y;
-        Vector3 probeStart = destination + Vector3.up * 5f;
-        if (Physics.Raycast(probeStart, Vector3.down, out var probeHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            candidateLandingY = probeHit.point.y;
-        }
-
-        //pre hop check to avoid false positives from nearby solid obstacles
-        Vector3 overlapCenter = new Vector3(destination.x, candidateLandingY + 0.6f, destination.z);
-        Collider[] hits = Physics.OverlapBox(overlapCenter, blockCastHalfExtents, Quaternion.identity, blockingMask, QueryTriggerInteraction.Ignore);
-        //prehop box check with boxcast to catch walls and boundaries reliably
-        if (hits != null && hits.Length > 0)
-        {
-            return;
-        }
-
         //function to turn the player the ideration we are moving
         transform.SetParent(null);
-        FaceDirection(direction);
-        StartCoroutine(HopCoroutine(destination));
+        movementExecutor.FaceDirection(direction);
+        StartCoroutine(ExecuteMovementWithCallback(destination));
 
         if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
         {
@@ -193,60 +210,28 @@ public class PlayerController : MonoBehaviour
         }
 
         // Send Solana transaction for player movement
-        SendMovementTransaction(direction);
+        transactionService?.SendMovementTransaction(direction);
     }
 
-    private IEnumerator HopCoroutine(Vector3 destinationXZ)
+    /// <summary>
+    /// Execute movement with callback handling for water collision
+    /// </summary>
+    private IEnumerator ExecuteMovementWithCallback(Vector3 destination)
     {
-        //Debug.Log($"HopCoroutine started for destination: {destinationXZ}");
         isMoving = true;
-        transform.SetParent(null);
-        float landingY = destinationXZ.y;
+        yield return StartCoroutine(movementExecutor.ExecuteMovement(destination));
 
-        Vector3 rayStart = destinationXZ + Vector3.up * 5f;
-        if (Physics.Raycast(rayStart, Vector3.down, out var groundHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            landingY = groundHit.point.y;
-        }
-
-        Vector3 startPos = playerRb.position;
-        Vector3 destination = new Vector3(destinationXZ.x, landingY, destinationXZ.z);
-        float elapsedTime = 0f;
-        //Debug.Log($"HopCoroutine: startPos={startPos}, destination={destination}, parent={transform.parent?.name ?? "null"}, rotation={transform.rotation.eulerAngles}");
-        while (elapsedTime < hopDuration)
-        {
-            elapsedTime += Time.fixedDeltaTime;
-            float a = Mathf.Clamp01(elapsedTime / hopDuration);
-            float arc = Mathf.Sin(a * Mathf.PI) * hopHeight;
-            Vector3 pos = Vector3.Lerp(startPos, destination, a);
-            pos.y += arc;
-            playerRb.MovePosition(pos);
-            //if (smoothTurn) { transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime); }
-            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-            yield return new WaitForFixedUpdate();
-        }
-
-        playerRb.MovePosition(destination);
-        transform.rotation = targetRotation;
-        //if we landed on a log
+        // Check if player landed in water (handled by movement executor)
         if (Physics.Raycast(destination + Vector3.up * 0.5f, Vector3.down, out var landinghit, 1.5f, groundMask, QueryTriggerInteraction.Ignore))
         {
-            if (landinghit.collider.CompareTag("Platform"))
-            {
-                transform.SetParent(landinghit.transform);
-            }
-            else if (landinghit.collider.CompareTag("Water"))
+            if (landinghit.collider.CompareTag("Water"))
             {
                 GameOver(true);
             }
-            else
-            {
-                transform.SetParent(null);
-            }
         }
-        cameraFollow.Shake(0.15f); //camera shake at the end of an hop
+
+        cameraController?.Shake(0.15f); //camera shake at the end of an hop
         isMoving = false;
-        //Debug.Log($"HopCoroutine completed, isMoving set to false");
     }
 
     //game over logic
@@ -264,10 +249,7 @@ public class PlayerController : MonoBehaviour
         if (isDrowning)
         {
             transform.SetParent(null); //detach from the log if we are attched to it
-            if (cameraFollow != null)
-            {
-                cameraFollow.enabled = false;
-            }
+            cameraController?.SetEnabled(false);
             StartCoroutine(DrownCoroutine());
         }
         else
@@ -292,54 +274,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void CheckForOutOfBounds()
-    {
-        //check if we are parented to the log or not
-        if (transform.parent != null && transform.parent.CompareTag("Platform"))
-        {
-            //when the player's X pos exceeds the XBoundary value
-            if (Mathf.Abs(transform.position.x) > xBoundary)
-            {
-                //then its game over for the player
-                GameOver(true);
-            }
-        }
-    }
     //collision detection
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Obstacle"))
-        {
-            GameOver(false);
-        }
-        else if (other.CompareTag("Coin"))
-        {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddCoins();
-            }
-            other.gameObject.SetActive(false);
-        }
-        //else if(other.CompareTag("Water"))
-        //{
-        //    if(transform.parent == null)
-        //    {
-        //        GameOver();
-        //    }
-        //}
-        //else if(other.CompareTag("Boundary"))
-        //{
-        //    if(transform.parent != null && transform.parent.CompareTag("Platform"))
-        //    {
-        //        GameOver();
-        //    }
-        //}
+        collisionHandler?.HandleTriggerEnter(other);
     }
 
     //this is for physical Collisions (like trees and rocks) that only block you
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
+        collisionHandler?.HandleCollisionEnter(collision);
     }
 
     private void ScatterIntoBlocks()
@@ -353,40 +297,13 @@ public class PlayerController : MonoBehaviour
         var colliders = GetComponentsInChildren<Collider>();
         foreach (var c in colliders) c.enabled = false;
 
-        if (cameraFollow != null)
-        {
-            cameraFollow.Shake(0.6f);
-        }
+        cameraController?.Shake(0.6f);
 
         ParticleSystem ps = Instantiate(scatterParticleSystem, transform.position, transform.rotation);
         var main = ps.main;
         ps.Play();
         Destroy(ps.gameObject, main.duration + main.startLifetime.constantMax + 0.5f);
 
-    }
-
-    private void FaceDirection(Vector3 dir)
-    {
-        Vector3 flat = new Vector3(dir.x, 0f, dir.z);
-        if (dir == Vector3.zero)
-        {
-            return;
-        }
-        Quaternion rawTarget = Quaternion.LookRotation(flat, Vector3.up);
-        float yaw = rawTarget.eulerAngles.y;
-        float snappedYaw = Mathf.Round(yaw / 90f) * 90f;
-        targetRotation = Quaternion.Euler(0f, snappedYaw, 0f);
-        //Debug.Log($"FaceDirection: dir={dir}, yaw={yaw}, snappedYaw={snappedYaw}, targetRotation={targetRotation.eulerAngles}");
-        //if (smoothTurn)
-        //{
-        //    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-        //}
-        //else
-        //{
-        //    transform.rotation = targetRotation;
-        //}
-        transform.rotation = targetRotation;
-        //Debug.Log($"FaceDirection: Set rotation to {transform.rotation.eulerAngles}");
     }
 
     public void ResetPlayer()
@@ -403,11 +320,8 @@ public class PlayerController : MonoBehaviour
         transform.SetParent(null);
 
         // Re-enable camera follow
-        if (cameraFollow != null)
-        {
-            cameraFollow.enabled = true;
-            cameraFollow.ResetCamera();
-        }
+        cameraController?.SetEnabled(true);
+        cameraController?.ResetCamera();
 
         // Re-enable renderers and colliders (in case they were disabled by scatter)
         var renderers = GetComponentsInChildren<Renderer>();
@@ -426,60 +340,4 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //this sends a transaction for the player movement
-    private async void SendMovementTransaction(Vector3 direction)
-    {
-        //Debug.Log("SendMovementTransaction called with direction: " + direction);
-        if (AuthenticationFlowManager.Instance == null)
-        {
-            Debug.LogWarning("AuthenticationFlowManager instance is null. Cannot send movement transaction.");
-            return;
-        }
-
-        try
-        {
-            //Debug.Log("Checking if user has Solana wallet...");
-            //first ensure the user has a solana wallet
-            if (!await AuthenticationFlowManager.Instance.EnsureSolanaWallet())
-            {
-                Debug.LogWarning("No solana wallet avilable, skipping transaction");
-                return;
-            }
-            //Debug.Log("Solana wallet check passed");
-            //create movement message
-            string directionText = GetDirectionText(direction);
-            string message = $"Crossy Road: Player moved {directionText} at {System.DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
-            //Debug.Log($"Sending Solana transaction: {message}");
-
-            string walletAddress = await AuthenticationFlowManager.Instance.GetSolanaWalletAddress();
-            //Debug.Log($"From Solana wallet: {walletAddress}");
-
-            //Debug.Log("Attempting to sign message...");
-            var signature = await AuthenticationFlowManager.Instance.SignSolanaMessage(message);
-            //Debug.Log($"SignSolanaMessage returned: {(string.IsNullOrEmpty(signature) ? "NULL/EMPTY" : "SUCCESS")}");
-
-            if (!string.IsNullOrEmpty(signature))
-            {
-                //Debug.Log("Solana transaction sent successfully!");
-                //Debug.Log($"View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster=devnet");
-            }
-            else
-            {
-                Debug.LogWarning("Failed to send Solana transaction");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Error sending Solana transaction: {ex.Message}");
-        }
-    }
-
-    private string GetDirectionText(Vector3 direction)
-    {
-        if (direction == Vector3.forward) return "FORWARD";
-        if (direction == Vector3.back) return "BACKWARD";
-        if (direction == Vector3.left) return "LEFT";
-        if (direction == Vector3.right) return "RIGHT";
-        return "UNKNOWN";
-    }
 }
