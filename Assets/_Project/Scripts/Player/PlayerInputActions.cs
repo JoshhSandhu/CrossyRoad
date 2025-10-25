@@ -102,22 +102,22 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""PrimaryContact"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""6214fab3-79be-4878-8dc6-db9c549b3692"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""name"": ""PrimaryTouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""fae3fe4e-b398-44e0-ac96-2a7c907c7b4b"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""PrimaryTouch"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""0f733768-07c9-423c-a490-7191dff65607"",
-                    ""expectedControlType"": ""Button"",
+                    ""name"": ""PrimaryContact"",
+                    ""type"": ""Value"",
+                    ""id"": ""9b90667b-3544-4a86-9baf-12ba26557536"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -178,23 +178,23 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""6f453ae8-6957-4639-825b-6ce9aee12cca"",
-                    ""path"": ""<Touchscreen>/primaryTouch/position"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PrimaryContact"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b553fa5d-9b49-4e2d-9548-180f66e267cf"",
+                    ""id"": ""61d5600c-e195-44f8-93df-345892e0bee5"",
                     ""path"": ""<Touchscreen>/primaryTouch/tap"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""PrimaryTouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""27a98364-ea58-49fd-9a40-677fb2a6c454"",
+                    ""path"": ""<Touchscreen>/primaryTouch/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PrimaryContact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -206,8 +206,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-        m_Player_PrimaryContact = m_Player.FindAction("PrimaryContact", throwIfNotFound: true);
         m_Player_PrimaryTouch = m_Player.FindAction("PrimaryTouch", throwIfNotFound: true);
+        m_Player_PrimaryContact = m_Player.FindAction("PrimaryContact", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -289,8 +289,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
-    private readonly InputAction m_Player_PrimaryContact;
     private readonly InputAction m_Player_PrimaryTouch;
+    private readonly InputAction m_Player_PrimaryContact;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -307,13 +307,13 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Move => m_Wrapper.m_Player_Move;
         /// <summary>
-        /// Provides access to the underlying input action "Player/PrimaryContact".
-        /// </summary>
-        public InputAction @PrimaryContact => m_Wrapper.m_Player_PrimaryContact;
-        /// <summary>
         /// Provides access to the underlying input action "Player/PrimaryTouch".
         /// </summary>
         public InputAction @PrimaryTouch => m_Wrapper.m_Player_PrimaryTouch;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/PrimaryContact".
+        /// </summary>
+        public InputAction @PrimaryContact => m_Wrapper.m_Player_PrimaryContact;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -343,12 +343,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
-            @PrimaryContact.started += instance.OnPrimaryContact;
-            @PrimaryContact.performed += instance.OnPrimaryContact;
-            @PrimaryContact.canceled += instance.OnPrimaryContact;
             @PrimaryTouch.started += instance.OnPrimaryTouch;
             @PrimaryTouch.performed += instance.OnPrimaryTouch;
             @PrimaryTouch.canceled += instance.OnPrimaryTouch;
+            @PrimaryContact.started += instance.OnPrimaryContact;
+            @PrimaryContact.performed += instance.OnPrimaryContact;
+            @PrimaryContact.canceled += instance.OnPrimaryContact;
         }
 
         /// <summary>
@@ -363,12 +363,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
-            @PrimaryContact.started -= instance.OnPrimaryContact;
-            @PrimaryContact.performed -= instance.OnPrimaryContact;
-            @PrimaryContact.canceled -= instance.OnPrimaryContact;
             @PrimaryTouch.started -= instance.OnPrimaryTouch;
             @PrimaryTouch.performed -= instance.OnPrimaryTouch;
             @PrimaryTouch.canceled -= instance.OnPrimaryTouch;
+            @PrimaryContact.started -= instance.OnPrimaryContact;
+            @PrimaryContact.performed -= instance.OnPrimaryContact;
+            @PrimaryContact.canceled -= instance.OnPrimaryContact;
         }
 
         /// <summary>
@@ -417,18 +417,18 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMove(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "PrimaryContact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnPrimaryContact(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "PrimaryTouch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnPrimaryTouch(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PrimaryContact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPrimaryContact(InputAction.CallbackContext context);
     }
 }
