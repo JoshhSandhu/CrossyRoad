@@ -73,8 +73,6 @@ public class PlayerController : MonoBehaviour
             playerInputActions = new PlayerInputActions();
         }
         playerInputActions.Player.Move.performed += OnMove;
-        playerInputActions.Player.PrimaryTouch.started += OnTouchStart;
-        playerInputActions.Player.PrimaryTouch.canceled += OnTouchEnd;
         playerInputActions.Enable();
     }
 
@@ -82,8 +80,6 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         playerInputActions.Player.Move.performed -= OnMove;
-        playerInputActions.Player.PrimaryTouch.started -= OnTouchStart;
-        playerInputActions.Player.PrimaryTouch.canceled -= OnTouchEnd;
         playerInputActions.Player.Disable();
     }
 
@@ -120,55 +116,6 @@ public class PlayerController : MonoBehaviour
             else if (inputDirection.x < 0)
             {
                 movePlayer(Vector3.left);
-            }
-        }
-    }
-
-    private void OnTouchStart(InputAction.CallbackContext context)
-    {
-        touchStartPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch started at: {touchStartPos}");
-    }
-
-    private void OnTouchEnd(InputAction.CallbackContext context)
-    {
-        Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch ended at: {touchEndPos}");
-        ProcessSwipe(touchEndPos);
-    }
-
-    private void ProcessSwipe(Vector2 TouchendPos)
-    {
-        float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
-        float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
-        
-        Debug.Log($"Swipe processing: Start={touchStartPos}, End={TouchendPos}, DistX={swipeDistX}, DistY={swipeDistY}, MinDist={minSwipeDist}");
-
-        if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
-        {
-            Debug.Log("Swipe distance too small, ignoring");
-            return;
-        }
-        if (swipeDistX > swipeDistY)
-        {
-            if (TouchendPos.x > touchStartPos.x)
-            {
-                movePlayer(Vector3.right);
-            }
-            else
-            {
-                movePlayer(Vector3.left);
-            }
-        }
-        else
-        {
-            if (TouchendPos.y > touchStartPos.y)
-            {
-                movePlayer(Vector3.forward);
-            }
-            else
-            {
-                movePlayer(Vector3.back);
             }
         }
     }

@@ -14,24 +14,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "PrimaryTouch",
-                    "type": "Button",
-                    "id": "fae3fe4e-b398-44e0-ac96-2a7c907c7b4b",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "PrimaryContact",
-                    "type": "Value",
-                    "id": "9b90667b-3544-4a86-9baf-12ba26557536",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -89,28 +71,6 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
-                {
-                    "name": "",
-                    "id": "61d5600c-e195-44f8-93df-345892e0bee5",
-                    "path": "<Touchscreen>/primaryTouch/tap",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryTouch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "27a98364-ea58-49fd-9a40-677fb2a6c454",
-                    "path": "<Touchscreen>/primaryTouch/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryContact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
                 }
             ]
         }
