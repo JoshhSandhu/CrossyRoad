@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
     private IMovementValidator movementValidator;
     private IMovementExecutor movementExecutor;
     private ICollisionHandler collisionHandler;
-    private ITransactionService transactionService;
+    private HybridTransactionService hybridTransactionService;
     private ICameraController cameraController;
 
     private void Awake()
@@ -94,8 +94,14 @@ public class PlayerController : MonoBehaviour
         // Initialize collision handler with callbacks
         collisionHandler = new PlayerCollisionHandler(transform, xBoundary, GameOver, () => gameStateManager.AddCoins());
 
-        // Initialize transaction service with authentication manager
-        transactionService = new PlayerTransactionService(authenticationManager);
+        // Initialize Hybrid transaction service
+        hybridTransactionService = HybridTransactionService.Instance;
+        if (hybridTransactionService == null)
+        {
+            Debug.LogError("HybridTransactionService not found! Creating new instance...");
+            var serviceObject = new GameObject("HybridTransactionService");
+            hybridTransactionService = serviceObject.AddComponent<HybridTransactionService>();
+        }
     }
 
     //subscribe the events
@@ -164,14 +170,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Touch input handling for Crossy Road style movement
+    /// <summary>
+    /// touch input for movement
+    /// </summary>
     private Vector2 touchStartPosition;
     private bool isTouching = false;
-    private float minSwipeDistance = 50f; // Minimum distance for a swipe to be registered
+    private float minSwipeDistance = 50f; //min distance for a swipe to be registered
 
     private void OnTouchTap(InputAction.CallbackContext context)
     {
-        // For Crossy Road, a tap could move forward
         if (context.performed)
         {
             Debug.Log("Touch tap detected - moving forward");
@@ -207,7 +214,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (context.canceled)
         {
-            // Touch ended - check if it was a swipe or tap
+            // Touch ended
             Vector2 touchEndPosition = touchPosition;
             Vector2 swipeVector = touchEndPosition - touchStartPosition;
 
@@ -223,7 +230,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // It was a tap - move forward
+                // It was a tap
                 Debug.Log("Touch tap completed - moving forward");
                 movePlayer(Vector3.forward);
             }
@@ -237,32 +244,28 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private Vector3 GetSwipeDirection(Vector2 swipeVector)
     {
-        // Normalize the swipe vector
         Vector2 normalizedSwipe = swipeVector.normalized;
 
-        // Determine primary direction (similar to keyboard input logic)
         if (Mathf.Abs(normalizedSwipe.y) > Mathf.Abs(normalizedSwipe.x))
         {
-            // Vertical swipe takes priority
             if (normalizedSwipe.y > 0)
             {
-                return Vector3.forward;  // Swipe up = move forward
+                return Vector3.forward;     // Swipe up = move forward
             }
             else
             {
-                return Vector3.back;      // Swipe down = move backward
+                return Vector3.back;        // Swipe down = move backward
             }
         }
         else
         {
-            // Horizontal swipe
             if (normalizedSwipe.x > 0)
             {
-                return Vector3.right;     // Swipe right = move right
+                return Vector3.right;       // Swipe right = move right
             }
             else
             {
-                return Vector3.left;      // Swipe left = move left
+                return Vector3.left;        // Swipe left = move left
             }
         }
     }
@@ -324,7 +327,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Send Solana transaction for player movement
-        transactionService?.SendMovementTransaction(direction);
+        hybridTransactionService?.SendMovementTransaction(direction);
     }
 
     /// <summary>
@@ -437,7 +440,7 @@ public class PlayerController : MonoBehaviour
         cameraController?.SetEnabled(true);
         cameraController?.ResetCamera();
 
-        // Re-enable renderers and colliders (in case they were disabled by scatter)
+        // Re-enable renderers and colliders
         var renderers = GetComponentsInChildren<Renderer>();
         foreach (var r in renderers) r.enabled = true;
         var colliders = GetComponentsInChildren<Collider>();

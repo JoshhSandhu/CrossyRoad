@@ -594,57 +594,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         //Debug.Log($"EmbeddedSolanaWallets count: {user.EmbeddedSolanaWallets?.Length ?? 0}");
         return user.EmbeddedSolanaWallets;
     }
-
-    //signs a message with the primary solana wallet
-    public async Task<string> SignSolanaMessage(string Message)
-    {
-        //Debug.Log("SignSolanaMessage called with message: " + Message);
-        var solanaWallets = await GetSolanaWallets();
-        //Debug.Log($"Found {solanaWallets.Length} Solana wallets");
-        if (solanaWallets.Length == 0)
-        {
-            Debug.LogError("No Solana wallets found");
-            return null;
-        }
-        var wallet = solanaWallets[0]; //using the primay wallet
-        //Debug.Log($"Using wallet: {wallet.Address}");
-
-        try
-        {
-            //converting the message to base64
-            var messageBytes = System.Text.Encoding.UTF8.GetBytes(Message);
-            var base64Message = System.Convert.ToBase64String(messageBytes);
-            //Debug.Log($"Base64 message: {base64Message}");
-
-            //sign the message 
-            //var signature = await wallet.EmbeddedSolanaWalletProvider.SignMessage(base64Message);
-            //Debug.Log("About to call SignMessage on wallet...");
-
-            // Add timeout to prevent hanging
-            var signTask = wallet.EmbeddedSolanaWalletProvider.SignMessage(base64Message);
-            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10)); // 10 second timeout
-
-            var completedTask = await Task.WhenAny(signTask, timeoutTask);
-
-            if (completedTask == timeoutTask)
-            {
-                Debug.LogError("SignMessage timed out after 10 seconds!");
-                return null;
-            }
-
-            var signature = await signTask;
-            //Debug.Log($"Message signed successfully: {signature}");
-            return signature;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to sign message: {ex.Message}");
-            Debug.LogError($"Exception type: {ex.GetType().Name}");
-            Debug.LogError($"Stack trace: {ex.StackTrace}");
-            return null;
-        }
-    }
-
+    
     //this ensures the user has a solana wallet and if not then creates one
     public async Task<bool> EnsureSolanaWallet()
     {
@@ -671,3 +621,4 @@ public class AuthenticationFlowManager : MonoBehaviour
         // Cleanup
     }
 }
+

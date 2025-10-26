@@ -35,13 +35,4 @@ public class AuthenticationManagerAdapter : IAuthenticationManager
         }
         return string.Empty;
     }
-
-    public async Task<string> SignSolanaMessage(string message)
-    {
-        if (AuthenticationFlowManager.Instance != null)
-        {
-            return await AuthenticationFlowManager.Instance.SignSolanaMessage(message);
-        }
-        return string.Empty;
-    }
 }

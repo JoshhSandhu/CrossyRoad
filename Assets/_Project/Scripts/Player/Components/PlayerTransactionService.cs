@@ -41,19 +41,7 @@ public class PlayerTransactionService : ITransactionService
             string walletAddress = await authenticationManager.GetSolanaWalletAddress();
             //Debug.Log($"From Solana wallet: {walletAddress}");
 
-            //Debug.Log("Attempting to sign message...");
-            var signature = await authenticationManager.SignSolanaMessage(message);
-            //Debug.Log($"SignSolanaMessage returned: {(string.IsNullOrEmpty(signature) ? "NULL/EMPTY" : "SUCCESS")}");
 
-            if (!string.IsNullOrEmpty(signature))
-            {
-                //Debug.Log("Solana transaction sent successfully!");
-                //Debug.Log($"View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster=devnet");
-            }
-            else
-            {
-                Debug.LogWarning("Failed to send Solana transaction");
-            }
         }
         catch (Exception ex)
         {

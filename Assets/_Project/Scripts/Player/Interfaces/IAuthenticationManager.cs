@@ -9,5 +9,4 @@ public interface IAuthenticationManager
     void StartGame();
     Task<bool> EnsureSolanaWallet();
     Task<string> GetSolanaWalletAddress();
-    Task<string> SignSolanaMessage(string message);
 }
