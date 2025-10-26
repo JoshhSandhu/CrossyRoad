@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 488c30735dbdd02418625fb0881808dc, type: 3}
+  m_Name: MagicBlocksConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MagicBlocksConfig
+  rpcEndpoint: https://api.devnet.solana.com
+  network: devnet
+  enableBatching: 1
+  transactionTimeout: 5
+  batchSize: 5
+  batchInterval: 2
+  enableRetry: 1
+  maxRetries: 3
+  retryDelay: 0.5
+  enableDebugLogging: 1
+  logAllTransactions: 1
+  enableMockTransactions: 0
+  enablePrivySync: 1
+  privyWebhookUrl: 
+  privySyncInterval: 10
