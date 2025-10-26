@@ -2,7 +2,9 @@ using System;
 using UnityEngine;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-
+using Solana.Unity.SDK;
+using Solana.Unity.Wallet;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Magiclocks Solana SDK adapter for Unity Inteegration
@@ -14,6 +16,7 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     [Header("MagicBlocks Configuration")]
     [SerializeField] private string rpcEndpoint = "https://api.devnet.solana.com";
     [SerializeField] private string walletNetwork = "devnet";
+    [SerializeField] private MagicBlocksConfig config;
 
     [Header("Transaction Settings")]
     [SerializeField] private float transactionTimeout = 5f;
@@ -65,20 +68,28 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
         try
         {
             Debug.Log("Initializing MagicBlocks Solana SDK...");
-            //init magic block SDK here
-            //walletadapter = new solana wallet adapter()
-            //repcClient = new solana rpc client(rpcEndpoint)
+            
+            //checking if the web3 instance exists
+            if(Web3.Instance == null)
+            {
+                Debug.LogWarning("Web3 instance not found. Solana SDK not initialized yet");
+                return;
+            }
 
-            //await walletadapter.connect();
-            //await connectToPrvywallet(); 
+            //wait for the solana sdk to be ready
+            if(Web3.Wallet == null)
+            {
+                Debug.LogWarning("web3 wallet not found. waiting for the privy connection");
+                return;
+            }
 
             Debug.Log("MagicBlocks Solana SDK Initialized");
+            Debug.Log($"Wallet address: {Web3.Wallet.Account.PublicKey}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error initializing MagicBlocks Solana SDK: {ex.Message}");
+            Debug.LogError($"Failed to initialize Solana SDK: {ex.Message}");
         }
-        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -149,16 +160,36 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// 
     private async Task<string> SendImmediateTransaction(string message)
     {
-        //TODO: impl immediate transaction with magicblocks SDK
+        try
+        {
+            //check if the wallet is connected
+            if(Web3.Wallet == null)
+            {
+                Debug.LogError("Solana wallet not connected!");
+                OnTransactionFailed?.Invoke("Wallet not connected");
+                return null;
+            }
 
-        //placeholder impl
-        await Task.Delay(100); //simulate network delay
-        var mockSignature = GenerateMockSignature(message);
+            //convert message to bytes
+            var messagBytes = System.Text.Encoding.UTF8.GetBytes(message);
 
-        Debug.Log($"MagicBlocks! Transaction sent immediately with Signature: {mockSignature}");
-        OnTransactionSent?.Invoke(mockSignature);
+            //sign message using solana sdk
+            var signatureBytes = await Web3.Wallet.SignMessage(messagBytes);
 
-        return mockSignature;
+            //convert signature to readable format
+            var signature = Convert.ToBase64String(signatureBytes);
+
+            Debug.Log($"Solana SDK: Transaction sent, signature = {signature}");
+            OnTransactionSent?.Invoke(signature);
+
+            return signature;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Solana SDK transaction failed: {ex.Message}");
+            OnTransactionFailed?.Invoke(ex.Message);
+            return null;
+        }
     }
 
     /// <summary>
@@ -200,22 +231,48 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
             return null;
         }
 
-        Debug.Log($"MagicBlocks! processing batch of {pendingTransactions.Count} transactions");
+        try
+        {
+            Debug.Log($"processing batch of {pendingTransactions.Count} transactions");
 
-        //TODO: impl batch transcations with magicblocks sdk
+            //check if the wallet is conected
+            if(Web3.Wallet == null)
+            {
+                Debug.LogError("Solana wallet not connected!");
+                OnTransactionFailed?.Invoke("Wallet not connected");
+                return null;
+            }
 
-        //placeholder impl
-        await Task.Delay(200); // Simulate batch processing
-        var batchSignature = GenerateMockSignature($"BATCH_{pendingTransactions.Count}");
+            //get wallet public key for batch refrence 
+            var walletAddress = Web3.Wallet.Account.PublicKey.ToString();
 
-        // Clear the batch
-        pendingTransactions.Clear();
-        lastBatchTime = Time.time;
+            //create batch message
+            var batchMessages = string.Join("|", pendingTransactions);
+            var batchMessage = $"BATCH_{pendingTransactions.Count}_{walletAddress}_{DateTime.UtcNow:yyyyMMddHHmmss}";
 
-        Debug.Log($"MagicBlocks: Batch processed - Signature: {batchSignature}");
-        OnTransactionSent?.Invoke(batchSignature);
+            //sign message to batch
+            var messageBytes = System.Text.Encoding.UTF8.GetBytes(batchMessages);
+            var signatureBytes = await Web3.Wallet.SignMessage(messageBytes);
+            var batchSignature = System.Convert.ToBase64String(signatureBytes);
 
-        return batchSignature;
+            //clear batch
+            pendingTransactions.Clear();
+            lastBatchTime = Time.time;
+
+            Debug.Log($"Batch processed, Signature: {batchSignature}");
+            OnTransactionSent?.Invoke(batchSignature);
+
+            return batchSignature;
+        }
+        catch(Exception ex)
+        {
+            Debug.LogError($"Batch processing failed: {ex.Message}");
+            OnTransactionFailed?.Invoke(ex.Message);
+
+            //clear pending transactions on error
+            pendingTransactions.Clear();
+            return null;
+        }
     }
 
 
@@ -276,11 +333,33 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// </summary>
     public bool IsReady()
     {
-        // TODO: Check MagicBlocks SDK status
-        // return walletAdapter != null && walletAdapter.IsConnected;
+        try
+        {
+            //check if web3 instance exists
+            if(Web3.Instance == null)
+            {
+                return false;
+            }
 
-        // Placeholder implementation
-        return true;
+            //check if wallet is connected
+            if(Web3.Wallet == null)
+            {
+                return false;
+            }
+
+            //check if wallet accout exists
+            if(Web3.Wallet.Account == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch(Exception ex)
+        {
+            Debug.LogError($"Error checking Solana SDK status: {ex.Message}");
+            return false;
+        }
     }
 
     /// <summary>
@@ -290,16 +369,20 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     {
         try
         {
-            // TODO: Get wallet address from MagicBlocks SDK
-            // return await walletAdapter.GetWalletAddress();
+            //check if the walllet is connected
+            if(Web3.Wallet == null)
+            {
+                Debug.LogWarning("Solana wallet not connected yet");
+                return null;
+            }
 
-            // Placeholder implementation
-            await Task.Delay(10);
-            return "MagicBlocks_Wallet_Address_Placeholder";
+            //get wallet public key
+            var publickey = Web3.Wallet.Account.PublicKey.ToString();
+            return publickey;
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Failed to get MagicBlocks wallet address: {ex.Message}");
+            Debug.LogError($"Failed to get Solana wallet address: {ex.Message}");
             return null;
         }
     }
