@@ -1,10 +1,11 @@
-using System;
-using UnityEngine;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Solana.Unity.SDK;
 using Solana.Unity.Wallet;
-using Cysharp.Threading.Tasks;
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using UnityEngine;
 
 /// <summary>
 /// Magiclocks Solana SDK adapter for Unity Inteegration
@@ -17,6 +18,7 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     [SerializeField] private string rpcEndpoint = "https://api.devnet.solana.com";
     [SerializeField] private string walletNetwork = "devnet";
     [SerializeField] private MagicBlocksConfig config;
+    [SerializeField] private bool usePrivyBridge = true;
 
     [Header("Transaction Settings")]
     [SerializeField] private float transactionTimeout = 5f;
@@ -27,6 +29,9 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// here add the SDK componets after the installation
     /// </summary>
     /// 
+
+    //custom pruivy wallet adapter
+    private CustomPrivyWalletAdapter customPrivyAdapter;
 
     //transaction batching
     private System.Collections.Generic.Queue<string> pendingTransactions = new System.Collections.Generic.Queue<string>();
@@ -59,7 +64,7 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     }
 
     /// <summary>
-    /// Initializing the MagicBlocks SDK with the privy wallet
+    /// Initializing the MagicBlocks SDK with the custom privy wallet adapter
     /// </summary>
     /// 
     private async void InitializeMagicBlocks()
@@ -67,63 +72,34 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
         //Here add the SDK initialization code after installation
         try
         {
-            Debug.Log("Initializing MagicBlocks Solana SDK...");
-            
-            //checking if the web3 instance exists
-            if(Web3.Instance == null)
+            Debug.Log("Init Solana SDK with custom privy wallet adapter...");
+
+            //waiting for the custom wallet adapter to init
+            await Task.Delay(1000);
+
+            customPrivyAdapter = CustomPrivyWalletAdapter.Instance;
+            if(customPrivyAdapter == null)
             {
-                Debug.LogWarning("Web3 instance not found. Solana SDK not initialized yet");
+                Debug.LogError("Custom Privy Wallet Adapter not found!");
                 return;
             }
 
-            //wait for the solana sdk to be ready
-            if(Web3.Wallet == null)
+            //checking if the adapter is ready
+            if(customPrivyAdapter.IsReady())
             {
-                Debug.LogWarning("web3 wallet not found. waiting for the privy connection");
-                return;
+                Debug.Log("Custom Privy Wallet Adapter ready!");
+                Debug.Log($"Wallet address: {customPrivyAdapter.GetWalletAddress()}");
+            }
+            else
+            {
+                Debug.LogWarning("Custom Privy Wallet Adapter not ready yet, will retry...");
             }
 
-            Debug.Log("MagicBlocks Solana SDK Initialized");
-            Debug.Log($"Wallet address: {Web3.Wallet.Account.PublicKey}");
         }
         catch (Exception ex)
         {
             Debug.LogError($"Failed to initialize Solana SDK: {ex.Message}");
         }
-    }
-
-    /// <summary>
-    /// Connect Magic Blocks to Privy Wallet
-    /// </summary>
-    /// 
-    private async Task connectToPrvywallet()
-    {
-        //get wallet information
-        try
-        {
-            if(AuthenticationFlowManager.Instance != null)
-            {
-                var walletAddress = await AuthenticationFlowManager.Instance.GetSolanaWalletAddress();
-
-                if (!string.IsNullOrEmpty(walletAddress) && walletAddress != "No Wallet")
-                {
-                    Debug.Log($"Connecting MagicBlocks to Privy Wallet: {walletAddress}");
-
-                    //TODO: Connect MagicBlocks SDK to Privy Wallet using walletAddress
-
-                    Debug.Log("Connected to Privy Wallet successfully.");
-                }
-                else
-                {
-                    Debug.LogWarning("no wallet address found for magicblocks connection.");
-                }
-            }
-        }
-        catch(Exception ex)
-        {
-            Debug.LogError($"Error connecting to Privy Wallet: {ex.Message}");
-        }
-        await Task.CompletedTask;
     }
 
 
@@ -155,38 +131,41 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     }
 
     /// <summary>
-    /// Send transacion immediatly without batching
+    /// Send transacion immediatly using custom privy wallet adapter
     /// </summary>
     /// 
     private async Task<string> SendImmediateTransaction(string message)
     {
         try
         {
-            //check if the wallet is connected
-            if(Web3.Wallet == null)
+            //checking if the adapter is ready
+            if(customPrivyAdapter == null || !customPrivyAdapter.IsReady())
             {
-                Debug.LogError("Solana wallet not connected!");
-                OnTransactionFailed?.Invoke("Wallet not connected");
+                Debug.LogError("Custom Privy Wallet Adapter not ready!");
+                OnTransactionFailed?.Invoke("Adapter not ready");
                 return null;
             }
 
-            //convert message to bytes
-            var messagBytes = System.Text.Encoding.UTF8.GetBytes(message);
+            Debug.Log($"Signing message with Custom Privy Wallet Adapter: {message}");
+            var signature = await customPrivyAdapter.SignAndSendTransaction(message);
 
-            //sign message using solana sdk
-            var signatureBytes = await Web3.Wallet.SignMessage(messagBytes);
-
-            //convert signature to readable format
-            var signature = Convert.ToBase64String(signatureBytes);
-
-            Debug.Log($"Solana SDK: Transaction sent, signature = {signature}");
-            OnTransactionSent?.Invoke(signature);
-
-            return signature;
+            //sign and send transaction via custom privy adapter
+            if (!string.IsNullOrEmpty(signature))
+            {
+                Debug.Log($"Transaction sent successfully - Signature: {signature}");
+                OnTransactionSent?.Invoke(signature);
+                return signature;
+            }
+            else
+            {
+                Debug.LogError("Transaction signature failed!");
+                OnTransactionFailed?.Invoke("Signature failed");
+                return null;
+            }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Solana SDK transaction failed: {ex.Message}");
+            Debug.LogError($"transaction failed: {ex.Message}");
             OnTransactionFailed?.Invoke(ex.Message);
             return null;
         }
@@ -235,34 +214,43 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
         {
             Debug.Log($"processing batch of {pendingTransactions.Count} transactions");
 
-            //check if the wallet is conected
-            if(Web3.Wallet == null)
+            Debug.Log($"processing batch of {pendingTransactions.Count} transactions");
+
+            //check if custom privy adapter is ready
+            if (customPrivyAdapter == null || !customPrivyAdapter.IsReady())
             {
-                Debug.LogError("Solana wallet not connected!");
+                Debug.LogError("Custom Privy Wallet Adapter not ready!");
                 OnTransactionFailed?.Invoke("Wallet not connected");
                 return null;
             }
 
-            //get wallet public key for batch refrence 
-            var walletAddress = Web3.Wallet.Account.PublicKey.ToString();
+            //get wallet address for batch reference
+            var walletAddress = customPrivyAdapter.GetWalletAddress();
 
-            //create batch message
+            //create batch message with all pending transactions
             var batchMessages = string.Join("|", pendingTransactions);
             var batchMessage = $"BATCH_{pendingTransactions.Count}_{walletAddress}_{DateTime.UtcNow:yyyyMMddHHmmss}";
 
-            //sign message to batch
-            var messageBytes = System.Text.Encoding.UTF8.GetBytes(batchMessages);
-            var signatureBytes = await Web3.Wallet.SignMessage(messageBytes);
-            var batchSignature = System.Convert.ToBase64String(signatureBytes);
+            //send batch transaction via custom privy adapter
+            var batchSignature = await customPrivyAdapter.SignAndSendTransaction(batchMessage);
 
-            //clear batch
-            pendingTransactions.Clear();
-            lastBatchTime = Time.time;
+            if (!string.IsNullOrEmpty(batchSignature))
+            {
+                //clear batch
+                pendingTransactions.Clear();
+                lastBatchTime = Time.time;
 
-            Debug.Log($"Batch processed, Signature: {batchSignature}");
-            OnTransactionSent?.Invoke(batchSignature);
+                Debug.Log($"Batch processed successfully - Signature: {batchSignature}");
+                OnTransactionSent?.Invoke(batchSignature);
 
-            return batchSignature;
+                return batchSignature;
+            }
+            else
+            {
+                Debug.LogError("Batch transaction failed");
+                OnTransactionFailed?.Invoke("Batch transaction failed");
+                return null;
+            }
         }
         catch(Exception ex)
         {
@@ -335,29 +323,11 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     {
         try
         {
-            //check if web3 instance exists
-            if(Web3.Instance == null)
-            {
-                return false;
-            }
-
-            //check if wallet is connected
-            if(Web3.Wallet == null)
-            {
-                return false;
-            }
-
-            //check if wallet accout exists
-            if(Web3.Wallet.Account == null)
-            {
-                return false;
-            }
-
-            return true;
+            return customPrivyAdapter != null && customPrivyAdapter.IsReady();
         }
         catch(Exception ex)
         {
-            Debug.LogError($"Error checking Solana SDK status: {ex.Message}");
+            Debug.LogError($"Error checking wallet status: {ex.Message}");
             return false;
         }
     }
@@ -369,16 +339,14 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     {
         try
         {
-            //check if the walllet is connected
-            if(Web3.Wallet == null)
+
+            if (customPrivyAdapter != null && customPrivyAdapter.IsReady())
             {
-                Debug.LogWarning("Solana wallet not connected yet");
-                return null;
+                return customPrivyAdapter.GetWalletAddress();
             }
 
-            //get wallet public key
-            var publickey = Web3.Wallet.Account.PublicKey.ToString();
-            return publickey;
+            Debug.LogWarning("Custom Privy Wallet Adapter not ready");
+            return null;
         }
         catch (Exception ex)
         {
