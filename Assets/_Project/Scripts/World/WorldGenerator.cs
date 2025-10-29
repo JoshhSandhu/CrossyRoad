@@ -67,7 +67,7 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
         if (spawnAreaPrefab != null)
         {
             spawnAreaInstance = Instantiate(spawnAreaPrefab, new Vector3(0, 0.1f, 0), Quaternion.identity);
-            Debug.Log("Spawn area prefab instantiated at (0, 0.1, 0)");
+            //Debug.Log("Spawn area prefab instantiated at (0, 0.1, 0)");
         }
         else
         {
@@ -141,7 +141,7 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
 
     public void ResetWorld()
     {
-        Debug.Log("Restarting the game world...");
+        //Debug.Log("Restarting the game world...");
 
         if (obstacleSpawner != null)
         {
@@ -168,7 +168,7 @@ public class WorldGenerator : MonoBehaviour, IWorldGenerator
 
         InitializeWorld();
 
-        Debug.Log("Wrold Reset Complete");
+        //Debug.Log("Wrold Reset Complete");
     }
 
     public void cleanRemainingCoins()

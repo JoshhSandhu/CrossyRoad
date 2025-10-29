@@ -7,6 +7,9 @@ public class PrivyConfiguration : ScriptableObject
     [Tooltip("Your Privy App ID from the dashboard")]
     public string appId = "cmgodao4u00c7l50caof1nhau";
 
+    [Tooltip("Your Privy Client ID from the dashboard")]
+    public string clientId = "client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz";
+
     [Tooltip("Use devnet for testing, mainnet for production")]
     public bool useDevnet = true;
 
@@ -28,6 +31,9 @@ public class PrivyConfiguration : ScriptableObject
     public float panelTransitionDuration = 0.5f;
 
     [Header("Solana Settings")]
+    [Tooltip("Enable Solana wallet creation")]
+    public bool enableSolana = true;
+
     [Tooltip("Solana RPC URL *leave empty to use Privy's default")]
     public string solanaRpcUrl = "https://api.devnet.solana.com";
 
@@ -47,6 +53,11 @@ public class PrivyConfiguration : ScriptableObject
         if (string.IsNullOrEmpty(appId) || appId == "cmgodao4u00c7l50caof1nhau")
         {
             Debug.LogWarning("Please set your Privy App ID in the PrivyConfiguration asset!");
+        }
+
+        if (string.IsNullOrEmpty(clientId) || clientId == "client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz")
+        {
+            Debug.LogWarning("Please set your Privy Client ID in the PrivyConfiguration asset!");
         }
     }
 }

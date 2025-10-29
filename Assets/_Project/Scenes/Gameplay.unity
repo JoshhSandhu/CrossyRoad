@@ -392,6 +392,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 15285683}
   m_CullTransparentMesh: 1
+--- !u!1 &19931275
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 19931277}
+  - component: {fileID: 19931276}
+  m_Layer: 0
+  m_Name: MagicBlocks
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &19931276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19931275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e38e1c1f34b1c469c373f83f535728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MagicBlocksSolanaAdapter
+  rpcEndpoint: https://api.devnet.solana.com
+  walletNetwork: devnet
+  config: {fileID: 11400000, guid: 52d2f97e6fb0107458f3b7bad49c2cb3, type: 2}
+  usePrivyBridge: 1
+  transactionTimeout: 5
+  enableTransactionBatching: 1
+  batchSize: 5
+--- !u!4 &19931277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19931275}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &42165247
 GameObject:
   m_ObjectHideFlags: 0
@@ -7327,6 +7378,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1251783548}
   m_CullTransparentMesh: 1
+--- !u!1 &1288640938
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1288640940}
+  - component: {fileID: 1288640939}
+  m_Layer: 0
+  m_Name: CustomPrivyWalletAdapter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1288640939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1288640938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7c799f71c435e848bfa64afc80e8f76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPrivyWalletAdapter
+--- !u!4 &1288640940
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1288640938}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -556.1094, y: 0, z: 29867.771}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1289800175
 GameObject:
   m_ObjectHideFlags: 0
@@ -8655,6 +8750,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1435963068}
   m_CullTransparentMesh: 1
+--- !u!1 &1437909079
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1437909081}
+  - component: {fileID: 1437909080}
+  m_Layer: 0
+  m_Name: HybridTransactionService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1437909080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1437909079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f55db259f8c86d4f8f6091a42ac7bf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HybridTransactionService
+  config: {fileID: 11400000, guid: 52d2f97e6fb0107458f3b7bad49c2cb3, type: 2}
+  enableHybridMode: 0
+  enableFallbackMode: 0
+--- !u!4 &1437909081
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1437909079}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1483106506
 GameObject:
   m_ObjectHideFlags: 0
@@ -11593,8 +11735,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578fa908c0d5f794a8137664c4141ebd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthenticationFlowManager
-  privyAppId: cmgodao4u00c7l50caof1nhau
-  privyClientId: client-WY6RcMvDgyVeD25ssjFivmGBiWdhkddSMon2vEWHm4uTz
+  privyConfig: {fileID: 11400000, guid: 134e740e01e76dd489ff72adc4fc0b4d, type: 2}
   logLevel: 2
   isMobileApp: 1
   authPanel: {fileID: 817277030}
@@ -13201,3 +13342,6 @@ SceneRoots:
   - {fileID: 1056753027}
   - {fileID: 1880769464}
   - {fileID: 1333395232}
+  - {fileID: 19931277}
+  - {fileID: 1437909081}
+  - {fileID: 1288640940}

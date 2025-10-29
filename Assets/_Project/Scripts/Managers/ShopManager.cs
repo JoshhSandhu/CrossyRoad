@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Threading.Tasks;
 using System.Security.Cryptography;
 using UnityEngine.Rendering;
 
@@ -62,7 +63,6 @@ public class ShopManager : MonoBehaviour
 
         //subscribe to Privy authentication events
         AuthenticationFlowManager.OnAuthenticationStateChanged += OnWalletConnectionChanged;
-        AuthenticationFlowManager.OnWalletAddressChanged += OnWalletAddressChanged;
     }
 
     public void InitializeShop()
@@ -119,7 +119,6 @@ public class ShopManager : MonoBehaviour
     {
         // Unsubscribe from Privy authentication events
         AuthenticationFlowManager.OnAuthenticationStateChanged -= OnWalletConnectionChanged;
-        AuthenticationFlowManager.OnWalletAddressChanged -= OnWalletAddressChanged;
     }
 
     private void SetupCategoryButtons()
@@ -281,16 +280,16 @@ public class ShopManager : MonoBehaviour
         UpdateWalletStatus();
     }
 
-    private void OnWalletAddressChanged(string address)
-    {
-        UpdateWalletStatus();
-    }
-
-    private void UpdateWalletStatus()
+    private async void UpdateWalletStatus()
     {
         // Get actual wallet status from Privy
         bool isConnected = AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsAuthenticated;
-        string walletAddress = AuthenticationFlowManager.Instance != null ? AuthenticationFlowManager.Instance.WalletAddress : "";
+        string walletAddress = "";
+
+        if (isConnected && AuthenticationFlowManager.Instance != null)
+        {
+            walletAddress = await AuthenticationFlowManager.Instance.GetSolanaWalletAddress();
+        }
 
         if (walletStatusText != null)
         {
@@ -300,16 +299,16 @@ public class ShopManager : MonoBehaviour
 
         if (walletAddressText != null)
         {
-            if (isConnected && !string.IsNullOrEmpty(walletAddress))
+            if (isConnected && !string.IsNullOrEmpty(walletAddress) && walletAddress != "No wallet")
             {
                 string shortAddress = walletAddress.Length > 12 ?
                     $"{walletAddress.Substring(0, 6)}...{walletAddress.Substring(walletAddress.Length - 6)}" :
                     walletAddress;
-                walletAddressText.text = $"Wallet: {shortAddress}";
+                walletAddressText.text = $"Solana Wallet: {shortAddress}";
             }
             else
             {
-                walletAddressText.text = "No wallet connected";
+                walletAddressText.text = "No Solana wallet connected";
             }
         }
 

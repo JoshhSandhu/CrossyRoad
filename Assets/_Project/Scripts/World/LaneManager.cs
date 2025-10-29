@@ -53,7 +53,7 @@ public class LaneManager : MonoBehaviour, ILaneManager
     //clears all the active lanes
     public void ClearAllLanes()
     {
-        Debug.Log($"cleaing {activeLanes.Count} active lanes");
+        //Debug.Log($"cleaing {activeLanes.Count} active lanes");
 
         while (activeLanes.Count > 0)
         {
@@ -69,7 +69,7 @@ public class LaneManager : MonoBehaviour, ILaneManager
             }
         }
 
-        Debug.Log("All lanes removed");
+        //Debug.Log("All lanes removed");
     }
 
     public void ClearLaneChild(GameObject Lane)

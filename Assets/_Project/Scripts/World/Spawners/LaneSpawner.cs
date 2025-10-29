@@ -27,7 +27,7 @@ public class LaneSpawner : MonoBehaviour
     {
 
         //debugs
-        Debug.Log("LaneSpawner.InitializePool() called");
+        //Debug.Log("LaneSpawner.InitializePool() called");
         if (objectPooler == null)
         {
             Debug.LogError("objectPooler is not assigned in LaneSpawner!");
@@ -44,7 +44,7 @@ public class LaneSpawner : MonoBehaviour
         {
             objectPooler.CreatePool(lanes.laneName, lanes.lanePrefab, maxLanesInScene);
         }
-        Debug.Log("All pools created successfully!");
+        //Debug.Log("All pools created successfully!");
     }
 
     public GameObject SpawnLane(int index = -1, float? zPos = null, bool isSafeZone = false, bool isDense = false)

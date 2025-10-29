@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -55,6 +56,15 @@ public class PlayerController : MonoBehaviour
     private float minSwipeDist = 50f;   //minimum distance for a swipe to be registered
     private PlayerInputActions playerInputActions;
 
+    // SOLID Principle Components - Dependency Injection
+    private IGameStateManager gameStateManager;
+    private IAuthenticationManager authenticationManager;
+    private IMovementValidator movementValidator;
+    private IMovementExecutor movementExecutor;
+    private ICollisionHandler collisionHandler;
+    private HybridTransactionService hybridTransactionService;
+    private ICameraController cameraController;
+
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody>();
@@ -62,57 +72,74 @@ public class PlayerController : MonoBehaviour
         playerRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         playerRb.freezeRotation = true;
         TouchSimulation.Enable();
+
+        // Initialize SOLID Principle Components
+        InitializeComponents();
+    }
+
+    /// <summary>
+    /// Initialize all SOLID principle components with dependency injection
+    /// </summary>
+    private void InitializeComponents()
+    {
+        // Initialize adapters for existing singleton managers
+        gameStateManager = new GameStateManagerAdapter();
+        authenticationManager = new AuthenticationManagerAdapter();
+        cameraController = new CameraControllerAdapter(cameraFollow);
+
+        // Initialize components with dependencies
+        movementValidator = new PlayerMovementValidator(transform, xBoundary, blockingMask, groundMask, blockCastHalfExtents);
+        movementExecutor = new PlayerMovementExecutor(transform, playerRb, hopHeight, hopDuration, groundMask);
+
+        // Initialize collision handler with callbacks
+        collisionHandler = new PlayerCollisionHandler(transform, xBoundary, GameOver, () => gameStateManager.AddCoins());
+
+        // Initialize Hybrid transaction service
+        hybridTransactionService = HybridTransactionService.Instance;
+        if (hybridTransactionService == null)
+        {
+            Debug.LogError("HybridTransactionService not found! Creating new instance...");
+            var serviceObject = new GameObject("HybridTransactionService");
+            hybridTransactionService = serviceObject.AddComponent<HybridTransactionService>();
+        }
     }
 
     //subscribe the events
     private void OnEnable()
     {
-        Debug.Log("PlayerController OnEnable called.");
         if (playerInputActions == null)
         {
             playerInputActions = new PlayerInputActions();
         }
+
+        // Subscribe to keyboard/gamepad movement
         playerInputActions.Player.Move.performed += OnMove;
-        playerInputActions.Player.PrimaryTouch.started += OnTouchStart;
-        playerInputActions.Player.PrimaryTouch.canceled += OnTouchEnd;
+
+        // Subscribe to touch input
+        playerInputActions.Player.TouchTap.performed += OnTouchTap;
+        playerInputActions.Player.TouchSwipe.performed += OnTouchSwipe;
+        playerInputActions.Player.TouchPosition.performed += OnTouchPosition;
+
         playerInputActions.Enable();
-        Debug.Log("PlayerController enabled and input actions subscribed.");
-        Debug.Log($"PrimaryTouch action enabled: {playerInputActions.Player.PrimaryTouch.enabled}");
-        Debug.Log($"PrimaryContact action enabled: {playerInputActions.Player.PrimaryContact.enabled}");
-        foreach (var binding in playerInputActions.Player.PrimaryTouch.bindings)
-        {
-            Debug.Log($"PrimaryTouch binding: {binding.path}");
-        }
     }
 
     //unsubscribe the events
     private void OnDisable()
     {
-        Debug.Log("PlayerController OnDisable called.");
         playerInputActions.Player.Move.performed -= OnMove;
-        playerInputActions.Player.PrimaryTouch.started -= OnTouchStart;
-        playerInputActions.Player.PrimaryTouch.canceled -= OnTouchEnd;
+        playerInputActions.Player.TouchTap.performed -= OnTouchTap;
+        playerInputActions.Player.TouchSwipe.performed -= OnTouchSwipe;
+        playerInputActions.Player.TouchPosition.performed -= OnTouchPosition;
         playerInputActions.Player.Disable();
-        Debug.Log("PlayerController disabled and input actions unsubscribed.");
     }
 
     private void Update()
     {
-        InputSystem.Update();
-        if (playerInputActions.Player.PrimaryTouch.WasPressedThisFrame())
-        {
-            Debug.Log("PrimaryTouch was pressed this frame!");
-        }
-        if (playerInputActions.Player.PrimaryTouch.IsPressed())
-        {
-            Debug.Log("PrimaryTouch is currently pressed!");
-        }
-        CheckForOutOfBounds();
+        collisionHandler?.CheckForOutOfBounds();
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
-        Debug.Log("OnMove called.");
         Vector2 inputDirection = context.ReadValue<Vector2>();
         float deadZone = 0.1f;
         if (Mathf.Abs(inputDirection.x) < deadZone) inputDirection.x = 0;
@@ -141,98 +168,141 @@ public class PlayerController : MonoBehaviour
                 movePlayer(Vector3.left);
             }
         }
-        else
+    }
+
+    /// <summary>
+    /// touch input for movement
+    /// </summary>
+    private Vector2 touchStartPosition;
+    private bool isTouching = false;
+    private float minSwipeDistance = 50f; //min distance for a swipe to be registered
+
+    private void OnTouchTap(InputAction.CallbackContext context)
+    {
+        if (context.performed)
         {
-            Debug.Log("no clear direction the input is ignored");
+            Debug.Log("Touch tap detected - moving forward");
+            movePlayer(Vector3.forward);
         }
     }
 
-    private void OnTouchStart(InputAction.CallbackContext context)
+    private void OnTouchSwipe(InputAction.CallbackContext context)
     {
-        Debug.Log("Touch started");
-        touchStartPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch started at: {touchStartPos}");
-    }
+        Vector2 swipeDelta = context.ReadValue<Vector2>();
 
-    private void OnTouchEnd(InputAction.CallbackContext context)
-    {
-        Debug.Log("Touch ended");
-        Vector2 touchEndPos = playerInputActions.Player.PrimaryContact.ReadValue<Vector2>();
-        Debug.Log($"Touch ended at: {touchEndPos}");
-        ProcessSwipe(touchEndPos);
-    }
-
-    private void ProcessSwipe(Vector2 TouchendPos)
-    {
-        float swipeDistX = Mathf.Abs(TouchendPos.x - touchStartPos.x);
-        float swipeDistY = Mathf.Abs(TouchendPos.y - touchStartPos.y);
-
-        Debug.Log($"Swipe distance - X: {swipeDistX}, Y: {swipeDistY}, Min required: {minSwipeDist}");
-
-        if (swipeDistX < minSwipeDist && swipeDistY < minSwipeDist)
+        if (isTouching && swipeDelta.magnitude > 0.1f)
         {
-            Debug.Log("Swipe too short, ignoring");
-            return;
-        }
-        if (swipeDistX > swipeDistY)
-        {
-            if (TouchendPos.x > touchStartPos.x)
+            // Determine swipe direction
+            Vector3 moveDirection = GetSwipeDirection(swipeDelta);
+            if (moveDirection != Vector3.zero)
             {
-                Debug.Log("Swipe RIGHT detected");
-                movePlayer(Vector3.right);
+                Debug.Log($"Touch swipe detected: {swipeDelta} -> {moveDirection}");
+                movePlayer(moveDirection);
+            }
+        }
+    }
+
+    private void OnTouchPosition(InputAction.CallbackContext context)
+    {
+        Vector2 touchPosition = context.ReadValue<Vector2>();
+
+        if (context.performed)
+        {
+            // Touch started
+            touchStartPosition = touchPosition;
+            isTouching = true;
+        }
+        else if (context.canceled)
+        {
+            // Touch ended
+            Vector2 touchEndPosition = touchPosition;
+            Vector2 swipeVector = touchEndPosition - touchStartPosition;
+
+            if (swipeVector.magnitude >= minSwipeDistance)
+            {
+                // It was a swipe
+                Vector3 moveDirection = GetSwipeDirection(swipeVector);
+                if (moveDirection != Vector3.zero)
+                {
+                    Debug.Log($"Touch swipe completed: {swipeVector} -> {moveDirection}");
+                    movePlayer(moveDirection);
+                }
             }
             else
             {
-                Debug.Log("Swipe LEFT detected");
-                movePlayer(Vector3.left);
-            }
-        }
-        else
-        {
-            if (TouchendPos.y > touchStartPos.y)
-            {
-                Debug.Log("Swipe UP detected");
+                // It was a tap
+                Debug.Log("Touch tap completed - moving forward");
                 movePlayer(Vector3.forward);
             }
+
+            isTouching = false;
+        }
+    }
+
+    /// <summary>
+    /// Convert swipe vector to movement direction for Crossy Road style movement
+    /// </summary>
+    private Vector3 GetSwipeDirection(Vector2 swipeVector)
+    {
+        Vector2 normalizedSwipe = swipeVector.normalized;
+
+        if (Mathf.Abs(normalizedSwipe.y) > Mathf.Abs(normalizedSwipe.x))
+        {
+            if (normalizedSwipe.y > 0)
+            {
+                return Vector3.forward;     // Swipe up = move forward
+            }
             else
             {
-                Debug.Log("Swipe DOWN detected");
-                movePlayer(Vector3.back);
+                return Vector3.back;        // Swipe down = move backward
+            }
+        }
+        else
+        {
+            if (normalizedSwipe.x > 0)
+            {
+                return Vector3.right;       // Swipe right = move right
+            }
+            else
+            {
+                return Vector3.left;        // Swipe left = move left
             }
         }
     }
 
     private void movePlayer(Vector3 direction)
     {
-        Debug.Log($"movePlayer called with direction: {direction}");
-
         if (isMoving || isDead)
         {
-            Debug.Log("Player is moving or dead, ignoring movement");
             return;
         }
 
         //check if authentication flow is active and game is not ready
-        if (AuthenticationFlowManager.Instance != null && !AuthenticationFlowManager.Instance.IsGameReady())
+        if (authenticationManager != null && !authenticationManager.IsGameReady())
         {
-            Debug.Log("Authentication not complete, ignoring movement");
             return;
         }
         //if authentication is complete but game hasn't started yet, start the game
-        if (AuthenticationFlowManager.Instance != null && AuthenticationFlowManager.Instance.IsGameReady() && !GameManager.Instance.IsGameActive())
+        if (authenticationManager != null && authenticationManager.IsGameReady() && !gameStateManager.IsGameActive())
         {
-            Debug.Log("Game ready but not active, starting game via movement input");
-            AuthenticationFlowManager.Instance.StartGame();
+            Debug.Log("Authentication complete, starting game...");
+            authenticationManager.StartGame();
             return;
         }
         //if no authentication flow but game is not active, start the game
-        if (AuthenticationFlowManager.Instance == null && !GameManager.Instance.IsGameActive())
+        if (authenticationManager == null && !gameStateManager.IsGameActive())
         {
-            Debug.Log("No authentication flow, starting game via movement input");
             if (StartScreenManager.Instance != null)
             {
+                Debug.Log("No authentication flow, starting game from start screen...");
                 StartScreenManager.Instance.StartGame();
             }
+            return;
+        }
+
+        // Use movement validator to check if movement is valid
+        if (!movementValidator.CanMove(direction))
+        {
             return;
         }
 
@@ -244,34 +314,10 @@ public class PlayerController : MonoBehaviour
 
         Vector3 destination = snappedPos + direction;
 
-        if (Mathf.Abs(destination.x) > xBoundary)
-        {
-            Debug.Log($"movement is blocked ({destination.x}) exceeds boundary ({xBoundary})");
-            return;
-        }
-
-        //compute expected landing height, and then using it for accurate blocking vs rocks while on logs
-        float candidateLandingY = transform.position.y;
-        Vector3 probeStart = destination + Vector3.up * 5f;
-        if (Physics.Raycast(probeStart, Vector3.down, out var probeHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            candidateLandingY = probeHit.point.y;
-        }
-
-        //pre hop check to avoid false positives from nearby solid obstacles
-        Vector3 overlapCenter = new Vector3(destination.x, candidateLandingY + 0.6f, destination.z);
-        Collider[] hits = Physics.OverlapBox(overlapCenter, blockCastHalfExtents, Quaternion.identity, blockingMask, QueryTriggerInteraction.Ignore);
-        //prehop box check with boxcast to catch walls and boundaries reliably
-        if (hits != null && hits.Length > 0)
-        {
-            Debug.Log($"movement blocked by {destination}. hit object: {string.Join(", ", System.Array.ConvertAll(hits, hit => hit.name))}");
-            return;
-        }
-
         //function to turn the player the ideration we are moving
         transform.SetParent(null);
-        FaceDirection(direction);
-        StartCoroutine(HopCoroutine(destination));
+        movementExecutor.FaceDirection(direction);
+        StartCoroutine(ExecuteMovementWithCallback(destination));
 
         if (direction == Vector3.forward && (int)destination.z > forwardPosZ)
         {
@@ -279,59 +325,30 @@ public class PlayerController : MonoBehaviour
             OnPlayerMovedForward?.Invoke();
             OnScoreChanged?.Invoke(forwardPosZ);
         }
+
+        // Send Solana transaction for player movement
+        hybridTransactionService?.SendMovementTransaction(direction);
     }
 
-    private IEnumerator HopCoroutine(Vector3 destinationXZ)
+    /// <summary>
+    /// Execute movement with callback handling for water collision
+    /// </summary>
+    private IEnumerator ExecuteMovementWithCallback(Vector3 destination)
     {
-        //Debug.Log($"HopCoroutine started for destination: {destinationXZ}");
         isMoving = true;
-        transform.SetParent(null);
-        float landingY = destinationXZ.y;
+        yield return StartCoroutine(movementExecutor.ExecuteMovement(destination));
 
-        Vector3 rayStart = destinationXZ + Vector3.up * 5f;
-        if (Physics.Raycast(rayStart, Vector3.down, out var groundHit, 10f, groundMask, QueryTriggerInteraction.Ignore))
-        {
-            landingY = groundHit.point.y;
-        }
-
-        Vector3 startPos = playerRb.position;
-        Vector3 destination = new Vector3(destinationXZ.x, landingY, destinationXZ.z);
-        float elapsedTime = 0f;
-        //Debug.Log($"HopCoroutine: startPos={startPos}, destination={destination}, parent={transform.parent?.name ?? "null"}, rotation={transform.rotation.eulerAngles}");
-        while (elapsedTime < hopDuration)
-        {
-            elapsedTime += Time.fixedDeltaTime;
-            float a = Mathf.Clamp01(elapsedTime / hopDuration);
-            float arc = Mathf.Sin(a * Mathf.PI) * hopHeight;
-            Vector3 pos = Vector3.Lerp(startPos, destination, a);
-            pos.y += arc;
-            playerRb.MovePosition(pos);
-            //if (smoothTurn) { transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime); }
-            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-            yield return new WaitForFixedUpdate();
-        }
-
-        playerRb.MovePosition(destination);
-        transform.rotation = targetRotation;
-        //if we landed on a log
+        // Check if player landed in water (handled by movement executor)
         if (Physics.Raycast(destination + Vector3.up * 0.5f, Vector3.down, out var landinghit, 1.5f, groundMask, QueryTriggerInteraction.Ignore))
         {
-            if (landinghit.collider.CompareTag("Platform"))
-            {
-                transform.SetParent(landinghit.transform);
-            }
-            else if (landinghit.collider.CompareTag("Water"))
+            if (landinghit.collider.CompareTag("Water"))
             {
                 GameOver(true);
             }
-            else
-            {
-                transform.SetParent(null);
-            }
         }
-        cameraFollow.Shake(0.15f); //camera shake at the end of an hop
+
+        cameraController?.Shake(0.15f); //camera shake at the end of an hop
         isMoving = false;
-        //Debug.Log($"HopCoroutine completed, isMoving set to false");
     }
 
     //game over logic
@@ -349,10 +366,7 @@ public class PlayerController : MonoBehaviour
         if (isDrowning)
         {
             transform.SetParent(null); //detach from the log if we are attched to it
-            if (cameraFollow != null)
-            {
-                cameraFollow.enabled = false;
-            }
+            cameraController?.SetEnabled(false);
             StartCoroutine(DrownCoroutine());
         }
         else
@@ -377,54 +391,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void CheckForOutOfBounds()
-    {
-        //check if we are parented to the log or not
-        if (transform.parent != null && transform.parent.CompareTag("Platform"))
-        {
-            //when the player's X pos exceeds the XBoundary value
-            if (Mathf.Abs(transform.position.x) > xBoundary)
-            {
-                //then its game over for the player
-                GameOver(true);
-            }
-        }
-    }
     //collision detection
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Obstacle"))
-        {
-            GameOver(false);
-        }
-        else if (other.CompareTag("Coin"))
-        {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddCoins();
-            }
-            other.gameObject.SetActive(false);
-        }
-        //else if(other.CompareTag("Water"))
-        //{
-        //    if(transform.parent == null)
-        //    {
-        //        GameOver();
-        //    }
-        //}
-        //else if(other.CompareTag("Boundary"))
-        //{
-        //    if(transform.parent != null && transform.parent.CompareTag("Platform"))
-        //    {
-        //        GameOver();
-        //    }
-        //}
+        collisionHandler?.HandleTriggerEnter(other);
     }
 
     //this is for physical Collisions (like trees and rocks) that only block you
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Bumped into a solid object: " + collision.gameObject.name);
+        collisionHandler?.HandleCollisionEnter(collision);
     }
 
     private void ScatterIntoBlocks()
@@ -438,10 +414,7 @@ public class PlayerController : MonoBehaviour
         var colliders = GetComponentsInChildren<Collider>();
         foreach (var c in colliders) c.enabled = false;
 
-        if (cameraFollow != null)
-        {
-            cameraFollow.Shake(0.6f);
-        }
+        cameraController?.Shake(0.6f);
 
         ParticleSystem ps = Instantiate(scatterParticleSystem, transform.position, transform.rotation);
         var main = ps.main;
@@ -450,34 +423,8 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void FaceDirection(Vector3 dir)
-    {
-        Vector3 flat = new Vector3(dir.x, 0f, dir.z);
-        if (dir == Vector3.zero)
-        {
-            return;
-        }
-        Quaternion rawTarget = Quaternion.LookRotation(flat, Vector3.up);
-        float yaw = rawTarget.eulerAngles.y;
-        float snappedYaw = Mathf.Round(yaw / 90f) * 90f;
-        targetRotation = Quaternion.Euler(0f, snappedYaw, 0f);
-        //Debug.Log($"FaceDirection: dir={dir}, yaw={yaw}, snappedYaw={snappedYaw}, targetRotation={targetRotation.eulerAngles}");
-        //if (smoothTurn)
-        //{
-        //    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-        //}
-        //else
-        //{
-        //    transform.rotation = targetRotation;
-        //}
-        transform.rotation = targetRotation;
-        //Debug.Log($"FaceDirection: Set rotation to {transform.rotation.eulerAngles}");
-    }
-
     public void ResetPlayer()
     {
-        Debug.Log("Resetting player state...");
-
         // Reset death state
         isDead = false;
         hasScattered = false;
@@ -490,13 +437,10 @@ public class PlayerController : MonoBehaviour
         transform.SetParent(null);
 
         // Re-enable camera follow
-        if (cameraFollow != null)
-        {
-            cameraFollow.enabled = true;
-            cameraFollow.ResetCamera();
-        }
+        cameraController?.SetEnabled(true);
+        cameraController?.ResetCamera();
 
-        // Re-enable renderers and colliders (in case they were disabled by scatter)
+        // Re-enable renderers and colliders
         var renderers = GetComponentsInChildren<Renderer>();
         foreach (var r in renderers) r.enabled = true;
         var colliders = GetComponentsInChildren<Collider>();
@@ -511,7 +455,6 @@ public class PlayerController : MonoBehaviour
                 playerRb.angularVelocity = Vector3.zero;
             }
         }
-
-        Debug.Log("Player reset complete!");
     }
+
 }
