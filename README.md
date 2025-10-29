@@ -1,140 +1,250 @@
-# Crossy Road - Unity Game
+# Crossy Road - Unity Game with Solana Blockchain Integration
 
-This project is a "Crossy Road" style game developed in Unity, featuring classic endless runner gameplay with procedural world generation, object pooling for optimal performance, and a comprehensive skin customization system with Solana blockchain integration.
+A modern Unity-based endless runner game inspired by Crossy Road, featuring Solana blockchain integration for on-chain player movement tracking and seamless wallet authentication.
 
-## 🎮 Key Features
+## 🎮 Game Overview
 
-* **Classic Gameplay**: Familiar "Crossy Road" mechanics with grid-based movement and endless procedural world generation
-* **Skin Customization System**: Complete character skin management with categories (Man, Woman, Animal, Farm) and rarity levels (Common, Rare, Epic, Legendary)
-* **Solana Integration**: Blockchain-based skin purchasing and ownership with wallet connectivity
-* **Advanced UI System**: Modern UI with safe area handling, smooth transitions, and category-based skin browsing
-* **Performance Optimization**: Advanced architecture using Singleton patterns, Object Pooling, and event-driven design
-* **Procedural World**: Dynamic lane generation with multiple lane types (road, water, train tracks, grass) and intelligent path validation
-* **Scalable Design**: Clean separation of concerns with interface-based architecture
+Crossy Road is an endless runner where players navigate a character through procedurally generated lanes filled with obstacles, vehicles, water hazards, and collectibles. The objective is to move as far forward as possible while avoiding collisions and collecting coins.
 
-## 🛠️ Tech Stack
+## ✨ Features
 
-* **Game Engine**: Unity 2021.3 LTS (or newer)
-* **Language**: C#
-* **Blockchain**: Solana integration for NFT skins and wallet connectivity
-* **UI Framework**: Unity UI (uGUI) with TextMeshPro
-* **Architecture**: Clean Architecture with Interfaces
-* **Design Patterns**: Singleton, Object Pooling, Observer Pattern, Factory Pattern
-* **Input System**: Unity Input System with touch and keyboard support
+### Core Gameplay
+- **Endless Runner Mechanics**: Procedurally generated world with infinite lanes
+- **Multiple Lane Types**: Grass, Roads, Water, Train Tracks
+- **Dynamic Obstacles**: Moving cars, trains, logs, and environmental hazards
+- **Coin Collection System**: Collect coins to unlock new character skins
+- **Progressive Difficulty**: Game difficulty increases as you progress further
+
+### Blockchain Integration
+- **Solana Blockchain Support**: Player movements recorded on Solana devnet
+- **MagicBlocks SDK Integration**: Reliable transaction batching and execution
+- **Privy Wallet Authentication**: Seamless wallet connection and management
+- **Hybrid Transaction Service**: Combines Privy authentication with MagicBlocks SDK
+- **Transaction Batching**: Optimized transaction handling for better performance
+
+### Technical Features
+- **SOLID Principles**: Clean architecture with dependency injection
+- **Unity Input System**: Support for both touch and keyboard controls
+- **Object Pooling**: Optimized object management for better performance
+- **Dynamic World Generation**: Procedural lane generation with decorations
+- **Camera System**: Smooth following camera with shake effects
+
+## 🛠️ Technology Stack
+
+- **Game Engine**: Unity 6000.2.6f2
+- **Render Pipeline**: Universal Render Pipeline (URP)
+- **Input System**: Unity Input System 1.15.0
+- **Blockchain**: Solana (via Solana Unity SDK)
+- **Wallet**: Privy + MagicBlocks SDK
+- **Architecture**: SOLID principles with dependency injection
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Unity Hub** with Unity 6000.2.6f2 or compatible version
+- **Visual Studio** or **Visual Studio Code** (for C# development)
+- **Git** (for version control)
+- **Solana Wallet** (Phantom, Solflare, or compatible wallet for blockchain features)
+
+## 🚀 Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd CrossyRoad
+```
+
+### 2. Open in Unity
+
+1. Launch Unity Hub
+2. Click "Open" or "Add" and select the `CrossyRoad` folder
+3. Wait for Unity to import all assets and packages
+
+### 3. Install Dependencies
+
+The project uses Unity Package Manager. All dependencies should be automatically resolved from `Packages/manifest.json`:
+
+- Solana Unity SDK
+- Unity Input System
+- Universal Render Pipeline
+- And other required packages
+
+### 4. Configure MagicBlocks (Optional)
+
+For blockchain integration:
+
+1. Navigate to `Assets/_Project/Scripts/Managers/MagicBlocks/`
+2. Review `MagicBlocks_Installation_Guide.md` for detailed setup instructions
+3. Create a `MagicBlocksConfig` asset in the Project window
+4. Configure RPC endpoint (default: `https://api.devnet.solana.com`)
+5. Set wallet network to `devnet` (or `mainnet` for production)
+
+### 5. Configure Privy (Optional)
+
+For wallet authentication:
+
+1. Navigate to `Assets/_Project/Scripts/Managers/privy/`
+2. Set up your Privy configuration
+3. Assign the configuration to the authentication manager
+
+## 🎮 Controls
+
+### Mobile (Touch)
+- **Swipe Up**: Move forward
+- **Swipe Down**: Move backward
+- **Swipe Left**: Move left
+- **Swipe Right**: Move right
+
+### Desktop (Keyboard)
+- **W / Up Arrow**: Move forward
+- **S / Down Arrow**: Move backward
+- **A / Left Arrow**: Move left
+- **D / Right Arrow**: Move right
 
 ## 📁 Project Structure
 
-The project follows a clean and scalable folder structure. The Unity scripts are organized with clean architecture in mind:
-
-```plaintext
-Scripts/
-├── Data/              (ScriptableObjects and Data Management)
-│   ├── SkinData.cs           (Skin system data structures)
-│   └── LaneType.cs           (Lane configuration data)
-├── Managers/         (Singleton pattern implementations)
-│   ├── GameManager.cs        (Core game state management)
-│   ├── LaneManager.cs        (Lane lifecycle management)
-│   ├── ObjectPooler.cs       (Object pooling system)
-│   ├── ShopManager.cs        (Skin shop and blockchain integration)
-│   └── StartScreenManager.cs (Main menu and UI flow)
-├── Player/           (Player-related scripts)
-│   ├── PlayerController.cs   (Player movement and input)
-│   └── PlayerInputActions.cs (Input action definitions)
-├── World/            (World generation and spawning)
-│   ├── WorldGenerator.cs     (Main world orchestration)
-│   ├── LaneManager.cs        (Lane queue management)
-│   ├── PathValidator.cs      (Lily pad path validation)
-│   └── Spawners/
-│       ├── LaneSpawner.cs        (Lane spawning logic)
-│       ├── ObstacleSpawner.cs    (Obstacle placement)
-│       ├── CollectableSpawner.cs (Coin and power-up spawning)
-│       └── DecorationSpawner.cs  (Environmental decorations)
-├── UI/               (User Interface Components)
-│   ├── SkinItemUI.cs         (Individual skin display)
-│   ├── CategoryDetailPanel.cs (Skin category browsing)
-│   ├── EquippedSkinDisplay.cs (Currently equipped skin)
-│   ├── SafeArea.cs           (Device safe area handling)
-│   └── FadeTransition.cs     (Screen transition effects)
-├── Solana/          (Blockchain Integration - Future)
-└── Camera/          (Camera and Visual Effects)
-    ├── CamFollow.cs
-    └── WaterFoamController.cs
+```
+Assets/
+├── _Project/
+│   ├── Art/                    # Models, Materials, Textures, Animations
+│   ├── Audio/                  # Music and SFX
+│   ├── Prefabs/                # Game object prefabs
+│   ├── Scenes/                 # Unity scenes
+│   ├── Scripts/
+│   │   ├── Camera/             # Camera controllers
+│   │   ├── Data/               # ScriptableObjects and data structures
+│   │   ├── Managers/
+│   │   │   ├── GameManager.cs       # Main game state management
+│   │   │   ├── UIManager.cs         # UI management
+│   │   │   ├── ShopManager.cs       # Skin shop system
+│   │   │   ├── MagicBlocks/         # Solana blockchain integration
+│   │   │   └── privy/               # Privy wallet integration
+│   │   ├── Obstacles/          # Car, Train, Log, Coin scripts
+│   │   ├── Player/
+│   │   │   ├── PlayerController.cs  # Main player controller
+│   │   │   ├── Components/          # SOLID principle components
+│   │   │   ├── Adapters/            # Interface adapters
+│   │   │   └── Interfaces/          # SOLID interfaces
+│   │   ├── UI/                 # UI scripts
+│   │   └── World/              # World generation and lane management
+│   └── UI/                     # UI assets (sprites, prefabs)
+└── Plugins/
+    ├── Android/                # Android-specific plugins
+    └── Privy/                  # Privy SDK integration
 ```
 
-## 🚀 Getting Started
+## 🔗 Blockchain Integration
 
-To run this project locally, follow these steps:
+### Solana Integration
 
-1. **Clone the repository:**
-   ```bash
-   [git clone https://github.com/JoshhSandhu/CrossyToad.git](https://github.com/JoshhSandhu/CrossyRoad.git)
-   ```
+The game integrates with Solana blockchain to record player movements on-chain:
 
-2. **Open in Unity:**
-   * Install Unity Hub
-   * Open the project folder in Unity 2021.3 LTS (or newer)
-   * Unity will import all necessary packages automatically
+- **Network**: Solana Devnet (configurable)
+- **Transactions**: Player movement transactions batched for efficiency
+- **Wallet**: Privy wallet adapter for seamless authentication
+- **SDK**: MagicBlocks Solana Unity SDK
 
-3. **Run the Game:**
-   * Press **Play** in the Unity Editor
-   * Use arrow keys or WASD to navigate the character
-   * Avoid obstacles and cross as many lanes as possible
-   * Access the skin shop to customize your character
-   * Connect your Solana wallet to purchase NFT skins
-   * The game features procedural world generation with different lane types
+### Transaction Flow
 
-## 🎮 How to Play
+1. Player makes a movement
+2. Movement is validated
+3. Transaction message is created
+4. Transaction is batched (if batching enabled)
+5. Batch is sent to Solana via MagicBlocks SDK
+6. Transaction signature is received and tracked
 
-* **Objective**: Navigate across lanes without hitting obstacles
-* **Movement**: Use arrow keys or WASD to move in any direction
-* **Strategy**: Time your movements to avoid oncoming obstacles
-* **Collectibles**: Gather coins and power-ups while avoiding obstacles
-* **Skin Customization**: Access the shop to browse and purchase character skins
-* **Blockchain Integration**: Connect your Solana wallet to buy NFT skins
-* **Categories**: Explore different skin categories (Man, Woman, Animal, Farm)
-* **Rarity**: Collect skins of different rarity levels for unique appearances
+### Configuration
 
-## 🛠️ Core Game Systems
+Edit the `MagicBlocksSolanaAdapter` component in your scene:
 
-* **Advanced Lane Management**: Procedural lane generation with multiple types (road, water, train tracks, grass) and intelligent sequencing to prevent consecutive water lanes
-* **Path Validation System**: Smart lily pad path validation ensuring solvable routes with configurable jump distances
-* **Object Pooling**: Efficient memory management for spawning obstacles, collectables, and lanes with automatic cleanup
-* **Event-Driven Architecture**: Spawners communicate through interfaces for clean decoupling and modular design
-* **Data-Driven Design**: ScriptableObject-based data for easy level editing and skin configuration
-* **Skin Management System**: Complete character customization with categories, rarity levels, ownership tracking, and blockchain integration
-* **Safe Area UI**: Automatic UI adaptation for different device screen sizes and safe areas (notches, home indicators)
-* **Smooth Transitions**: Fade effects and animated UI transitions for polished user experience
+- **RPC Endpoint**: Solana RPC endpoint URL
+- **Wallet Network**: `devnet` or `mainnet`
+- **Transaction Batching**: Enable/disable batching
+- **Batch Size**: Number of transactions per batch (default: 5)
+- **Transaction Timeout**: Timeout in seconds (default: 5)
 
-## 🎨 Skin System Features
+## 🏗️ Architecture
 
-* **Category-Based Organization**: Skins organized into Man, Woman, Animal, and Farm categories
-* **Rarity System**: Four rarity levels (Common, Rare, Epic, Legendary) with visual indicators
-* **Ownership Tracking**: Persistent skin ownership and equipped status
-* **Blockchain Integration**: Solana-based purchasing and NFT ownership
-* **Wallet Connectivity**: Secure wallet connection for transactions
-* **Visual Customization**: Real-time skin preview and equipped skin display
-* **Shop Interface**: Intuitive browsing with category filters and detailed views
+### SOLID Principles
 
-## 📝 Future Goals
+The project follows SOLID principles for maintainable and extensible code:
 
-* **Enhanced Blockchain Features**: Complete Solana integration with NFT marketplace
-* **More Skin Content**: Expand skin categories and add seasonal collections
-* **Social Features**: Share high scores and skin collections
-* **Advanced Scoring**: Implement combo systems and achievement tracking
-* **Sound Design**: Add comprehensive audio feedback and background music
-* **Mobile Optimization**: Enhanced touch controls and performance tuning
-* **Level Progression**: Create increasing difficulty patterns and unlockable content
+- **Single Responsibility**: Each component has one clear purpose
+- **Open/Closed**: Extensible through interfaces without modifying existing code
+- **Liskov Substitution**: Components can be swapped via interfaces
+- **Interface Segregation**: Focused, minimal interfaces
+- **Dependency Injection**: Dependencies injected through constructors
+
+### Key Components
+
+- **PlayerController**: Orchestrates player behavior
+- **GameManager**: Manages game state and score
+- **WorldGenerator**: Procedurally generates game lanes
+- **MagicBlocksSolanaAdapter**: Handles Solana transactions
+- **HybridTransactionService**: Combines authentication and transaction services
+
+## 🎨 Customization
+
+### Adding New Skins
+
+1. Create skin assets in `Assets/_Project/Art/`
+2. Add skin data to `SkinDatabase` asset
+3. Configure skin properties (name, price, category)
+4. Skins will appear in the shop automatically
+
+### Adding New Lane Types
+
+1. Create lane data scriptable object (extends `LaneData`)
+2. Configure lane properties (obstacles, decorations, spawn settings)
+3. Add lane type to lane spawner configuration
+4. Update `LaneType` enum if needed
+
+## 🐛 Troubleshooting
+
+### Blockchain Issues
+
+- **Transactions not sending**: Check wallet connection and network configuration
+- **MagicBlocks not initializing**: Verify SDK installation and configuration asset setup
+- **Wallet not connecting**: Ensure Privy configuration is correct
+
+### Game Issues
+
+- **Player not moving**: Check input system configuration
+- **Obstacles not spawning**: Verify obstacle spawner configuration and prefabs
+- **Performance issues**: Check object pooling settings and reduce batch sizes
+
+## 📝 Development Notes
+
+- The game uses Unity 6 (6000.2.6f2)
+- Universal Render Pipeline (URP) is required
+- Some features require Solana devnet setup
+- All blockchain features are optional - game can run without wallet connection
 
 ## 🤝 Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+This is a game development project. Contributions should follow the existing SOLID architecture and code style.
 
 ## 📄 License
 
-This project is distributed under the MIT License. See the `LICENSE` file for more information.
+[Specify your license here]
+
+## 🙏 Credits
+
+- **Unity Technologies**: Unity Engine
+- **Solana Labs**: Solana Blockchain
+- **MagicBlocks**: MagicBlocks SDK
+- **Privy**: Wallet Authentication SDK
+- **Polyperfect**: Low Poly Ultimate Pack (asset pack)
+
+## 🔗 Links
+
+- [Unity Documentation](https://docs.unity3d.com/)
+- [Solana Documentation](https://docs.solana.com/)
+- [MagicBlocks SDK](https://github.com/magicblock-labs/Solana.Unity-SDK)
+- [Privy Documentation](https://docs.privy.io/)
+
+---
+
+**Note**: This game is in active development. Some features may be incomplete or subject to change.
