@@ -13,7 +13,7 @@ public class HybridTransactionService : MonoBehaviour
     [Header("Service Configuration")]
     [SerializeField] private MagicBlocksConfig config;
     [SerializeField] private bool enableHybridMode = true;
-    [SerializeField] private bool enableFallbackMode = true;
+    [SerializeField] private bool enableFallbackMode = false;
 
     //Service components
     private IAuthenticationManager authenticationManager;
@@ -156,18 +156,20 @@ public class HybridTransactionService : MonoBehaviour
     /// 
     private async Task<string> SendHybridTransaction(string message)
     {
-        if (!enableHybridMode)
-        {
-            return await SendFallbackTransaction(message);
-        }
+        //if (!enableHybridMode)
+        //{
+        //    //return await SendFallbackTransaction(message);
+        //    Debug.LogError("Hybrid mode disabled; refusing to use fallback. Enable hybrid mode to send transactions.");
+        //    return null;
+        //}
 
         try
         {
             //verify privy auth
             if (!await VerifyPrivyAuthentication())
             {
-                Debug.LogWarning("Privy authentication failed, using fallback mode");
-                return await SendFallbackTransaction(message);
+                Debug.LogError("Privy authentication failed; not sending fallback. Fix auth/wallet and retry.");
+                return null;
             }
 
             //send transaction via magic blocks
@@ -179,11 +181,11 @@ public class HybridTransactionService : MonoBehaviour
             }
 
             //fallback if magicblocks fails
-            if (enableFallbackMode)
-            {
-                Debug.LogWarning("MagicBlocks transaction failed, using fallback");
-                return await SendFallbackTransaction(message);
-            }
+            //if (enableFallbackMode)
+            //{
+            //    Debug.LogWarning("MagicBlocks transaction failed, using fallback");
+            //    return await SendFallbackTransaction(message);
+            //}
 
             return null;
         }
@@ -191,10 +193,10 @@ public class HybridTransactionService : MonoBehaviour
         {
             Debug.LogError($"Hybrid transaction failed: {ex.Message}");
 
-            if (enableFallbackMode)
-            {
-                return await SendFallbackTransaction(message);
-            }
+            //if (enableFallbackMode)
+            //{
+            //    return await SendFallbackTransaction(message);
+            //}
 
             return null;
         }

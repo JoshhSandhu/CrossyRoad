@@ -9,6 +9,7 @@ using Solana.Unity.Rpc.Builders;
 using Solana.Unity.Rpc.Models;
 using Solana.Unity.Rpc.Types;
 using Solana.Unity.Programs;
+using Cysharp.Threading.Tasks;
 
 
 /// <summary>
@@ -87,6 +88,9 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
 
             isInitialized = true;
             Debug.Log("Privy Wallet Adapter initialized successfully.");
+
+            // Quick diagnostic: attempt a simple message sign to verify Privy UI flow
+            _ = TestPrivySimpleSign();
         }
         catch (Exception ex)
         {
@@ -171,6 +175,8 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             // 1. Build Solana transaction
             var transaction = await BuildSolanaTransaction(message);
 
+            Debug.Log($"Transaction built, proceeding to sign and send...{transaction}");
+
             // 2. Sign and send transaction with Privy
             var signature = await SignAndSendTransactionInternal(transaction);
 
@@ -213,14 +219,25 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             var recentBlockHash = blockHashResult.Result.Value.Blockhash;
 
             // Build transaction bytes - TransactionBuilder.Build returns byte[]
-            var transactionBytes = new TransactionBuilder()
-                .SetRecentBlockHash(recentBlockHash)
-                .SetFeePayer(walletPubKey)
-                .Build(new List<Account>());
+            //var transactionBytes = new TransactionBuilder()
+            //    .SetRecentBlockHash(recentBlockHash)
+            //    .SetFeePayer(walletPubKey)
+            //    .Build(new List<Account>());
+            var instructions = new List<TransactionInstruction>();
+            instructions.Add(MemoProgram.NewMemo(walletPubKey, message));
 
             // Deserialize bytes into Transaction object
-            var transaction = Transaction.Deserialize(transactionBytes);
+            //var transaction = Transaction.Deserialize(transactionBytes);
 
+            var transaction = new Transaction
+            {
+                RecentBlockHash = recentBlockHash,
+                FeePayer = walletPubKey,
+                Instructions = instructions,
+                Signatures = new List<SignaturePubKeyPair>()
+            };
+
+            Debug.Log($"Tx prepared: feePayer={walletPubKey}, blockhash={recentBlockHash}, instructions={instructions.Count}");
             Debug.Log($"Transaction built with recent blockhash: {recentBlockHash}");
             Debug.Log("Transaction built successfully");
             return transaction;
@@ -243,11 +260,47 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             Debug.Log("Signing transaction with Privy wallet...");
 
             // Serialize the transaction message for signing
-            var transactionBytes = transaction.Serialize();
-            var transactionBase64 = System.Convert.ToBase64String(transactionBytes);
+            //var transactionBytes = transaction.Serialize();
+            //var transactionBase64 = System.Convert.ToBase64String(transactionBytes);
+
+            var messageBytes = transaction.CompileMessage();
+            var transactionBase64 = System.Convert.ToBase64String(messageBytes);
 
             // Request signature from Privy
-            var signatureString = await privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
+            //var signatureString = await privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
+
+            await UniTask.SwitchToMainThread();
+
+            if (privyWallet.EmbeddedSolanaWalletProvider == null)
+            {
+                Debug.LogError("EmbeddedSolanaWalletProvider is null on Privy wallet.");
+                return null;
+            }
+
+            var signTask = privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
+            var completed = await Task.WhenAny(signTask, Task.Delay(TimeSpan.FromSeconds(30)));
+            string signatureString;
+            if (completed != signTask)
+            {
+                Debug.LogWarning("Privy signing timed out with compiled-message base64. Retrying with FULL-TX base64...");
+
+                // Retry with full serialized transaction (some SDKs expect this as the payload)
+                transaction.CompileMessage();
+                var fullTxBytes = transaction.Serialize();
+                var fullTxBase64 = System.Convert.ToBase64String(fullTxBytes);
+                var retryTask = privyWallet.EmbeddedSolanaWalletProvider.SignMessage(fullTxBase64);
+                var retried = await Task.WhenAny(retryTask, Task.Delay(TimeSpan.FromSeconds(20)));
+                if (retried != retryTask)
+                {
+                    Debug.LogError("Privy signing timed out after retry (full-tx base64).");
+                    return null;
+                }
+                signatureString = await retryTask;
+            }
+            else
+            {
+                signatureString = await signTask;
+            }
 
             if (string.IsNullOrEmpty(signatureString))
             {
@@ -267,6 +320,7 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
                 Signature = signatureBytes
             });
 
+            transaction.CompileMessage();
             // Serialize the fully signed transaction
             var signedTransactionBytes = transaction.Serialize();
 
@@ -319,5 +373,41 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
     public IEmbeddedSolanaWallet GetPrivyWalletInstance()
     {
         return privyWallet;
+    }
+
+    /// <summary>
+    /// Quick diagnostic to confirm Privy can sign a trivial payload
+    /// </summary>
+    private async UniTaskVoid TestPrivySimpleSign()
+    {
+        try
+        {
+            await UniTask.SwitchToMainThread();
+            var testMsg = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("hello"));
+            Debug.Log("[Privy Diagnostic] Prompting simple SignMessage('hello' base64)...");
+            var signTask = privyWallet?.EmbeddedSolanaWalletProvider?.SignMessage(testMsg);
+            if (signTask == null)
+            {
+                Debug.LogError("[Privy Diagnostic] EmbeddedSolanaWalletProvider is null");
+                return;
+            }
+            var completed = await Task.WhenAny(signTask, Task.Delay(TimeSpan.FromSeconds(20)));
+            if (completed != signTask)
+            {
+                Debug.LogError("[Privy Diagnostic] SignMessage timed out (no modal?)");
+                return;
+            }
+            var sig = await signTask;
+            if (string.IsNullOrEmpty(sig))
+            {
+                Debug.LogError("[Privy Diagnostic] SignMessage returned empty signature");
+                return;
+            }
+            Debug.Log($"[Privy Diagnostic] SignMessage success. Sig(len)={sig.Length}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[Privy Diagnostic] SignMessage error: {ex.Message}");
+        }
     }
 }
