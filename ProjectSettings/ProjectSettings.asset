@@ -150,9 +150,9 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   - {fileID: -944628639613478452, guid: cf1885eda512d1a47846255bd0e0ac83, type: 3}
-  - {fileID: -7690102943646900774, guid: 38e06dcdfa59cb547bce91ace6d640bc, type: 2}
+  - {fileID: 0}
   - {fileID: 11400000, guid: 5ad8ab2708f27ce4587b7ebb639e4e8e, type: 2}
-  - {fileID: 11400000, guid: 0961208f1ce3e674aab2ac87649881f6, type: 2}
+  - {fileID: -7690102943646900774, guid: 38e06dcdfa59cb547bce91ace6d640bc, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -268,10 +268,10 @@ PlayerSettings:
   templateDefaultScene: Assets/Scenes/SampleScene.unity
   useCustomMainManifest: 1
   useCustomLauncherManifest: 0
-  useCustomMainGradleTemplate: 0
+  useCustomMainGradleTemplate: 1
   useCustomLauncherGradleManifest: 0
-  useCustomBaseGradleTemplate: 0
-  useCustomGradlePropertiesTemplate: 0
+  useCustomBaseGradleTemplate: 1
+  useCustomGradlePropertiesTemplate: 1
   useCustomGradleSettingsTemplate: 0
   useCustomProguardFile: 0
   AndroidTargetArchitectures: 2

@@ -1,0 +1,122 @@
+apply plugin: 'com.android.library'
+
+apply from: '../shared/keepUnitySymbols.gradle'
+
+apply from: '../shared/common.gradle'
+
+**APPLY_PLUGINS**
+
+// Force resolve AndroidX dependency conflicts (must be before dependencies block)
+configurations.all {
+    resolutionStrategy {
+        // Force specific versions to avoid conflicts
+        force 'androidx.core:core:1.9.0'
+        force 'androidx.arch.core:core-common:2.2.0'
+        force 'androidx.collection:collection:1.2.0'
+        force 'androidx.concurrent:concurrent-futures:1.1.0'
+        force 'androidx.lifecycle:lifecycle-runtime:2.6.0'
+        
+        // Ensure all sub-dependencies use compatible versions
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'androidx.core' && details.requested.name == 'core') {
+                details.useVersion '1.9.0'
+                details.because 'Resolve duplicate class conflicts'
+            }
+            if (details.requested.group == 'androidx.arch.core' && details.requested.name == 'core-common') {
+                details.useVersion '2.2.0'
+                details.because 'Resolve duplicate class conflicts'
+            }
+            if (details.requested.group == 'androidx.collection' && details.requested.name == 'collection') {
+                details.useVersion '1.2.0'
+                details.because 'Resolve duplicate class conflicts'
+            }
+            if (details.requested.group == 'androidx.concurrent' && details.requested.name == 'concurrent-futures') {
+                details.useVersion '1.1.0'
+                details.because 'Resolve duplicate class conflicts'
+            }
+            if (details.requested.group == 'androidx.lifecycle' && details.requested.name == 'lifecycle-runtime') {
+                details.useVersion '2.6.0'
+                details.because 'Resolve duplicate class conflicts'
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+**DEPS**}
+
+android {
+    namespace "com.unity3d.player"
+
+    ndkPath "**NDKPATH**"
+
+    ndkVersion "**NDKVERSION**"
+
+    compileSdk **APIVERSION**
+
+    buildToolsVersion = "**BUILDTOOLS**"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    defaultConfig {
+        minSdk **MINSDK**
+
+        targetSdk **TARGETSDK**
+
+        ndk {
+            abiFilters **ABIFILTERS**
+
+            debugSymbolLevel **DEBUGSYMBOLLEVEL**
+
+        }
+
+        versionCode **VERSIONCODE**
+
+        versionName '**VERSIONNAME**'
+
+        consumerProguardFiles 'proguard-unity.txt'**USER_PROGUARD**
+
+**DEFAULT_CONFIG_SETUP**
+
+    }
+
+    lint {
+        abortOnError false
+    }
+
+    androidResources {
+        noCompress = **BUILTIN_NOCOMPRESS** + unityStreamingAssets.tokenize(', ')
+
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
+
+    }
+    
+    packaging {
+        resources {
+            // Fix duplicate META-INF files
+            exclude 'META-INF/androidx.lifecycle_lifecycle-runtime.version'
+            exclude 'META-INF/*.version'
+            pickFirsts += ['META-INF/androidx.lifecycle_lifecycle-runtime.version']
+            merges += ['META-INF/androidx.lifecycle_lifecycle-runtime.version']
+        }
+    }
+**PACKAGING**
+
+}
+
+// Disable duplicate class check for bundled AAR conflicts
+tasks.whenTaskAdded { task ->
+    if (task.name.contains('checkDuplicateClasses')) {
+        task.enabled = false
+    }
+}
+
+**IL_CPP_BUILD_SETUP**
+
+**SOURCE_BUILD_SETUP**
+
+**EXTERNAL_SOURCES**

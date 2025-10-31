@@ -1,0 +1,15 @@
+org.gradle.jvmargs=-Xmx**JVM_HEAP_SIZE**M
+
+org.gradle.parallel=true
+
+unityStreamingAssets=**STREAMING_ASSETS**
+
+# AndroidX dependency resolution
+android.enableJetifier=true
+android.useAndroidX=true
+
+# Disable Gradle daemon timeout to prevent build interruptions
+org.gradle.daemon.idletimeout=10800000
+
+**ADDITIONAL_PROPERTIES**
+
