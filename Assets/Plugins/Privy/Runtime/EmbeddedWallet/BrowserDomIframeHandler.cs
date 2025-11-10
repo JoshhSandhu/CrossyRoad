@@ -80,21 +80,108 @@ namespace Privy
             //The source of the iframe, is the Privy embedded wallet url
             //We also add an event listener on to the page, to listen to events coming from the iframe
             string jsCode = $@"
+            console.log('Privy: Creating iframe with URL:', '{url}');
             var iframe = document.createElement('iframe');
             iframe.id = 'myIframe';
             iframe.style.position = 'absolute';
             iframe.style.display = 'none';
-            iframe.src = '{url}';
+            
+            // Add error handlers for debugging
+            iframe.onerror = function(error) {{
+                console.error('Privy iframe error:', error);
+            }};
+            
+            iframe.onload = function() {{
+                console.log('Privy iframe loaded successfully');
+                
+                // Try to access iframe content (will fail due to CORS for cross-origin, but that's OK)
+                setTimeout(function() {{
+                    try {{
+                        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        var iframeBody = iframeDoc.body;
+                        console.log('Privy: Iframe body content:', iframeBody ? iframeBody.innerHTML.substring(0, 100) : 'null');
+                        console.log('Privy: Iframe document readyState:', iframeDoc.readyState);
+                    }} catch(e) {{
+                        console.log('Privy: Cannot access iframe content (CORS - this is normal for cross-origin):', e.message);
+                    }}
+                    
+                    // Try to check if iframe has any errors
+                    try {{
+                        var iframeWin = iframe.contentWindow;
+                        // Override console methods in iframe to catch errors
+                        if (iframeWin && iframeWin.console) {{
+                            var originalError = iframeWin.console.error;
+                            iframeWin.console.error = function() {{
+                                console.error('Privy iframe error:', Array.from(arguments));
+                                originalError.apply(iframeWin.console, arguments);
+                            }};
+                        }}
+                    }} catch(e) {{
+                        // CORS prevents this, but that's OK
+                        console.log('Privy: Cannot access iframe console (CORS):', e.message);
+                    }}
+                }}, 2000); // Wait 2 seconds for iframe to fully load
+            }};
+            
+            iframe.onabort = function() {{
+                console.error('Privy iframe loading aborted');
+            }};
+            
+            // Set src after appending to body (helps with some browser security policies)
             document.body.appendChild(iframe);
+            console.log('Privy: Setting iframe src to:', '{url}');
+            iframe.src = '{url}';
 
+            // Helper function to get unityInstance (waits for it if not ready)
+            function getUnityInstance() {{
+                if (typeof window.unityInstance !== 'undefined' && window.unityInstance !== null) {{
+                    return window.unityInstance;
+                }}
+                if (typeof unityInstance !== 'undefined' && unityInstance !== null) {{
+                    return unityInstance;
+                }}
+                return null;
+            }}
+            
+            // Setup message listener - will be called when iframe sends messages
             window.addEventListener('message', function(event) {{
                 // Check that the message is coming from the correct origin
                 if (event.origin === new URL(iframe.src).origin) {{
+                    // Get unityInstance (with retry logic if not ready yet)
+                    var unity = getUnityInstance();
+                    
+                    if (!unity) {{
+                        // Unity might not be loaded yet - wait a bit and try again
+                        console.warn('Privy: unityInstance not found yet. Will retry when Unity loads. Set window.unityInstance in your Unity template!');
+                        // Try to wait for Unity to be ready
+                        var retryCount = 0;
+                        var maxRetries = 10;
+                        var checkUnity = setInterval(function() {{
+                            unity = getUnityInstance();
+                            if (unity || retryCount >= maxRetries) {{
+                                clearInterval(checkUnity);
+                                if (!unity) {{
+                                    console.error('Privy: unityInstance still not found after waiting. Make sure your Unity WebGL template sets window.unityInstance = unityInstance;');
+                                    return;
+                                }}
+                                // Unity is now ready, process the message
+                                if(event.data === 'ready') {{
+                                    unity.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnWebViewReady', '');
+                                }} else {{
+                                    let data = JSON.stringify(event.data);
+                                    unity.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnMessageReceived', data);
+                                }}
+                            }}
+                            retryCount++;
+                        }}, 500); // Check every 500ms
+                        return;
+                    }}
+                    
                     if(event.data === 'ready') {{
-                        unityInstance.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnWebViewReady', '');
+                        unity.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnWebViewReady', '');
                     }} else {{
                         let data = JSON.stringify(event.data);
-                        unityInstance.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnMessageReceived', data);
+                        unity.SendMessage('{BrowserDomIframeObject.SingletonGameObjectName}', 'OnMessageReceived', data);
                     }}
                 }} else {{
                     console.warn('Message received from unknown origin:', event.origin);
