@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.solana.unity_sdk": {
-      "version": "https://github.com/magicblock-labs/Solana.Unity-SDK.git",
+      "version": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#v1.2.7",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.textmeshpro": "3.0.6"
       },
-      "hash": "cb3a8f3a6c6ba23e5b05c97f5c0400a8c149827e"
+      "hash": "de32f427f5fc1dfbf122b9ecbf42077336ab1e59"
     },
     "com.unity.2d.common": {
       "version": "11.0.1",
@@ -137,7 +137,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.device-simulator.devices": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -162,11 +162,11 @@
       "dependencies": {}
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.23",
+      "version": "2.0.25",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.9"
+        "com.unity.test-framework": "1.1.31"
       },
       "url": "https://packages.unity.com"
     },
@@ -341,7 +341,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.7",
+      "version": "1.9.9",
       "depth": 0,
       "source": "registry",
       "dependencies": {
