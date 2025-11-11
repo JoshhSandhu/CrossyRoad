@@ -27,6 +27,10 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
     // RPC client for sending transactions
     private IRpcClient rpcClient;
 
+    // Auto-approve mechanism: After first approval, auto-approve subsequent transactions
+    private bool hasUserApprovedOnce = false;
+    private bool autoApproveEnabled = true; // Set to false to always show modal
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -90,7 +94,9 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             Debug.Log("Privy Wallet Adapter initialized successfully.");
 
             // Quick diagnostic: attempt a simple message sign to verify Privy UI flow
-            _ = TestPrivySimpleSign();
+            // DISABLED: This test times out because Privy SDK is headless and requires our custom modal
+            // Uncomment the line below if you want to test the signing flow manually
+            // _ = TestPrivySimpleSign();
         }
         catch (Exception ex)
         {
@@ -177,7 +183,7 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
 
             Debug.Log($"Transaction built, proceeding to sign and send...{transaction}");
 
-            // 2. Sign and send transaction with Privy
+            // 2. Sign and send transaction with Privy (this will show the signing modal)
             var signature = await SignAndSendTransactionInternal(transaction);
 
             if (!string.IsNullOrEmpty(signature))
@@ -259,24 +265,104 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
         {
             Debug.Log("Signing transaction with Privy wallet...");
 
-            // Serialize the transaction message for signing
-            //var transactionBytes = transaction.Serialize();
-            //var transactionBase64 = System.Convert.ToBase64String(transactionBytes);
+            await UniTask.SwitchToMainThread();
 
+            // Check if we should show modal or auto-approve
+            bool shouldShowModal = !hasUserApprovedOnce || !autoApproveEnabled;
+            bool userApproved = true; // Default to approved if auto-approving
+
+            if (shouldShowModal)
+            {
+                // Show signing modal and wait for user approval
+                // Since Privy SDK is headless, we need to show our own UI
+                if (TransactionSigningModal.Instance == null)
+                {
+                    Debug.LogError("TransactionSigningModal instance is null. Cannot show signing UI.");
+                    return null;
+                }
+
+                // Extract transaction message for display
+                // Since we build the transaction with MemoProgram.NewMemo(), we can extract the memo data
+                string transactionMessage = "Transaction ready to sign";
+                if (transaction.Instructions != null && transaction.Instructions.Count > 0)
+                {
+                    // Try to extract memo message from instruction data
+                    foreach (var instruction in transaction.Instructions)
+                    {
+                        // Try to decode instruction data as UTF-8 (memo instructions contain UTF-8 strings)
+                        if (instruction.Data != null && instruction.Data.Length > 0)
+                        {
+                            try
+                            {
+                                // Memo data is typically UTF-8 encoded string
+                                string decoded = System.Text.Encoding.UTF8.GetString(instruction.Data);
+                                if (!string.IsNullOrEmpty(decoded))
+                                {
+                                    transactionMessage = decoded;
+                                    break; // Found memo, no need to continue
+                                }
+                            }
+                            catch
+                            {
+                                // If decoding fails, continue to next instruction
+                            }
+                        }
+                    }
+                }
+
+                // Show modal and wait for user approval
+                userApproved = await TransactionSigningModal.Instance.ShowSigningModal(
+                    transactionMessage,
+                    privyWallet.Address
+                );
+
+                if (!userApproved)
+                {
+                    Debug.LogWarning("User rejected transaction signing.");
+                    await TransactionSigningModal.Instance.CloseModal();
+                    return null;
+                }
+
+                // User approved - remember this for future transactions
+                hasUserApprovedOnce = true;
+                Debug.Log("User approved transaction. Auto-approving subsequent transactions for this session.");
+
+                // Show loading state in modal (only if modal is shown)
+                if (TransactionSigningModal.Instance != null)
+                {
+                    TransactionSigningModal.Instance.ShowLoadingState();
+                }
+            }
+            else
+            {
+                // Auto-approve: User has already approved once, skip modal
+                Debug.Log("Auto-approving transaction (user approved previously).");
+            }
+
+            Debug.Log("Proceeding with Privy signing...");
+
+            // Android/iOS: Native WebView is used automatically by Privy SDK
+            // No iframe or manual WebView handling needed
+#if !(UNITY_ANDROID || UNITY_IOS)
+            Debug.LogWarning("Privy signing only works in Android/iOS builds!");
+            Debug.LogWarning("Testing in Unity Editor will timeout. Please build for Android to test.");
+#endif
+
+            // Serialize the transaction message for signing
             var messageBytes = transaction.CompileMessage();
             var transactionBase64 = System.Convert.ToBase64String(messageBytes);
-
-            // Request signature from Privy
-            //var signatureString = await privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
-
-            await UniTask.SwitchToMainThread();
 
             if (privyWallet.EmbeddedSolanaWalletProvider == null)
             {
                 Debug.LogError("EmbeddedSolanaWalletProvider is null on Privy wallet.");
+                if (TransactionSigningModal.Instance != null && TransactionSigningModal.Instance.IsModalActive())
+                {
+                    await TransactionSigningModal.Instance.CloseModal();
+                }
                 return null;
             }
 
+            // Request signature from Privy
             var signTask = privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
             var completed = await Task.WhenAny(signTask, Task.Delay(TimeSpan.FromSeconds(30)));
             string signatureString;
@@ -293,6 +379,11 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
                 if (retried != retryTask)
                 {
                     Debug.LogError("Privy signing timed out after retry (full-tx base64).");
+                    Debug.LogError("NOTE: Privy signing only works in Android/iOS builds! If testing in Unity Editor, build for Android instead.");
+                    if (TransactionSigningModal.Instance != null && TransactionSigningModal.Instance.IsModalActive())
+                    {
+                        await TransactionSigningModal.Instance.CloseModal();
+                    }
                     return null;
                 }
                 signatureString = await retryTask;
@@ -305,6 +396,10 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             if (string.IsNullOrEmpty(signatureString))
             {
                 Debug.LogError("Privy signature failed!");
+                if (TransactionSigningModal.Instance != null && TransactionSigningModal.Instance.IsModalActive())
+                {
+                    await TransactionSigningModal.Instance.CloseModal();
+                }
                 return null;
             }
 
@@ -328,6 +423,12 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             Debug.Log("Sending transaction to Solana devnet...");
             var sendResult = await rpcClient.SendTransactionAsync(signedTransactionBytes);
 
+            // Close modal after transaction is sent (only if it was shown)
+            if (TransactionSigningModal.Instance != null && TransactionSigningModal.Instance.IsModalActive())
+            {
+                await TransactionSigningModal.Instance.CloseModal();
+            }
+
             if (sendResult.WasSuccessful && !string.IsNullOrEmpty(sendResult.Result))
             {
                 Debug.Log($"? Transaction sent successfully! Signature: {sendResult.Result}");
@@ -343,6 +444,13 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
         {
             Debug.LogError($"Failed to sign and send transaction: {ex.Message}");
             Debug.LogError($"Stack trace: {ex.StackTrace}");
+
+            // Close modal on error (only if it was shown)
+            if (TransactionSigningModal.Instance != null && TransactionSigningModal.Instance.IsModalActive())
+            {
+                await TransactionSigningModal.Instance.CloseModal();
+            }
+
             return null;
         }
     }
@@ -373,6 +481,24 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
     public IEmbeddedSolanaWallet GetPrivyWalletInstance()
     {
         return privyWallet;
+    }
+
+    /// <summary>
+    /// Reset auto-approve state (useful for testing or if user wants to see modal again)
+    /// </summary>
+    public void ResetAutoApprove()
+    {
+        hasUserApprovedOnce = false;
+        Debug.Log("Auto-approve state reset. Modal will show on next transaction.");
+    }
+
+    /// <summary>
+    /// Enable or disable auto-approve feature
+    /// </summary>
+    public void SetAutoApproveEnabled(bool enabled)
+    {
+        autoApproveEnabled = enabled;
+        Debug.Log($"Auto-approve {(enabled ? "enabled" : "disabled")}.");
     }
 
     /// <summary>
