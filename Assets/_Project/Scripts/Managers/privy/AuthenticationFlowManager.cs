@@ -499,6 +499,11 @@ public class AuthenticationFlowManager : MonoBehaviour
     {
         //Debug.Log("Starting game...");
         isGameReady = true;
+
+        if (CustomPrivyWalletAdapter.Instance != null)
+        {
+            CustomPrivyWalletAdapter.Instance.ApproveTransactionsViaPlayGame();
+        }
         //ShowLoadingPanel();
         HideAllPanels();
         //if (StartScreenManager.Instance != null)
