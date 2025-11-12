@@ -394,5 +394,10 @@ public class ShopManager : MonoBehaviour
         }
         return null;
     }
+
+    public bool IsShopOpen()
+    {
+        return shopPanel != null && shopPanel.activeSelf;
+    }
 }
 
