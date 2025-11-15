@@ -132,24 +132,26 @@ public class TokenTransferPanel : MonoBehaviour
                     string shortAddress = seekerAddress != null && seekerAddress.Length > 12
                         ? $"{seekerAddress.Substring(0, 6)}...{seekerAddress.Substring(seekerAddress.Length - 6)}"
                         : seekerAddress ?? "Not Connected";
-                    seekerAddressText.text = $"Seeker: {shortAddress}";
+                    seekerAddressText.text = $"{shortAddress}";
+                    seekerAddressText.color = Color.lightGreen;
                 }
 
                 if (seekerBalanceText != null)
                 {
                     double solBalance = seekerBalance / 1_000_000_000.0; // Convert lamports to SOL
-                    seekerBalanceText.text = $"Balance: {solBalance:F6} SOL";
+                    seekerBalanceText.text = $"{solBalance:F6} SOL";
                 }
             }
             else
             {
                 if (seekerAddressText != null)
                 {
-                    seekerAddressText.text = "Seeker: Not Connected";
+                    seekerAddressText.text = "Not Connected";
+                    seekerAddressText.color = Color.red;
                 }
                 if (seekerBalanceText != null)
                 {
-                    seekerBalanceText.text = "Balance: 0 SOL";
+                    seekerBalanceText.text = "0 SOL";
                 }
             }
 
@@ -165,24 +167,26 @@ public class TokenTransferPanel : MonoBehaviour
                     string shortAddress = privyAddress != null && privyAddress.Length > 12
                         ? $"{privyAddress.Substring(0, 6)}...{privyAddress.Substring(privyAddress.Length - 6)}"
                         : privyAddress ?? "Not Available";
-                    privyAddressText.text = $"Privy: {shortAddress}";
+                    privyAddressText.text = $"{shortAddress}";
+                    privyAddressText.color = Color.lightGreen;
                 }
 
                 if (privyBalanceText != null)
                 {
                     double solBalance = privyBalance / 1_000_000_000.0; // Convert lamports to SOL
-                    privyBalanceText.text = $"Balance: {solBalance:F6} SOL";
+                    privyBalanceText.text = $"{solBalance:F6} SOL";
                 }
             }
             else
             {
                 if (privyAddressText != null)
                 {
-                    privyAddressText.text = "Privy: Not Available";
+                    privyAddressText.text = "Not Connected";
+                    privyAddressText.color = Color.red;
                 }
                 if (privyBalanceText != null)
                 {
-                    privyBalanceText.text = "Balance: 0 SOL";
+                    privyBalanceText.text = "0 SOL";
                 }
             }
         }
