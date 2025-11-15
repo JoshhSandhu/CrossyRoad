@@ -93,6 +93,13 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             isInitialized = true;
             Debug.Log("Privy Wallet Adapter initialized successfully.");
 
+            // Trigger balance refresh in welcome panel if it's showing
+            if (AuthenticationFlowManager.Instance != null)
+            {
+                // Use a coroutine to refresh balance on main thread
+                StartCoroutine(RefreshWelcomePanelBalance());
+            }
+
             // Quick diagnostic: attempt a simple message sign to verify Privy UI flow
             // DISABLED: This test times out because Privy SDK is headless and requires our custom modal
             // Uncomment the line below if you want to test the signing flow manually
@@ -101,6 +108,20 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
         catch (Exception ex)
         {
             Debug.LogError($"Error initializing Privy Wallet Adapter: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Refresh balance in welcome panel when adapter becomes ready
+    /// </summary>
+    private System.Collections.IEnumerator RefreshWelcomePanelBalance()
+    {
+        yield return new WaitForSeconds(0.5f); // Small delay to ensure UI is ready
+
+        if (AuthenticationFlowManager.Instance != null)
+        {
+            // Trigger balance check update
+            _ = AuthenticationFlowManager.Instance.RefreshWelcomePanelBalance();
         }
     }
 
@@ -162,6 +183,9 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
         }
     }
 
+    // Transaction cost per move in lamports (0.000005 SOL = 5000 lamports)
+    public const ulong TRANSACTION_COST_PER_MOVE = 5000;
+
     /// <summary>
     /// sign mesaage with privy and send transaction via solana sdk
     /// </summary>
@@ -173,6 +197,24 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
             if (!isInitialized || privyWallet == null)
             {
                 Debug.LogError("Privy Wallet Adapter is not initialized.");
+                return null;
+            }
+
+            // Check balance before sending transaction
+            var balance = await GetPrivyBalance();
+            if (balance < TRANSACTION_COST_PER_MOVE)
+            {
+                Debug.LogWarning($"Insufficient balance: {balance} lamports. Need at least {TRANSACTION_COST_PER_MOVE} lamports.");
+
+                // Show toast message
+                if (TransactionToastManager.Instance != null)
+                {
+                    TransactionToastManager.Instance.ShowToastBottom(
+                        "Please add SOL to continue playing",
+                        Color.red
+                    );
+                }
+
                 return null;
             }
 
@@ -384,6 +426,39 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
     public string GetWalletAddress()
     {
         return walletAddress;
+    }
+
+    /// <summary>
+    /// Get Privy wallet balance in lamports
+    /// </summary>
+    public async Task<ulong> GetPrivyBalance()
+    {
+        if (!isInitialized || rpcClient == null || string.IsNullOrEmpty(walletAddress))
+        {
+            Debug.LogWarning("Privy wallet not initialized or address not available");
+            return 0;
+        }
+
+        try
+        {
+            var pubKey = new PublicKey(walletAddress);
+            var balanceResult = await rpcClient.GetBalanceAsync(pubKey);
+
+            if (balanceResult.WasSuccessful)
+            {
+                return balanceResult.Result.Value;
+            }
+            else
+            {
+                Debug.LogError($"Failed to get Privy balance: {balanceResult.Reason}");
+                return 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error getting Privy balance: {ex.Message}");
+            return 0;
+        }
     }
 
 

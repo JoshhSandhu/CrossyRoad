@@ -5,15 +5,29 @@ using System.Collections;
 /// <summary>
 /// Manages toast messages for transaction notifications
 /// Shows transaction hashes in green (success) or red (failure)
+/// Supports both top and bottom toast positions
 /// </summary>
 public class TransactionToastManager : MonoBehaviour
 {
     public static TransactionToastManager Instance { get; private set; }
 
-    [Header("Toast UI Elements")]
-    [SerializeField] private GameObject toastPanel;
-    [SerializeField] private TextMeshProUGUI toastText;
-    [SerializeField] private CanvasGroup toastCanvasGroup; 
+    public enum ToastPosition
+    {
+        Top,
+        Bottom
+    }
+
+    [Header("Top Toast UI Elements")]
+    [SerializeField] private GameObject topToastPanel;
+    [SerializeField] private TextMeshProUGUI topToastText;
+    [SerializeField] private CanvasGroup topToastCanvasGroup;
+
+    [Header("Bottom Toast UI Elements")]
+    [SerializeField] private GameObject bottomToastPanel;
+    [SerializeField] private TextMeshProUGUI bottomToastText;
+    [SerializeField] private CanvasGroup bottomToastCanvasGroup;
+
+    [Header("Toast Settings")]
     [SerializeField] private float toastDuration = 3f;
     [SerializeField] private float fadeInDuration = 0.3f;
     [SerializeField] private float fadeOutDuration = 0.3f;
@@ -22,7 +36,8 @@ public class TransactionToastManager : MonoBehaviour
     [SerializeField] private Color successColor = Color.green;
     [SerializeField] private Color failureColor = Color.red;
 
-    private Coroutine currentToastCoroutine;
+    private Coroutine currentTopToastCoroutine;
+    private Coroutine currentBottomToastCoroutine;
 
     private void Awake()
     {
@@ -43,10 +58,14 @@ public class TransactionToastManager : MonoBehaviour
         HybridTransactionService.OnTransactionSuccess += OnTransactionSuccess;
         HybridTransactionService.OnTransactionFailure += OnTransactionFailure;
 
-        // Initialize toast panel as hidden
-        if (toastPanel != null)
+        // Initialize toast panels as hidden
+        if (topToastPanel != null)
         {
-            toastPanel.SetActive(false);
+            topToastPanel.SetActive(false);
+        }
+        if (bottomToastPanel != null)
+        {
+            bottomToastPanel.SetActive(false);
         }
     }
 
@@ -58,13 +77,13 @@ public class TransactionToastManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Handle successful transaction
+    /// Handle successful transaction (shows at top)
     /// </summary>
     private void OnTransactionSuccess(string signature)
     {
         if (string.IsNullOrEmpty(signature))
         {
-            ShowToast("Transaction successful", successColor);
+            ShowToast("Transaction successful", successColor, ToastPosition.Top);
         }
         else
         {
@@ -73,12 +92,12 @@ public class TransactionToastManager : MonoBehaviour
                 ? $"{signature.Substring(0, 5)}...{signature.Substring(signature.Length - 5)}"
                 : signature;
 
-            ShowToast($"Tx: {shortSignature}", successColor);
+            ShowToast($"Tx: {shortSignature}", successColor, ToastPosition.Top);
         }
     }
 
     /// <summary>
-    /// Handle failed transaction
+    /// Handle failed transaction (shows at top)
     /// </summary>
     private void OnTransactionFailure(string errorMessage)
     {
@@ -86,67 +105,127 @@ public class TransactionToastManager : MonoBehaviour
             ? "Transaction failed"
             : $"Failed: {errorMessage}";
 
-        ShowToast(message, failureColor);
+        ShowToast(message, failureColor, ToastPosition.Top);
     }
 
     /// <summary>
-    /// Show a toast message with the specified color
+    /// Show a toast message with the specified color at the specified position
     /// </summary>
-    public void ShowToast(string message, Color color)
+    public void ShowToast(string message, Color color, ToastPosition position = ToastPosition.Top)
     {
-        if (toastPanel == null || toastText == null)
+        if (position == ToastPosition.Top)
         {
-            Debug.LogWarning("TransactionToastManager: Toast UI elements not assigned!");
-            return;
-        }
+            if (topToastPanel == null || topToastText == null)
+            {
+                Debug.LogWarning("TransactionToastManager: Top toast UI elements not assigned!");
+                return;
+            }
 
-        // Stop any existing toast
-        if (currentToastCoroutine != null)
+            // Stop any existing top toast
+            if (currentTopToastCoroutine != null)
+            {
+                StopCoroutine(currentTopToastCoroutine);
+            }
+
+            // Start new top toast
+            currentTopToastCoroutine = StartCoroutine(ShowToastCoroutine(message, color, ToastPosition.Top));
+        }
+        else
         {
-            StopCoroutine(currentToastCoroutine);
-        }
+            if (bottomToastPanel == null || bottomToastText == null)
+            {
+                Debug.LogWarning("TransactionToastManager: Bottom toast UI elements not assigned!");
+                return;
+            }
 
-        // Start new toast
-        currentToastCoroutine = StartCoroutine(ShowToastCoroutine(message, color));
+            // Stop any existing bottom toast
+            if (currentBottomToastCoroutine != null)
+            {
+                StopCoroutine(currentBottomToastCoroutine);
+            }
+
+            // Start new bottom toast
+            currentBottomToastCoroutine = StartCoroutine(ShowToastCoroutine(message, color, ToastPosition.Bottom));
+        }
+    }
+
+    /// <summary>
+    /// Convenience method for showing top toast (backward compatibility)
+    /// </summary>
+    public void ShowToastTop(string message, Color color)
+    {
+        ShowToast(message, color, ToastPosition.Top);
+    }
+
+    /// <summary>
+    /// Convenience method for showing bottom toast
+    /// </summary>
+    public void ShowToastBottom(string message, Color color)
+    {
+        ShowToast(message, color, ToastPosition.Bottom);
     }
 
     /// <summary>
     /// Coroutine to show toast with fade in/out animation
     /// </summary>
-    private IEnumerator ShowToastCoroutine(string message, Color color)
+    private IEnumerator ShowToastCoroutine(string message, Color color, ToastPosition position)
     {
-        // Set message and color
-        toastText.text = message;
-        toastText.color = color;
+        GameObject panel;
+        TextMeshProUGUI text;
+        CanvasGroup canvasGroup;
 
-        // Show panel
-        toastPanel.SetActive(true);
-
-        // Fade in (using CanvasGroup if available, otherwise fade text)
-        if (toastCanvasGroup != null)
+        // Select UI elements based on position
+        if (position == ToastPosition.Top)
         {
-            yield return StartCoroutine(FadeCanvasGroup(toastCanvasGroup, 0f, 1f, fadeInDuration));
+            panel = topToastPanel;
+            text = topToastText;
+            canvasGroup = topToastCanvasGroup;
         }
         else
         {
-            yield return StartCoroutine(FadeText(toastText, 0f, 1f, fadeInDuration));
+            panel = bottomToastPanel;
+            text = bottomToastText;
+            canvasGroup = bottomToastCanvasGroup;
+        }
+
+        if (panel == null || text == null)
+        {
+            Debug.LogWarning($"TransactionToastManager: {position} toast UI elements not assigned!");
+            yield break;
+        }
+
+        // Set message and color
+        text.text = message;
+        text.color = color;
+
+        // Show panel
+        panel.SetActive(true);
+
+        // Fade in (using CanvasGroup if available, otherwise fade text)
+        if (canvasGroup != null)
+        {
+            yield return StartCoroutine(FadeCanvasGroup(canvasGroup, 0f, 1f, fadeInDuration));
+        }
+        else
+        {
+            yield return StartCoroutine(FadeText(text, 0f, 1f, fadeInDuration));
         }
 
         // Wait for duration
         yield return new WaitForSeconds(toastDuration);
 
         // Fade out
-        if (toastCanvasGroup != null)
+        if (canvasGroup != null)
         {
-            yield return StartCoroutine(FadeCanvasGroup(toastCanvasGroup, 1f, 0f, fadeOutDuration));
+            yield return StartCoroutine(FadeCanvasGroup(canvasGroup, 1f, 0f, fadeOutDuration));
         }
         else
         {
-            yield return StartCoroutine(FadeText(toastText, 1f, 0f, fadeOutDuration));
+            yield return StartCoroutine(FadeText(text, 1f, 0f, fadeOutDuration));
         }
 
         // Hide panel
-        toastPanel.SetActive(false);
+        panel.SetActive(false);
     }
 
     /// <summary>

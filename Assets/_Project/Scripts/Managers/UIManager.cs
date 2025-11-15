@@ -112,4 +112,16 @@ public class UIManager : MonoBehaviour
             ShopManager.Instance.CloseShop();
         }
     }
+
+    public void OpenTokenPanel()
+    {
+        if (AuthenticationFlowManager.Instance != null)
+        {
+            AuthenticationFlowManager.Instance.OpenTokenPanel();
+        }
+        else
+        {
+            Debug.LogWarning("AuthenticationFlowManager not found!");
+        }
+    }
 }
