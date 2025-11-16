@@ -8,6 +8,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.InputSystem.HID;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
+using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
@@ -181,6 +182,12 @@ public class PlayerController : MonoBehaviour
     {
         if (context.performed)
         {
+            // Check if clicking on UI
+            if (IsPointerOverUI())
+            {
+                return; // Don't move if clicking on UI
+            }
+
             Debug.Log("Touch tap detected - moving forward");
             movePlayer(Vector3.forward);
         }
@@ -192,6 +199,12 @@ public class PlayerController : MonoBehaviour
 
         if (isTouching && swipeDelta.magnitude > 0.1f)
         {
+            // Check if clicking on UI
+            if (IsPointerOverUI())
+            {
+                return; // Don't move if clicking on UI
+            }
+
             // Determine swipe direction
             Vector3 moveDirection = GetSwipeDirection(swipeDelta);
             if (moveDirection != Vector3.zero)
@@ -208,12 +221,26 @@ public class PlayerController : MonoBehaviour
 
         if (context.performed)
         {
+            // Check if clicking on UI
+            if (IsPointerOverUI())
+            {
+                isTouching = false;
+                return; // Don't move if clicking on UI
+            }
+
             // Touch started
             touchStartPosition = touchPosition;
             isTouching = true;
         }
         else if (context.canceled)
         {
+            // Check if clicking on UI
+            if (IsPointerOverUI())
+            {
+                isTouching = false;
+                return; // Don't move if clicking on UI
+            }
+
             // Touch ended
             Vector2 touchEndPosition = touchPosition;
             Vector2 swipeVector = touchEndPosition - touchStartPosition;
@@ -273,6 +300,12 @@ public class PlayerController : MonoBehaviour
     private void movePlayer(Vector3 direction)
     {
         if (isMoving || isDead)
+        {
+            return;
+        }
+
+        // Check if any UI panel is open (additional safety check)
+        if (IsAnyUIPanelOpen())
         {
             return;
         }
@@ -457,4 +490,49 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check if pointer/touch is over a UI element
+    /// </summary>
+    private bool IsPointerOverUI()
+    {
+        // Check if EventSystem exists and pointer is over UI
+        if (EventSystem.current != null)
+        {
+            // For mobile/touch input
+            if (Input.touchCount > 0)
+            {
+                return EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+            }
+            // For mouse input (editor testing)
+            else
+            {
+                return EventSystem.current.IsPointerOverGameObject();
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Check if any UI panel is currently open
+    /// </summary>
+    private bool IsAnyUIPanelOpen()
+    {
+        // Check shop panel
+        if (ShopManager.Instance != null && ShopManager.Instance.IsShopOpen())
+        {
+            return true;
+        }
+
+        // Check authentication panels
+        if (AuthenticationFlowManager.Instance != null)
+        {
+            // You might need to add a method to check if auth panels are open
+            // For now, we'll rely on IsPointerOverUI() which should catch most cases
+        }
+
+        // Add checks for other panels (settings, inventory, etc.) as needed
+
+        return false;
+    }
 }

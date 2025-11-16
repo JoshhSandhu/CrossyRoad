@@ -41,8 +41,13 @@ public class AuthenticationFlowManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI welcomeTitleText;
     [SerializeField] private TextMeshProUGUI walletAddressText;
     [SerializeField] private TextMeshProUGUI userInfoText;
+    [SerializeField] private TextMeshProUGUI balanceText;
     [SerializeField] private Button logoutButton;
     [SerializeField] private Button playGameButton;
+    [SerializeField] private Button addTokensButton;
+
+    [Header("Token Panel")]
+    [SerializeField] private TokenTransferPanel tokenTransferPanel;
 
     //[Header("Loading Panel Elements")]
     //[SerializeField] private TextMeshProUGUI loadingText;
@@ -174,7 +179,11 @@ public class AuthenticationFlowManager : MonoBehaviour
         }
         if (playGameButton != null)
         {
-            playGameButton.onClick.AddListener(StartGame);
+            playGameButton.onClick.AddListener(OnPlayGameButtonClicked);
+        }
+        if (addTokensButton != null)
+        {
+            addTokensButton.onClick.AddListener(OpenTokenPanel);
         }
 
         UpdateUI();
@@ -275,11 +284,11 @@ public class AuthenticationFlowManager : MonoBehaviour
         //Debug.Log("Showing OTP Verification Panel");
     }
 
-    private void ShowWelcomePanel()
+    public async void ShowWelcomePanel()
     {
         HideAllPanels();
         if (welcomePanel != null) welcomePanel.SetActive(true);
-        UpdateWelcomePanel();
+        await UpdateWelcomePanel();
         isGameReady = false;
         //Debug.Log("Showing Welcome Panel");
     }
@@ -339,7 +348,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError($"Wallet connection failed: {e.Message}");
-            
+
             Debug.LogError("Note: OAuth login may not work properly in Unity Editor. Try building and testing on device/web.");
         }
     }
@@ -523,7 +532,7 @@ public class AuthenticationFlowManager : MonoBehaviour
 
 
     //updating the welcome panel with user info
-    private async void UpdateWelcomePanel()
+    private async System.Threading.Tasks.Task UpdateWelcomePanel()
     {
         if (walletAddressText != null)
         {
@@ -546,6 +555,139 @@ public class AuthenticationFlowManager : MonoBehaviour
             var user = await privyInstance.GetUser();
             userInfoText.text = $"User ID: {user?.Id ?? "Unknown"}";
         }
+
+        // Check balance and update UI
+        await CheckBalanceAndUpdateUI();
+    }
+
+    /// <summary>
+    /// Check Privy wallet balance and update UI accordingly
+    /// </summary>
+    private async System.Threading.Tasks.Task CheckBalanceAndUpdateUI()
+    {
+        // Retry mechanism: wait for adapter to be ready (max 10 seconds)
+        int maxRetries = 20;
+        int retryCount = 0;
+
+        while ((CustomPrivyWalletAdapter.Instance == null || !CustomPrivyWalletAdapter.Instance.IsReady()) && retryCount < maxRetries)
+        {
+            retryCount++;
+            await System.Threading.Tasks.Task.Delay(500); // Wait 500ms between retries
+        }
+
+        if (CustomPrivyWalletAdapter.Instance == null || !CustomPrivyWalletAdapter.Instance.IsReady())
+        {
+            // Wallet not ready after retries, disable play game
+            if (playGameButton != null)
+            {
+                playGameButton.interactable = false;
+            }
+            if (balanceText != null)
+            {
+                balanceText.text = "Balance: Wallet not ready";
+            }
+            Debug.LogWarning("CustomPrivyWalletAdapter not ready after waiting");
+            return;
+        }
+
+        try
+        {
+            var balance = await CustomPrivyWalletAdapter.Instance.GetPrivyBalance();
+            double solBalance = balance / 1_000_000_000.0; // Convert lamports to SOL
+
+            // Update balance text
+            if (balanceText != null)
+            {
+                balanceText.text = $"Balance: {solBalance:F6} SOL";
+            }
+
+            // Transaction cost per move (5000 lamports = 0.000005 SOL)
+            const ulong transactionCostPerMove = 5000;
+            const ulong lowBalanceThreshold = transactionCostPerMove * 3; // 3 moves worth
+            const ulong minBalanceThreshold = transactionCostPerMove * 4; // 4 moves worth
+
+            // Check if balance is sufficient
+            bool hasEnoughBalance = balance >= minBalanceThreshold;
+
+            // Update Play Game button
+            if (playGameButton != null)
+            {
+                playGameButton.interactable = hasEnoughBalance;
+            }
+
+            // Update Add Tokens button
+            if (addTokensButton != null)
+            {
+                addTokensButton.interactable = true; // Always allow adding tokens
+            }
+
+            // Show low balance warning if balance is between 3x and 4x cost
+            if (balance >= lowBalanceThreshold && balance < minBalanceThreshold)
+            {
+                if (TransactionToastManager.Instance != null)
+                {
+                    TransactionToastManager.Instance.ShowToastBottom(
+                        "Low balance warning: Please add SOL to continue playing",
+                        Color.yellow
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error checking balance: {ex.Message}");
+            if (balanceText != null)
+            {
+                balanceText.text = "Balance: Error";
+            }
+            if (playGameButton != null)
+            {
+                playGameButton.interactable = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handle Play Game button click (with balance check)
+    /// </summary>
+    private void OnPlayGameButtonClicked()
+    {
+        if (playGameButton != null && !playGameButton.interactable)
+        {
+            // Button is disabled, show toast message
+            if (TransactionToastManager.Instance != null)
+            {
+                TransactionToastManager.Instance.ShowToastBottom(
+                    "Please add SOL to your wallet",
+                    Color.red
+                );
+            }
+            return;
+        }
+
+        // Button is enabled, start game
+        StartGame();
+    }
+
+    /// <summary>
+    /// Open token transfer panel
+    /// </summary>
+    public void OpenTokenPanel()
+    {
+        HideAllPanels();
+        OpenTokenPanelWithSource(2);
+    }
+
+    public void OpenTokenPanelWithSource(int source)
+    {
+        if (tokenTransferPanel != null)
+        {
+            tokenTransferPanel.OpenPanel(source);
+        }
+        else
+        {
+            Debug.LogWarning("TokenTransferPanel not assigned!");
+        }
     }
 
 
@@ -553,7 +695,7 @@ public class AuthenticationFlowManager : MonoBehaviour
     private void UpdateUI()
     {
         if (authTitleText != null)
-            authTitleText.text = "Welcome to Crossy Road!";
+            authTitleText.text = "Crossy Road";
 
         if (authDescriptionText != null)
             authDescriptionText.text = "Connect your wallet to start playing and unlock exclusive skins!";
@@ -577,7 +719,7 @@ public class AuthenticationFlowManager : MonoBehaviour
             //Debug.Log($"Solana wallet created: {solanaWallet.Address}");
             return solanaWallet;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Failed to create Solana wallet: {e.Message}");
             return null;
@@ -599,7 +741,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         //Debug.Log($"EmbeddedSolanaWallets count: {user.EmbeddedSolanaWallets?.Length ?? 0}");
         return user.EmbeddedSolanaWallets;
     }
-    
+
     //this ensures the user has a solana wallet and if not then creates one
     public async Task<bool> EnsureSolanaWallet()
     {
@@ -619,6 +761,17 @@ public class AuthenticationFlowManager : MonoBehaviour
     {
         var wallets = await GetSolanaWallets();
         return wallets.Length > 0 ? wallets[0].Address : "No Wallet";
+    }
+
+    /// <summary>
+    /// Public method to refresh balance (called when adapter becomes ready)
+    /// </summary>
+    public async System.Threading.Tasks.Task RefreshWelcomePanelBalance()
+    {
+        if (welcomePanel != null && welcomePanel.activeSelf)
+        {
+            await CheckBalanceAndUpdateUI();
+        }
     }
 
     private void OnDestroy()
