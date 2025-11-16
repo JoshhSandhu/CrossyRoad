@@ -284,7 +284,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         //Debug.Log("Showing OTP Verification Panel");
     }
 
-    private async void ShowWelcomePanel()
+    public async void ShowWelcomePanel()
     {
         HideAllPanels();
         if (welcomePanel != null) welcomePanel.SetActive(true);
@@ -674,9 +674,15 @@ public class AuthenticationFlowManager : MonoBehaviour
     /// </summary>
     public void OpenTokenPanel()
     {
+        HideAllPanels();
+        OpenTokenPanelWithSource(2);
+    }
+
+    public void OpenTokenPanelWithSource(int source)
+    {
         if (tokenTransferPanel != null)
         {
-            tokenTransferPanel.OpenPanel();
+            tokenTransferPanel.OpenPanel(source);
         }
         else
         {

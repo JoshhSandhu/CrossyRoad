@@ -12,11 +12,19 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameObject fadeTransition;
 
+    [Space]
     [SerializeField]
     private TextMeshProUGUI scoreText;
-
     [SerializeField]
     private TextMeshProUGUI coinText;
+
+    [Space]
+    [Header("Game Over Panel")]
+    [SerializeField]
+    private TextMeshProUGUI gameOverScoreText;
+
+    [SerializeField]
+    private TextMeshProUGUI gameOverCoinsText;
 
     private void Awake()
     {
@@ -64,6 +72,19 @@ public class UIManager : MonoBehaviour
     public void ShowGameOver()
     {
         gameOverPanel.SetActive(true);
+
+        if (GameManager.Instance != null)
+        {
+            if (gameOverScoreText != null)
+            {
+                gameOverScoreText.text = GameManager.Instance.Score.ToString();
+            }
+
+            if (gameOverCoinsText != null)
+            {
+                gameOverCoinsText.text = GameManager.Instance.Coins.ToString();
+            }
+        }
     }
 
     public void RestartGame()
@@ -117,7 +138,7 @@ public class UIManager : MonoBehaviour
     {
         if (AuthenticationFlowManager.Instance != null)
         {
-            AuthenticationFlowManager.Instance.OpenTokenPanel();
+            AuthenticationFlowManager.Instance.OpenTokenPanelWithSource(1);
         }
         else
         {

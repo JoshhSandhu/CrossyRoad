@@ -36,6 +36,7 @@ public class TokenTransferPanel : MonoBehaviour
 
     private bool isRefreshing = false;
     private bool isTransferring = false;
+    private int IconOrPanel = 1;
 
     private void Awake()
     {
@@ -81,8 +82,9 @@ public class TokenTransferPanel : MonoBehaviour
     /// <summary>
     /// Open the token transfer panel
     /// </summary>
-    public async void OpenPanel()
+    public async void OpenPanel(int source = 1)
     {
+        IconOrPanel = source;
         if (tokenPanel != null)
         {
             tokenPanel.SetActive(true);
@@ -284,6 +286,15 @@ public class TokenTransferPanel : MonoBehaviour
                 // Close panel after short delay
                 await Task.Delay(1500);
                 ClosePanel();
+                switch (IconOrPanel)
+                {
+                    case 1:
+                        TriggerButtonSlideIn();
+                        break;
+                    case 2:
+                        ShowWelcomePanel();
+                        break;
+                }
             }
             else
             {
@@ -312,6 +323,39 @@ public class TokenTransferPanel : MonoBehaviour
     private void OnBackButtonClicked()
     {
         ClosePanel();
+        switch (IconOrPanel)
+        {
+            case 1:
+                TriggerButtonSlideIn();
+                break;
+            case 2:
+                ShowWelcomePanel();
+                break;
+        }
+    }
+
+    private void TriggerButtonSlideIn()
+    {
+        if (StartScreenManager.Instance != null)
+        {
+            StartScreenManager.Instance.SlideButtonsBackIn();
+        }
+        else
+        {
+            Debug.LogWarning("StartScreenManager not found!");
+        }
+    }
+
+    private void ShowWelcomePanel()
+    {
+        if (AuthenticationFlowManager.Instance != null)
+        {
+            AuthenticationFlowManager.Instance.ShowWelcomePanel();
+        }
+        else
+        {
+            Debug.LogWarning("AuthenticationFlowManager not found!");
+        }
     }
 
     /// <summary>
