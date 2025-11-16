@@ -689,7 +689,7 @@ public class AuthenticationFlowManager : MonoBehaviour
     private void UpdateUI()
     {
         if (authTitleText != null)
-            authTitleText.text = "Welcome to Crossy Road!";
+            authTitleText.text = "Crossy Road";
 
         if (authDescriptionText != null)
             authDescriptionText.text = "Connect your wallet to start playing and unlock exclusive skins!";
