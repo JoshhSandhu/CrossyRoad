@@ -11,17 +11,13 @@ Crossy Road is a **demo application** showcasing Web3 authentication and blockch
 **[Authentication and Setup]**
 
 | Login Screen | Email Verification | Wallet Connection |
-
 |---|---|---|
-
 | <img src="[screenshot-url]" alt="Login Screen" height="360" /> | <img src="[screenshot-url]" alt="Email Verification" height="360" /> | <img src="[screenshot-url]" alt="Wallet Connection" height="360" /> |
 
 **[Gameplay Features]**
 
 | Main Gameplay | Shop & Skins | Token Management |
-
 |---|---|---|
-
 | <img src="[screenshot-url]" alt="Main Gameplay" height="360" /> | <img src="[screenshot-url]" alt="Shop & Skins" height="360" /> | <img src="[screenshot-url]" alt="Token Management" height="360" /> |
 
 **Key Features:**
