@@ -1,250 +1,201 @@
-# Crossy Road - Unity Game with Solana Blockchain Integration
+# Crossy Road
 
-A modern Unity-based endless runner game inspired by Crossy Road, featuring Solana blockchain integration for on-chain player movement tracking and seamless wallet authentication.
+> A Unity-based mobile game that combines classic Crossy Road gameplay with Web3 authentication and Solana blockchain integration. Players navigate through procedurally generated worlds while managing their crypto wallets and tokens.
 
-## 🎮 Game Overview
+## What is this?
 
-Crossy Road is an endless runner where players navigate a character through procedurally generated lanes filled with obstacles, vehicles, water hazards, and collectibles. The objective is to move as far forward as possible while avoiding collisions and collecting coins.
+Crossy Road is a **demo application** showcasing Web3 authentication and blockchain integration in Unity mobile games. It demonstrates seamless user authentication through Privy, Solana wallet management, and token transactions within a classic endless runner game experience.
 
-## ✨ Features
+## Screenshots & Demo
 
-### Core Gameplay
-- **Endless Runner Mechanics**: Procedurally generated world with infinite lanes
-- **Multiple Lane Types**: Grass, Roads, Water, Train Tracks
-- **Dynamic Obstacles**: Moving cars, trains, logs, and environmental hazards
-- **Coin Collection System**: Collect coins to unlock new character skins
-- **Progressive Difficulty**: Game difficulty increases as you progress further
+**[Authentication and Setup]**
 
-### Blockchain Integration
-- **Solana Blockchain Support**: Player movements recorded on Solana devnet
-- **MagicBlocks SDK Integration**: Reliable transaction batching and execution
-- **Privy Wallet Authentication**: Seamless wallet connection and management
-- **Hybrid Transaction Service**: Combines Privy authentication with MagicBlocks SDK
-- **Transaction Batching**: Optimized transaction handling for better performance
+| Login Screen | Email Verification | Wallet Connection |
 
-### Technical Features
-- **SOLID Principles**: Clean architecture with dependency injection
-- **Unity Input System**: Support for both touch and keyboard controls
-- **Object Pooling**: Optimized object management for better performance
-- **Dynamic World Generation**: Procedural lane generation with decorations
-- **Camera System**: Smooth following camera with shake effects
+|---|---|---|
 
-## 🛠️ Technology Stack
+| <img src="[screenshot-url]" alt="Login Screen" height="360" /> | <img src="[screenshot-url]" alt="Email Verification" height="360" /> | <img src="[screenshot-url]" alt="Wallet Connection" height="360" /> |
 
-- **Game Engine**: Unity 6000.2.6f2
-- **Render Pipeline**: Universal Render Pipeline (URP)
-- **Input System**: Unity Input System 1.15.0
-- **Blockchain**: Solana (via Solana Unity SDK)
-- **Wallet**: Privy + MagicBlocks SDK
-- **Architecture**: SOLID principles with dependency injection
+**[Gameplay Features]**
 
-## 📋 Prerequisites
+| Main Gameplay | Shop & Skins | Token Management |
 
-Before you begin, ensure you have the following installed:
+|---|---|---|
 
-- **Unity Hub** with Unity 6000.2.6f2 or compatible version
-- **Visual Studio** or **Visual Studio Code** (for C# development)
-- **Git** (for version control)
-- **Solana Wallet** (Phantom, Solflare, or compatible wallet for blockchain features)
+| <img src="[screenshot-url]" alt="Main Gameplay" height="360" /> | <img src="[screenshot-url]" alt="Shop & Skins" height="360" /> | <img src="[screenshot-url]" alt="Token Management" height="360" /> |
 
-## 🚀 Installation & Setup
+**Key Features:**
 
-### 1. Clone the Repository
+- Web3 authentication via Privy (email login and wallet connection)
 
-```bash
-git clone <repository-url>
-cd CrossyRoad
+- Solana blockchain integration for wallet management and token transactions
+
+- Classic Crossy Road gameplay with procedurally generated worlds
+
+- Customizable player skins and shop system
+
+- Real-time token transfers and balance management
+
+- Mobile-optimized controls and UI
+
+## Project Structure
+
+```
+CrossyRoad/
+├── Assets/
+│   └── _Project/
+│       ├── Scripts/          # C# game scripts
+│       │   ├── Managers/      # Game managers (Auth, UI, Game, etc.)
+│       │   ├── Player/        # Player controller and components
+│       │   ├── World/         # World generation and lane management
+│       │   ├── Obstacles/     # Obstacle spawning and behavior
+│       │   └── UI/            # UI components and panels
+│       ├── Prefabs/           # Unity prefabs
+│       ├── Scenes/            # Unity scenes
+│       ├── Art/               # 3D models and materials
+│       └── UI/                # UI assets and sprites
+├── ProjectSettings/           # Unity project settings
+└── Packages/                 # Unity package dependencies
 ```
 
-### 2. Open in Unity
+## Frontend
 
-1. Launch Unity Hub
-2. Click "Open" or "Add" and select the `CrossyRoad` folder
-3. Wait for Unity to import all assets and packages
+**Tech Stack:**
 
-### 3. Install Dependencies
+- Unity 6000.2.6f2
 
-The project uses Unity Package Manager. All dependencies should be automatically resolved from `Packages/manifest.json`:
+- C# (.NET)
 
-- Solana Unity SDK
+- Privy SDK (Web3 authentication)
+
+- Solana Unity SDK v1.2.7
+
+- Universal Render Pipeline (URP)
+
 - Unity Input System
-- Universal Render Pipeline
-- And other required packages
 
-### 4. Configure MagicBlocks (Optional)
+**Setup:**
 
-For blockchain integration:
+1. **Prerequisites:**
+   - Unity Hub installed
+   - Unity Editor 6000.2.6f2 or compatible version
+   - Android SDK (for Android builds) or Xcode (for iOS builds)
 
-1. Navigate to `Assets/_Project/Scripts/Managers/MagicBlocks/`
-2. Review `MagicBlocks_Installation_Guide.md` for detailed setup instructions
-3. Create a `MagicBlocksConfig` asset in the Project window
-4. Configure RPC endpoint (default: `https://api.devnet.solana.com`)
-5. Set wallet network to `devnet` (or `mainnet` for production)
+2. **Clone and Open:**
+   ```bash
+   git clone [repo-url]
+   cd CrossyRoad
+   ```
+   Open the project in Unity Hub
 
-### 5. Configure Privy (Optional)
+3. **Configure Privy:**
+   - Navigate to `Assets/_Project/Data/privy/`
+   - Create or configure `PrivyConfig.asset` with your Privy App ID and Client ID
+   - Set up Solana RPC URL and network settings
 
-For wallet authentication:
+4. **Build Settings:**
+   - For Android: Set minimum SDK version to 23 (Android 6.0)
+   - For iOS: Configure signing and capabilities as needed
+   - Ensure "isMobileApp" is set to true in `AuthenticationFlowManager.cs` for mobile builds
 
-1. Navigate to `Assets/_Project/Scripts/Managers/privy/`
-2. Set up your Privy configuration
-3. Assign the configuration to the authentication manager
+5. **Build and Run:**
+   - File > Build Settings
+   - Select target platform (Android/iOS)
+   - Click "Build and Run"
 
-## 🎮 Controls
+**Important:** This project requires native dependencies (Privy SDK, Solana SDK) and must be built as a development build for mobile platforms. WebGL builds may have limited functionality.
 
-### Mobile (Touch)
-- **Swipe Up**: Move forward
-- **Swipe Down**: Move backward
-- **Swipe Left**: Move left
-- **Swipe Right**: Move right
+**Documentation:**
 
-### Desktop (Keyboard)
-- **W / Up Arrow**: Move forward
-- **S / Down Arrow**: Move backward
-- **A / Left Arrow**: Move left
-- **D / Right Arrow**: Move right
+- Main scripts are located in `Assets/_Project/Scripts/`
+- Authentication flow: `Assets/_Project/Scripts/Managers/privy/AuthenticationFlowManager.cs`
+- Game management: `Assets/_Project/Scripts/Managers/GameManager.cs`
+- Player controls: `Assets/_Project/Scripts/Player/PlayerController.cs`
 
-## 📁 Project Structure
+## Backend
 
-```
-Assets/
-├── _Project/
-│   ├── Art/                    # Models, Materials, Textures, Animations
-│   ├── Audio/                  # Music and SFX
-│   ├── Prefabs/                # Game object prefabs
-│   ├── Scenes/                 # Unity scenes
-│   ├── Scripts/
-│   │   ├── Camera/             # Camera controllers
-│   │   ├── Data/               # ScriptableObjects and data structures
-│   │   ├── Managers/
-│   │   │   ├── GameManager.cs       # Main game state management
-│   │   │   ├── UIManager.cs         # UI management
-│   │   │   ├── ShopManager.cs       # Skin shop system
-│   │   │   ├── MagicBlocks/         # Solana blockchain integration
-│   │   │   └── privy/               # Privy wallet integration
-│   │   ├── Obstacles/          # Car, Train, Log, Coin scripts
-│   │   ├── Player/
-│   │   │   ├── PlayerController.cs  # Main player controller
-│   │   │   ├── Components/          # SOLID principle components
-│   │   │   ├── Adapters/            # Interface adapters
-│   │   │   └── Interfaces/          # SOLID interfaces
-│   │   ├── UI/                 # UI scripts
-│   │   └── World/              # World generation and lane management
-│   └── UI/                     # UI assets (sprites, prefabs)
-└── Plugins/
-    ├── Android/                # Android-specific plugins
-    └── Privy/                  # Privy SDK integration
-```
+**Tech Stack:**
 
-## 🔗 Blockchain Integration
+- Privy (Authentication and wallet management service)
 
-### Solana Integration
+- Solana RPC (Blockchain network interaction)
 
-The game integrates with Solana blockchain to record player movements on-chain:
+- Magic Blocks (Optional - for on-chain game state management)
 
-- **Network**: Solana Devnet (configurable)
-- **Transactions**: Player movement transactions batched for efficiency
-- **Wallet**: Privy wallet adapter for seamless authentication
-- **SDK**: MagicBlocks Solana Unity SDK
+**Setup:**
 
-### Transaction Flow
+This project uses Privy as the authentication backend service. No local backend server is required.
 
-1. Player makes a movement
-2. Movement is validated
-3. Transaction message is created
-4. Transaction is batched (if batching enabled)
-5. Batch is sent to Solana via MagicBlocks SDK
-6. Transaction signature is received and tracked
+**Configuration:**
 
-### Configuration
+1. **Privy Setup:**
+   - Create a Privy account at https://privy.io
+   - Create a new application
+   - Obtain your App ID and Client ID
+   - Configure authentication methods (Email, Wallet)
 
-Edit the `MagicBlocksSolanaAdapter` component in your scene:
+2. **Solana Configuration:**
+   - Choose Solana network (Mainnet, Devnet, or Testnet)
+   - Configure RPC endpoint in `PrivyConfig.asset`
+   - Set up wallet adapter options if using custom wallets
 
-- **RPC Endpoint**: Solana RPC endpoint URL
-- **Wallet Network**: `devnet` or `mainnet`
-- **Transaction Batching**: Enable/disable batching
-- **Batch Size**: Number of transactions per batch (default: 5)
-- **Transaction Timeout**: Timeout in seconds (default: 5)
+3. **Environment Variables:**
+   - Privy App ID: Set in `PrivyConfig.asset`
+   - Privy Client ID: Set in `PrivyConfig.asset`
+   - Solana RPC URL: Set in `PrivyConfig.asset`
+   - Solana Network: Set in `PrivyConfig.asset`
 
-## 🏗️ Architecture
+**API Endpoints:**
 
-### SOLID Principles
+- Authentication: Handled by Privy SDK
+- Wallet Operations: Handled by Solana Unity SDK
+- Token Transfers: Managed through Solana RPC
 
-The project follows SOLID principles for maintainable and extensible code:
+**Documentation:**
 
-- **Single Responsibility**: Each component has one clear purpose
-- **Open/Closed**: Extensible through interfaces without modifying existing code
-- **Liskov Substitution**: Components can be swapped via interfaces
-- **Interface Segregation**: Focused, minimal interfaces
-- **Dependency Injection**: Dependencies injected through constructors
-
-### Key Components
-
-- **PlayerController**: Orchestrates player behavior
-- **GameManager**: Manages game state and score
-- **WorldGenerator**: Procedurally generates game lanes
-- **MagicBlocksSolanaAdapter**: Handles Solana transactions
-- **HybridTransactionService**: Combines authentication and transaction services
-
-## 🎨 Customization
-
-### Adding New Skins
-
-1. Create skin assets in `Assets/_Project/Art/`
-2. Add skin data to `SkinDatabase` asset
-3. Configure skin properties (name, price, category)
-4. Skins will appear in the shop automatically
-
-### Adding New Lane Types
-
-1. Create lane data scriptable object (extends `LaneData`)
-2. Configure lane properties (obstacles, decorations, spawn settings)
-3. Add lane type to lane spawner configuration
-4. Update `LaneType` enum if needed
-
-## 🐛 Troubleshooting
-
-### Blockchain Issues
-
-- **Transactions not sending**: Check wallet connection and network configuration
-- **MagicBlocks not initializing**: Verify SDK installation and configuration asset setup
-- **Wallet not connecting**: Ensure Privy configuration is correct
-
-### Game Issues
-
-- **Player not moving**: Check input system configuration
-- **Obstacles not spawning**: Verify obstacle spawner configuration and prefabs
-- **Performance issues**: Check object pooling settings and reduce batch sizes
-
-## 📝 Development Notes
-
-- The game uses Unity 6 (6000.2.6f2)
-- Universal Render Pipeline (URP) is required
-- Some features require Solana devnet setup
-- All blockchain features are optional - game can run without wallet connection
-
-## 🤝 Contributing
-
-This is a game development project. Contributions should follow the existing SOLID architecture and code style.
-
-## 📄 License
-
-[Specify your license here]
-
-## 🙏 Credits
-
-- **Unity Technologies**: Unity Engine
-- **Solana Labs**: Solana Blockchain
-- **MagicBlocks**: MagicBlocks SDK
-- **Privy**: Wallet Authentication SDK
-- **Polyperfect**: Low Poly Ultimate Pack (asset pack)
-
-## 🔗 Links
-
-- [Unity Documentation](https://docs.unity3d.com/)
-- [Solana Documentation](https://docs.solana.com/)
-- [MagicBlocks SDK](https://github.com/magicblock-labs/Solana.Unity-SDK)
-- [Privy Documentation](https://docs.privy.io/)
+- Privy Documentation: https://docs.privy.io
+- Solana Unity SDK: https://github.com/magicblock-labs/Solana.Unity-SDK
+- Magic Blocks: https://docs.magicblock.app (if used)
 
 ---
 
-**Note**: This game is in active development. Some features may be incomplete or subject to change.
+## Quick Start (All-in-One)
+
+**1. Clone and Setup:**
+
+```bash
+git clone [repo-url]
+cd CrossyRoad
+```
+
+**2. Open in Unity:**
+
+- Launch Unity Hub
+- Click "Open" and select the `CrossyRoad` folder
+- Wait for Unity to import packages and compile scripts
+
+**3. Configure Privy:**
+
+- In Unity, navigate to `Assets/_Project/Data/privy/PrivyConfig.asset`
+- Enter your Privy App ID and Client ID
+- Configure Solana network settings
+
+**4. Build and Run:**
+
+- File > Build Settings
+- Select Android or iOS platform
+- Click "Build and Run"
+- Install and launch on your device
+
+**5. Test Authentication:**
+
+- Launch the app
+- Choose "Connect Wallet" or "Login with Email"
+- Complete authentication flow
+- Start playing!
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details

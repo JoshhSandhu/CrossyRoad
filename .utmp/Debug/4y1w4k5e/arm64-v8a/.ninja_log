@@ -1,23 +1,23 @@
 # ninja log v5
-1379	4350	7848419429161607	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	a9f337762f438b4e
-666	9683	7848419482640287	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	663984c2c89b9d43
-4350	4962	7848419435228554	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libswappywrapper.so	dd017728802520d5
-748	9248	7848419478249089	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	bd468bc1c8f87578
-819	9244	7848419477083942	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	b526695e7bcd0745
-758	9482	7848419480651968	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e17b12b6629d8c74
-659	9439	7848419480255864	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	880b2c3617f3bba2
-672	9369	7848419479555714	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	86cbeda986b8728c
-875	9679	7848419482610315	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3f120c905f288c44
-1343	10010	7848419485985345	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	8a2f768735423bfb
-10010	10378	7848419489646813	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libgame.so	b27f417e18c747dc
 208	4346	7848471223249397	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	a9f337762f438b4e
+137	18128	7848471361932926	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	663984c2c89b9d43
+132	17863	7848471359026729	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	bd468bc1c8f87578
 4347	5553	7848471236085227	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libswappywrapper.so	dd017728802520d5
 189	17743	7848471358080351	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	b526695e7bcd0745
-132	17863	7848471359026729	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	bd468bc1c8f87578
-183	17957	7848471359934861	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e17b12b6629d8c74
 143	17963	7848471360330355	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	880b2c3617f3bba2
+183	17957	7848471359934861	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e17b12b6629d8c74
 28	17982	7848471360532825	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	86cbeda986b8728c
 196	18120	7848471361897358	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3f120c905f288c44
-137	18128	7848471361932926	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	663984c2c89b9d43
 202	18339	7848471364108781	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	8a2f768735423bfb
 18339	18556	7848471366288480	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libgame.so	b27f417e18c747dc
+1684	5066	7850406134777344	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	a9f337762f438b4e
+5067	5693	7850406141073330	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libswappywrapper.so	dd017728802520d5
+1653	8383	7850406168159360	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	b526695e7bcd0745
+177	8476	7850406169106616	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	bd468bc1c8f87578
+167	8713	7850406171491312	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	86cbeda986b8728c
+183	8814	7850406171694916	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	880b2c3617f3bba2
+229	8825	7850406172325597	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	e17b12b6629d8c74
+204	9039	7850406174725340	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	663984c2c89b9d43
+1126	9060	7850406174957660	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3f120c905f288c44
+1664	9334	7850406177718174	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	8a2f768735423bfb
+9334	9549	7850406179869215	D:/mislanious/Unity/Uinty_projects/Crossy Road/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y1w4k5e/obj/arm64-v8a/libgame.so	b27f417e18c747dc

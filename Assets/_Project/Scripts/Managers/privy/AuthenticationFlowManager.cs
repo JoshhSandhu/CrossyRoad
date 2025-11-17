@@ -4,6 +4,8 @@ using TMPro;
 using System;
 using Privy;
 using System.Threading.Tasks;
+using Solana.Unity.SDK;
+using Solana.Unity.Rpc.Types;
 
 public class AuthenticationFlowManager : MonoBehaviour
 {
@@ -224,17 +226,18 @@ public class AuthenticationFlowManager : MonoBehaviour
             return;
         }
 
-        var embeddedWallets = user.EmbeddedWallets;
-        if (embeddedWallets != null && embeddedWallets.Length > 0)
+        // Check for Solana wallets only, not Ethereum wallets
+        var embeddedSolanaWallets = user.EmbeddedSolanaWallets;
+        if (embeddedSolanaWallets != null && embeddedSolanaWallets.Length > 0)
         {
-            walletAddress = embeddedWallets[0].Address;
+            walletAddress = embeddedSolanaWallets[0].Address;
             hasWallet = true;
-            //Debug.Log($"User has an embedded wallet: {walletAddress}");
+            //Debug.Log($"User has a Solana embedded wallet: {walletAddress}");
             ShowWelcomePanel();
         }
         else
         {
-            //Debug.Log("User does not have an embedded wallet");
+            //Debug.Log("User does not have a Solana embedded wallet");
             hasWallet = false;
             ShowAuthPanel();
         }
@@ -312,44 +315,32 @@ public class AuthenticationFlowManager : MonoBehaviour
     //authentication methods
     public async void ConnectWallet()
     {
-        if (privyInstance == null) return;
-
         try
         {
-            //Debug.Log("Connecting wallet via OAuth...");
-
-            // Configure redirect URI based on platform
-            string redirectUri;
-            if (isMobileApp)
+            if (Web3.Instance == null)
             {
-                // For mobile apps, use your app's URL scheme
-                // Format: your-app-scheme://auth/callback
-                redirectUri = "http://localhost:3000/auth/callback";
-                //Debug.Log("Using web redirect URI for mobile OAuth (Privy limitation)");
+                return;
+            }
+
+            Web3.Instance.rpcCluster = RpcCluster.DevNet;
+            var account = await Web3.Instance.LoginWalletAdapter();
+
+            if (account != null && Web3.Wallet != null)
+            {
+                if (connectWalletButton != null)
+                {
+                    connectWalletButton.interactable = false;
+                }
             }
             else
             {
-                // For web builds
-                redirectUri = "http://localhost:3000/auth/callback";
-                //Debug.Log("Using web redirect URI for OAuth");
-            }
-
-            var authState = await privyInstance.OAuth.LoginWithProvider(OAuthProvider.Google, redirectUri);
-
-            if (authState == AuthState.Authenticated)
-            {
-                //Debug.Log("OAuth login successful");
-            }
-            else
-            {
-                Debug.LogWarning("OAuth login failed or was cancelled");
+                Debug.LogWarning("Failed to connect to Mock MWA. Account or Wallet is null.");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"Wallet connection failed: {e.Message}");
-
-            Debug.LogError("Note: OAuth login may not work properly in Unity Editor. Try building and testing on device/web.");
+            Debug.LogError($"Mock MWA connection failed: {e.Message}");
+            Debug.LogError($"Stack trace: {e.StackTrace}");
         }
     }
 
@@ -436,12 +427,12 @@ public class AuthenticationFlowManager : MonoBehaviour
         //Debug.Log($"Checking wallet for user: {user.Id}");
         //Debug.Log($"Auth state: {authState}");
 
-        var embeddedWallets = user.EmbeddedWallets;
+        var embeddedSolanaWallets = user.EmbeddedSolanaWallets;
         //Debug.Log($"Found {embeddedWallets?.Length ?? 0} embedded wallets");
 
-        if (embeddedWallets != null && embeddedWallets.Length > 0)
+        if (embeddedSolanaWallets != null && embeddedSolanaWallets.Length > 0)
         {
-            walletAddress = embeddedWallets[0].Address;
+            walletAddress = embeddedSolanaWallets[0].Address;
             hasWallet = true;
             //Debug.Log($"User has wallet after email login: {walletAddress}");
             ShowWelcomePanel();
@@ -454,7 +445,7 @@ public class AuthenticationFlowManager : MonoBehaviour
             try
             {
                 //Debug.Log("Creating embedded wallet for authenticated user...");
-                var createWalletTask = user.CreateWallet();
+                var createWalletTask = user.CreateSolanaWallet();
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30)); // 30 second timeout
 
                 var completedTask = await Task.WhenAny(createWalletTask, timeoutTask);
