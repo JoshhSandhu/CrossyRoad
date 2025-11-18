@@ -8,17 +8,23 @@ Crossy Road is a **demo application** showcasing Web3 authentication and blockch
 
 ## Screenshots & Demo
 
-**[Authentication and Setup]**
+### Authentication and Setup
 
 | Login Screen | Email Verification | Wallet Connection |
 |---|---|---|
-| <img src="[screenshot-url]" alt="Login Screen" height="360" /> | <img src="[screenshot-url]" alt="Email Verification" height="360" /> | <img src="[screenshot-url]" alt="Wallet Connection" height="360" /> |
+| <img src="Assets/_Project/Art/Screenshots/LoginScreen.png" alt="Login Screen" width="300" /> | <img src="Assets/_Project/Art/Screenshots/VerifyEmail.png" alt="Email Verification" width="300" /> | <img src="Assets/_Project/Art/Screenshots/SDKConnection.jpg" alt="Wallet Connection" width="300" /> |
 
-**[Gameplay Features]**
+### Gameplay Features
 
-| Main Gameplay | Shop & Skins | Token Management |
+| Main Gameplay | Game Over | Wallet Management |
 |---|---|---|
-| <img src="[screenshot-url]" alt="Main Gameplay" height="360" /> | <img src="[screenshot-url]" alt="Shop & Skins" height="360" /> | <img src="[screenshot-url]" alt="Token Management" height="360" /> |
+| <img src="Assets/_Project/Art/Screenshots/GamePlay.jpg" alt="Main Gameplay" width="300" /> | <img src="Assets/_Project/Art/Screenshots/GameOver.jpg" alt="Game Over" width="300" /> | <img src="Assets/_Project/Art/Screenshots/MyWallet.jpg" alt="Wallet Management" width="300" /> |
+
+### Transaction Flow
+
+| Transaction Approval | Mock Transaction |
+|---|---|
+| <img src="Assets/_Project/Art/Screenshots/TxnApproval.jpg" alt="Transaction Approval" width="400" /> | <img src="Assets/_Project/Art/Screenshots/MockMWAtoPrivyTxn.jpg" alt="Mock Transaction" width="400" /> |
 
 **Key Features:**
 
