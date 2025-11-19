@@ -6,7 +6,7 @@
 
 > For quick start instructions, see [README.md](README.md).
 
-This document explains all the Web3/Solana integration steps implemented in the CrossyRoad game, with detailed explanations of **why** each decision was made, including the use of **Privy for authentication**, **transaction batching** for performance, and the **custom wallet adapter** architecture.
+This document explains all the Solana/Web3 integration steps implemented in the CrossyRoad Unity game, with detailed explanations of **why** each decision was made. Key topics include **Privy's batch transaction approval** (avoiding popups), **transaction batching** for performance, and the **custom wallet adapter** architecture.
 
 ## Table of Contents
 
@@ -26,15 +26,14 @@ This document explains all the Web3/Solana integration steps implemented in the 
 
 ## Overview
 
-CrossyRoad is a Unity-based mobile game that combines classic endless runner gameplay with Web3 authentication and Solana blockchain integration. Players authenticate via Privy (email or wallet), create embedded Solana wallets, and send on-chain transactions for each movement during gameplay. The game demonstrates seamless Web3 integration in Unity with transaction batching for optimal performance.
+CrossyRoad is a Unity-based mobile game that combines classic endless runner gameplay with Solana blockchain integration. Players authenticate via Privy (email login), get embedded Solana wallets automatically, and send on-chain transactions for each movement. The game uses **Privy's batch approval mechanism** to avoid transaction popups during gameplay, combined with transaction batching to reduce fees.
 
 **Key Features:**
-- Web3 authentication via Privy (email login and embedded wallet creation)
+- **Batch Transaction Approval**: User approves once via "Play Game" button, then all transactions sign automatically without popups
 - Solana blockchain integration for wallet management and transaction signing
-- Transaction batching to reduce fees and improve performance
+- Transaction batching to reduce fees (80% cost reduction)
 - Custom wallet adapter bridging Privy SDK and Solana Unity SDK
 - Real-time balance checking and transaction status updates
-- Mobile-optimized UI and transaction approval flow
 
 ---
 
@@ -185,20 +184,20 @@ public class PrivyConfiguration : ScriptableObject
 
 ### Native Module Setup
 
-For Privy SDK to work properly, you need a development build:
+For Privy SDK to work properly, you need a mobile development build:
 
 ```bash
 # In Unity Editor:
 # File > Build Settings
-# Select Android or iOS
+# Select Android
 # Click "Build and Run"
 ```
 
 **Why Not Unity Editor (for full functionality)**:
-- Privy SDK uses native WebView for signing
+- Privy SDK uses native WebView for transaction signing
 - Native WebView only available in mobile builds
 - Editor testing will timeout on transaction signing
-- Must use Android/iOS build for full functionality
+- Must use mobile build for full functionality
 
 ### Verify Setup
 
@@ -219,6 +218,16 @@ Privy initialized. Auth state: Unauthenticated
 
 ## Privy Authentication
 
+### Why Privy?
+
+**The Main Reason**: Privy enables **batch transaction approval** - users approve transactions once via the "Play Game" button, then all subsequent transactions sign automatically **without popups**. This is critical for games where players make many movements, as showing a popup for every transaction would ruin the gameplay experience.
+
+**Additional Benefits**:
+- **Email Login**: Simple email + OTP authentication (no wallet needed initially)
+- **Embedded Wallets**: Automatically creates Solana wallets for users
+- **No Seed Phrases**: Users don't manage private keys
+- **Session Persistence**: Users stay logged in across app restarts
+
 ### Implementation: [AuthenticationFlowManager.cs](Assets/_Project/Scripts/Managers/privy/AuthenticationFlowManager.cs)
 
 ```csharp
@@ -237,30 +246,9 @@ private async Task InitializePrivy()
 }
 ```
 
-### Why This Approach?
+### Authentication Flow
 
-#### 1. **Using Privy for Authentication**
-
-**What**: Privy SDK handles user authentication and wallet management
-
-**Why**:
-- **Email Login**: Users can login with email (no wallet needed initially)
-- **Embedded Wallets**: Automatically creates Solana wallets for users
-- **No Seed Phrases**: Users don't need to manage private keys
-- **Web2-like UX**: Familiar login flow for non-crypto users
-- **Multi-chain Support**: Can extend to other chains later
-
-#### 2. **Email + OTP Flow**
-
-**What**: Email login with OTP (One-Time Password) verification
-
-**Why**:
-- **No Password Required**: Simpler user experience
-- **Secure**: OTP sent to email, expires quickly
-- **Familiar**: Users understand email verification
-- **Privy Handles It**: No backend needed for OTP
-
-**Implementation**:
+**Email + OTP Login**:
 ```csharp
 // Send OTP
 bool codeSent = await privyInstance.Email.SendCode(userEmail);
@@ -269,41 +257,16 @@ bool codeSent = await privyInstance.Email.SendCode(userEmail);
 var authState = await privyInstance.Email.LoginWithCode(userEmail, code);
 ```
 
-#### 3. **Automatic Wallet Creation**
-
-**What**: Create embedded Solana wallet after email authentication
-
-**Why**:
-- **Seamless**: User doesn't need to understand wallets
-- **Automatic**: Wallet created on first login
-- **Secure**: Private keys managed by Privy (encrypted)
-- **No User Friction**: No seed phrase backup needed
-
-**Implementation**:
+**Automatic Wallet Creation**:
 ```csharp
-private async Task CheckWalletAfterEmailLogin()
+// After email login, create Solana wallet if it doesn't exist
+var user = await privyInstance.GetUser();
+if (user.EmbeddedSolanaWallets == null || user.EmbeddedSolanaWallets.Length == 0)
 {
-    var user = await privyInstance.GetUser();
-    var embeddedSolanaWallets = user.EmbeddedSolanaWallets;
-    
-    if (embeddedSolanaWallets == null || embeddedSolanaWallets.Length == 0)
-    {
-        // Create wallet automatically
-        var newWallet = await user.CreateSolanaWallet();
-        walletAddress = newWallet.Address;
-    }
+    var newWallet = await user.CreateSolanaWallet();
+    walletAddress = newWallet.Address;
 }
 ```
-
-#### 4. **Session Persistence**
-
-**What**: Privy SDK automatically persists authentication state
-
-**Why**:
-- **No Re-login**: Users stay logged in across app restarts
-- **Secure Storage**: Privy handles secure token storage
-- **Cross-device**: Can sync across devices (if configured)
-- **Automatic**: No manual session management needed
 
 ---
 
@@ -344,26 +307,21 @@ public class CustomPrivyWalletAdapter : MonoBehaviour
 - **Different Interfaces**: Privy and Solana SDK have different APIs
 - **Unified Interface**: Game code uses one consistent interface
 - **Abstraction**: Changes to either SDK don't break game code
-- **Testability**: Can mock adapter for testing
 
-#### 2. **Transaction Approval Mechanism**
+#### 2. **Transaction Approval Mechanism - The Key Feature**
 
-**What**: User approves transactions by pressing "Play Game" button
+**The Problem**: Without Privy, every transaction would require a wallet popup, interrupting gameplay constantly.
 
-**Why**:
-- **Batch Approval**: User approves once, not per transaction
-- **Better UX**: No popup for every movement
-- **Security**: User explicitly approves before game starts
-- **Game Flow**: Natural part of starting the game
+**The Solution**: User approves transactions **once** by pressing "Play Game" button. After approval, all transactions sign automatically without popups.
 
-**Implementation**:
+**How It Works**:
 ```csharp
-// In AuthenticationFlowManager.cs - StartGame()
+// 1. User presses "Play Game" - approves all future transactions
 public void StartGame()
 {
     isGameReady = true;
     
-    // Approve transactions for this game session
+    // This sets the approval flag - no more popups needed
     if (CustomPrivyWalletAdapter.Instance != null)
     {
         CustomPrivyWalletAdapter.Instance.ApproveTransactionsViaPlayGame();
@@ -372,19 +330,23 @@ public void StartGame()
     GameManager.Instance.StartGame();
 }
 
-// In CustomPrivyWalletAdapter.cs - SignAndSendTransaction()
+// 2. During gameplay, transactions check approval flag (no popup)
 private async Task<string> SignAndSendTransactionInternal(Transaction transaction)
 {
-    // Check if user approved via Play Game button
+    // If user hasn't approved, reject transaction
     if (!hasUserApprovedViaPlayGame)
     {
         Debug.LogWarning("Transaction signing rejected: User has not approved via Play Game button.");
         return null;
     }
     
-    // Proceed with signing...
+    // User approved, sign automatically without popup
+    var signatureString = await privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
+    // ... rest of signing flow
 }
 ```
+
+**Result**: Player makes 100 movements → Only 1 approval needed (at game start) → 100 transactions signed automatically
 
 #### 3. **Transaction Building**
 
@@ -394,7 +356,7 @@ private async Task<string> SignAndSendTransactionInternal(Transaction transactio
 - **Game Data**: Store movement data in transaction memo
 - **On-chain Record**: Permanent record of gameplay
 - **Low Cost**: Memo instructions are cheap (~5000 lamports)
-- **Flexible**: Can include any game data in memo
+- **No Custom Program**: Don't need to deploy a Solana program
 
 **Implementation**:
 ```csharp
@@ -423,15 +385,14 @@ private async Task<Transaction> BuildSolanaTransaction(string message)
 }
 ```
 
-#### 4. **Privy Signing Flow**
+#### 3. **Privy Signing Flow**
 
 **What**: Sign transaction using Privy's embedded wallet provider
 
-**Why**:
-- **Native WebView**: Privy uses native WebView for signing (Android/iOS)
-- **Secure**: Private keys never leave Privy's secure environment
-- **User-Friendly**: Shows transaction details in WebView
-- **Automatic**: Privy handles WebView lifecycle
+**How It Works**:
+- Privy uses native WebView for signing (mobile builds only)
+- Private keys never leave Privy's secure environment
+- After user approval, signing happens automatically without popups
 
 **Implementation**:
 ```csharp
@@ -441,10 +402,10 @@ private async Task<string> SignAndSendTransactionInternal(Transaction transactio
     var messageBytes = transaction.CompileMessage();
     var transactionBase64 = System.Convert.ToBase64String(messageBytes);
     
-    // Request signature from Privy (shows WebView modal)
+    // Request signature from Privy (no popup if user already approved)
     var signatureString = await privyWallet.EmbeddedSolanaWalletProvider.SignMessage(transactionBase64);
     
-    // Attach signature to transaction
+    // Attach signature and send to blockchain
     var signatureBytes = System.Convert.FromBase64String(signatureString);
     transaction.Signatures.Add(new SignaturePubKeyPair
     {
@@ -452,7 +413,6 @@ private async Task<string> SignAndSendTransactionInternal(Transaction transactio
         Signature = signatureBytes
     });
     
-    // Send to blockchain
     var signedTransactionBytes = transaction.Serialize();
     var sendResult = await rpcClient.SendTransactionAsync(signedTransactionBytes);
     
@@ -460,7 +420,7 @@ private async Task<string> SignAndSendTransactionInternal(Transaction transactio
 }
 ```
 
-**⚠️ Important**: Privy signing only works in Android/iOS builds. Unity Editor will timeout because native WebView is not available.
+**⚠️ Important**: Privy signing only works in mobile builds. Unity Editor will timeout because native WebView is not available.
 
 ---
 
@@ -772,10 +732,9 @@ public class HybridTransactionService : MonoBehaviour
 **What**: Separate authentication from transaction logic
 
 **Why**:
-- **Modularity**: Can swap authentication providers
+- **Modularity**: Separates authentication from transaction logic
 - **Testability**: Can mock authentication for testing
 - **Maintainability**: Changes to auth don't affect transactions
-- **Flexibility**: Can add other auth methods later
 
 #### 2. **Unified Interface**
 
@@ -783,9 +742,8 @@ public class HybridTransactionService : MonoBehaviour
 
 **Why**:
 - **Consistency**: Game code uses one service
-- **Abstraction**: Hides complexity of Web3 integration
+- **Abstraction**: Hides complexity of Solana/Privy integration
 - **Simplicity**: Game code doesn't need to know about Privy/MagicBlocks
-- **Future-proof**: Can change implementation without breaking game
 
 #### 3. **Movement Message Creation**
 
@@ -887,7 +845,6 @@ private async void StartAuthenticationFlow()
 - **No Re-login**: Users stay logged in across app restarts
 - **Secure Storage**: Privy handles secure token storage
 - **Automatic**: No manual session management needed
-- **Cross-device**: Can sync across devices (if configured)
 
 #### 2. **Wallet State Checking**
 
@@ -983,10 +940,9 @@ public void Logout()
 **Cause**: Privy signing only works in mobile builds
 
 **Solution**:
-1. Build for Android or iOS (not Unity Editor)
-2. Ensure `isMobileApp = true` in `AuthenticationFlowManager`
-3. Test on physical device (not emulator if possible)
-4. Check network connection
+1. Build for Android (not Unity Editor)
+2. Test on physical device
+3. Check network connection
 
 **Why It Happens**:
 - Privy uses native WebView for signing
@@ -1111,11 +1067,11 @@ public SolanaNetwork solanaNetwork = SolanaNetwork.Devnet;
 #### 3. **Testing Transaction Flow**
 
 **Steps**:
-1. Build for Android/iOS
+1. Build for Android
 2. Install on device
 3. Authenticate via email
 4. Add devnet SOL to wallet
-5. Press "Play Game" to approve transactions
+5. Press "Play Game" to approve transactions (this enables auto-signing)
 6. Play game and verify transactions on Solana Explorer
 
 **Solana Explorer**:
@@ -1197,10 +1153,10 @@ private const float BATCH_INTERVAL = 2f; // 2 seconds
 
 ### Why Privy?
 
-1. **User-Friendly**: Email login (no crypto knowledge needed)
-2. **Embedded Wallets**: Automatic wallet creation
-3. **Secure**: Private keys managed by Privy
-4. **Multi-chain**: Can extend to other chains
+1. **Batch Transaction Approval**: User approves once, all transactions sign automatically without popups
+2. **User-Friendly**: Email login (no crypto knowledge needed)
+3. **Embedded Wallets**: Automatic Solana wallet creation
+4. **Secure**: Private keys managed by Privy
 5. **No Backend**: Privy handles authentication
 
 ### Why Transaction Batching?
