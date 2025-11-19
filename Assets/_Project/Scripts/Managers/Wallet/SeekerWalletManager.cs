@@ -16,7 +16,7 @@ public class SeekerWalletManager : MonoBehaviour
     private bool isConnected = false;
     public bool IsConnected => isConnected && Web3.Wallet != null;
 
-    // Transaction cost per move in lamports (0.000005 SOL = 5000 lamports)
+    //transaction cost per move in lamports (0.000005 SOL = 5000 lamports)
     public const ulong TRANSACTION_COST_PER_MOVE = 5000;
 
     private void Awake()
@@ -33,7 +33,7 @@ public class SeekerWalletManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Connect to Seeker wallet via Mobile Wallet Adapter
+    /// connect to Seeker wallet via Mobile Wallet Adapter
     /// </summary>
     public async Task<bool> ConnectToSeekerWallet()
     {
@@ -45,11 +45,11 @@ public class SeekerWalletManager : MonoBehaviour
                 return false;
             }
 
-            // Set RPC cluster to DevNet
+            //set RPC cluster to DevNet
             Web3.Instance.rpcCluster = RpcCluster.DevNet;
 
-            // This automatically uses SolanaMobileWalletAdapter on Android/iOS
-            // On Seeker emulator, this connects to the Seeker wallet
+            //this automatically uses SolanaMobileWalletAdapter on Android/iOS
+            //on Seeker emulator, this connects to the Seeker wallet
             Debug.Log("Connecting to Seeker wallet via Mobile Wallet Adapter...");
             var account = await Web3.Instance.LoginWalletAdapter();
 
@@ -91,7 +91,6 @@ public class SeekerWalletManager : MonoBehaviour
         try
         {
             var balance = await Web3.Instance.WalletBase.GetBalance();
-            // GetBalance returns double (SOL), convert to lamports (ulong)
             return (ulong)(balance * 1_000_000_000);
         }
         catch (Exception ex)
@@ -122,19 +121,18 @@ public class SeekerWalletManager : MonoBehaviour
         {
             Debug.Log($"Transferring {amountLamports} lamports from Seeker wallet to Privy wallet: {privyAddress}");
 
-            // Use the built-in Transfer method from SDK
-            // Transfer method signature: Transfer(PublicKey destination, ulong amount)
-            var destinationPubKey = new PublicKey(privyAddress);
+            //using the build in transfer method from the SDK
+            var destinationPubKey = new PublicKey(privyAddress); 
             var result = await Web3.Instance.WalletBase.Transfer(
                 destinationPubKey,
                 amountLamports
             );
 
-            // RequestResult has Result (null if failed) and Reason (error message)
+            //RequestResult has Result (null if failed) and Reason (error message)
             if (result.Result != null)
             {
                 Debug.Log($"Transfer successful! Transaction signature: {result.Result}");
-                return result.Result; // Transaction signature
+                return result.Result; //transaction signature
             }
             else
             {

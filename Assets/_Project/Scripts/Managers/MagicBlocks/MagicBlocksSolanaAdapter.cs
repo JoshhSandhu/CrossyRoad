@@ -17,18 +17,12 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     [Header("MagicBlocks Configuration")]
     [SerializeField] private string rpcEndpoint = "https://api.devnet.solana.com";
     [SerializeField] private string walletNetwork = "devnet";
-    [SerializeField] private MagicBlocksConfig config;
     [SerializeField] private bool usePrivyBridge = true;
 
     [Header("Transaction Settings")]
     [SerializeField] private float transactionTimeout = 5f;
     [SerializeField] private bool enableTransactionBatching = true;
     [SerializeField] private int batchSize = 5;
-
-    /// <summary>
-    /// here add the SDK componets after the installation
-    /// </summary>
-    /// 
 
     //custom pruivy wallet adapter
     private CustomPrivyWalletAdapter customPrivyAdapter;
@@ -66,10 +60,8 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// <summary>
     /// Initializing the MagicBlocks SDK with the custom privy wallet adapter
     /// </summary>
-    /// 
     private async void InitializeMagicBlocks()
     {
-        //Here add the SDK initialization code after installation
         try
         {
             Debug.Log("Init Solana SDK with custom privy wallet adapter...");
@@ -106,7 +98,6 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// <summary>
     /// Send Solana transaction using magicblocks SDK
     /// </summary>
-    /// 
     public async Task<string> SendTransaction(string message)
     {
         try
@@ -133,7 +124,6 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// <summary>
     /// Send transacion immediatly using custom privy wallet adapter
     /// </summary>
-    /// 
     private async Task<string> SendImmediateTransaction(string message)
     {
         try
@@ -174,7 +164,6 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// <summary>
     /// sending transaction as a batch
     /// </summary>
-    /// 
     private async Task<string> SendBatchedTransaction(string message)
     {
         //adding the batch to the queue
@@ -202,7 +191,6 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
     /// <summary>
     /// process the current batch of transactions
     /// </summary>
-    /// 
     private async Task<string> ProcessBatch()
     {
         if(pendingTransactions.Count == 0)
@@ -261,37 +249,6 @@ public class MagicBlocksSolanaAdapter : MonoBehaviour
             pendingTransactions.Clear();
             return null;
         }
-    }
-
-
-    /// <summary>
-    /// create movement transcation
-    /// </summary>
-    /// 
-    private object CreateMovementTransaction(string message)
-    {
-
-        //TODO: impl transacion creation with magicblocks sdk
-
-        return new
-        {
-            type = "movement_transaction",
-            message = message,
-            timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            game = "CrossyRoad",
-            network = walletNetwork
-        };
-    }
-
-
-    /// <summary>
-    /// generate a mock signature for testing
-    /// </summary>
-    private string GenerateMockSignature(string data)
-    {
-        var hash = System.Security.Cryptography.SHA256.Create()
-            .ComputeHash(System.Text.Encoding.UTF8.GetBytes($"{data}_{Time.time}"));
-        return System.Convert.ToBase64String(hash);
     }
 
     /// <summary>
