@@ -18,7 +18,7 @@ Crossy Road is a **demo application** showcasing Web3 authentication and blockch
 
 | Main Gameplay | Game Over | Gameplay Video |
 |---|---|---|
-| <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GamePlay.jpg" alt="Main Gameplay" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GameOver.jpg" alt="Game Over" width="300" /> | [![Gameplay Video](https://img.youtube.com/vi/awPB35Bf9oA/0.jpg)](https://www.youtube.com/shorts/awPB35Bf9oA) |
+| <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GamePlay.jpg" alt="Main Gameplay" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GameOver.jpg" alt="Game Over" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/crossy road gif.gif" alt="Gameplay Gif" width="300" /> |
 
 ### Transaction Flow
 
