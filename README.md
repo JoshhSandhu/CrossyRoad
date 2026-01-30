@@ -12,19 +12,19 @@ Crossy Road is a **demo application** showcasing Web3 authentication and blockch
 
 | Login Screen | Email Verification | Wallet Connection |
 |---|---|---|
-| <img src="Assets/_Project/Art/Screenshots/LoginScreen.png" alt="Login Screen" width="300" /> | <img src="Assets/_Project/Art/Screenshots/VerifyEmail.png" alt="Email Verification" width="300" /> | <img src="Assets/_Project/Art/Screenshots/SDKConnection.jpg" alt="Wallet Connection" width="300" /> |
+| <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/LoginScreen.png" alt="Login Screen" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/VerifyEmail.png" alt="Email Verification" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/SDKConnection.jpg" alt="Wallet Connection" width="300" /> |
 
 ### Gameplay Features
 
-| Main Gameplay | Game Over | Wallet Management |
+| Main Gameplay | Game Over | Gameplay Video |
 |---|---|---|
-| <img src="Assets/_Project/Art/Screenshots/GamePlay.jpg" alt="Main Gameplay" width="300" /> | <img src="Assets/_Project/Art/Screenshots/GameOver.jpg" alt="Game Over" width="300" /> | <img src="Assets/_Project/Art/Screenshots/MyWallet.jpg" alt="Wallet Management" width="300" /> |
+| <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GamePlay.jpg" alt="Main Gameplay" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/GameOver.jpg" alt="Game Over" width="300" /> | <video width="300" controls><source src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/VID_20260129_174657_1.MP4" type="video/mp4">Your browser does not support the video tag.</video> |
 
 ### Transaction Flow
 
-| Transaction Approval | Mock Transaction |
-|---|---|
-| <img src="Assets/_Project/Art/Screenshots/TxnApproval.jpg" alt="Transaction Approval" width="400" /> | <img src="Assets/_Project/Art/Screenshots/MockMWAtoPrivyTxn.jpg" alt="Mock Transaction" width="400" /> |
+| Transaction Approval | Mock Transaction | Wallet Management |
+|---|---|---|
+| <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/TxnApproval.jpg" alt="Transaction Approval" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/MockMWAtoPrivyTxn.jpg" alt="Mock Transaction" width="300" /> | <img src="https://raw.githubusercontent.com/JoshhSandhu/CrossyRoad/GameDev/Assets/_Project/Art/Screenshots/MyWallet.jpg" alt="Wallet Management" width="300" /> |
 
 **Key Features:**
 
