@@ -294,6 +294,24 @@ public class AuthenticationFlowManager : MonoBehaviour
         await UpdateWelcomePanel();
         isGameReady = false;
         //Debug.Log("Showing Welcome Panel");
+
+        // Attempt silent MWA reconnect using cached auth token.
+        _ = TryReconnectMwaWallet();
+    }
+
+    private async Task TryReconnectMwaWallet()
+    {
+        try
+        {
+            var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+            if (adapter == null) return;
+
+            await adapter.ReconnectWallet();
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"[MWA] Silent reconnect not available: {e.Message}");
+        }
     }
 
     //private void ShowLoadingPanel()
@@ -483,10 +501,29 @@ public class AuthenticationFlowManager : MonoBehaviour
         {
             privyInstance.Logout();
             //Debug.Log("User logged out");
+
+            _ = DisconnectMwaWallet();
         }
         catch (Exception e)
         {
             Debug.LogError($"Logout failed: {e.Message}");
+        }
+    }
+
+    private async Task DisconnectMwaWallet()
+    {
+        try
+        {
+            var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+            if (adapter != null)
+            {
+                await adapter.DisconnectWallet();
+                Debug.Log("[MWA] Wallet deauthorized on logout");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[MWA] DisconnectWallet on logout failed: {e.Message}");
         }
     }
 

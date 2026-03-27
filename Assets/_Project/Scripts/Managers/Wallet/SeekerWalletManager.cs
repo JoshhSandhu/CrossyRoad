@@ -32,6 +32,50 @@ public class SeekerWalletManager : MonoBehaviour
         }
     }
 
+    private void SubscribeToWalletEvents()
+    {
+        var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+        if (adapter == null) return;
+
+        adapter.OnWalletDisconnected += OnMwaWalletDisconnected;
+        adapter.OnWalletReconnected  += OnMwaWalletReconnected;
+    }
+
+    private void OnMwaWalletDisconnected()
+    {
+        isConnected = false;
+        Debug.Log("[MWA] Wallet disconnected -- auth token cleared");
+        TransactionToastManager.Instance?.ShowToast(
+            "Wallet disconnected",
+            false,
+            TransactionToastManager.ToastPosition.Bottom
+        );
+    }
+
+    private void OnMwaWalletReconnected()
+    {
+        isConnected = true;
+        Debug.Log("[MWA] Wallet silently reconnected via cached token");
+        TransactionToastManager.Instance?.ShowToast(
+            "Wallet reconnected",
+            true,
+            TransactionToastManager.ToastPosition.Bottom
+        );
+    }
+
+    private void UnsubscribeFromWalletEvents()
+    {
+        var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+        if (adapter == null) return;
+        adapter.OnWalletDisconnected -= OnMwaWalletDisconnected;
+        adapter.OnWalletReconnected  -= OnMwaWalletReconnected;
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromWalletEvents();
+    }
+
     /// <summary>
     /// connect to Seeker wallet via Mobile Wallet Adapter
     /// </summary>
@@ -57,6 +101,36 @@ public class SeekerWalletManager : MonoBehaviour
             {
                 isConnected = true;
                 Debug.Log($"Connected to Seeker wallet: {Web3.Wallet.Account.PublicKey}");
+
+                try
+                {
+                    var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+                    if (adapter != null)
+                    {
+                        var caps = await adapter.GetCapabilities();
+                        if (caps != null)
+                        {
+                            Debug.Log($"[MWA] Capabilities -- " +
+                                $"MaxTx: {caps.MaxTransactionsPerRequest}, " +
+                                $"MaxMsg: {caps.MaxMessagesPerRequest}, " +
+                                $"Versions: {string.Join(",", caps.SupportedTransactionVersions ?? new string[0])}, " +
+                                $"CloneAuth: {caps.SupportsCloneAuthorization}");
+
+                            TransactionToastManager.Instance?.ShowToast(
+                                "Wallet connected",
+                                true,
+                                TransactionToastManager.ToastPosition.Bottom
+                            );
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[MWA] GetCapabilities failed: {e.Message}");
+                }
+
+                SubscribeToWalletEvents();
+
                 return true;
             }
             else
@@ -164,13 +238,30 @@ public class SeekerWalletManager : MonoBehaviour
     /// <summary>
     /// Disconnect from Seeker wallet
     /// </summary>
-    public void Disconnect()
+    public async Task Disconnect()
     {
-        if (Web3.Instance != null)
+        UnsubscribeFromWalletEvents();
+
+        try
         {
+            var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+            if (adapter != null)
+            {
+                await adapter.DisconnectWallet();
+            }
+            else
+            {
+                Web3.Instance.Logout();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[MWA] Disconnect failed: {e.Message}");
             Web3.Instance.Logout();
+        }
+        finally
+        {
             isConnected = false;
-            Debug.Log("Disconnected from Seeker wallet");
         }
     }
 }
