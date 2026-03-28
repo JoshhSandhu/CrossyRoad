@@ -46,6 +46,7 @@ public class StartScreenManager : MonoBehaviour
         }
 
         storeButtonPos();
+        HideButtonsInitially();
 
         SetGameObjActive(true);
     }
@@ -58,7 +59,8 @@ public class StartScreenManager : MonoBehaviour
         }
         playerInputActions.Enable();
 
-        ShowStartScreen();
+        if (startScreenPanel != null)
+            startScreenPanel.SetActive(true);
 
         StartCoroutine(WaitForPlayerMovement());
     }
@@ -218,18 +220,29 @@ public class StartScreenManager : MonoBehaviour
 
         StartCoroutine(WaitForPlayerMovement());
     }
-    public void SlideButtonsBackIn()
+    public void SlideButtonsIn()
     {
-        Debug.Log("SlideButtonsBackIn() called");
         if (startScreenPanel != null)
-        {
             startScreenPanel.SetActive(true);
-            Debug.Log("StartScreenPanel re-enabled for slide-in animation");
-        }
-        StartCoroutine(SlideButtonsIn());
+        StartCoroutine(SlideButtonsInCoroutine());
     }
 
-    private IEnumerator SlideButtonsIn()
+    public void SlideButtonsBackIn()
+    {
+        SlideButtonsIn();
+    }
+
+    private void HideButtonsInitially()
+    {
+        for (int i = 0; i < leftButtons.Length; i++)
+            leftButtons[i].transform.localPosition =
+                leftbuttonsStartPos[i] + new Vector3(-slideDist, 0, 0);
+        for (int i = 0; i < rightButtons.Length; i++)
+            rightButtons[i].transform.localPosition =
+                rightbuttonsStartPos[i] + new Vector3(slideDist, 0, 0);
+    }
+
+    private IEnumerator SlideButtonsInCoroutine()
     {
         Debug.Log("SlideButtonsIn coroutine started");
         Vector3[] leftCurrentPositions = new Vector3[leftButtons.Length];
