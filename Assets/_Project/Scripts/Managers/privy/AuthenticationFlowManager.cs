@@ -192,30 +192,44 @@ public class AuthenticationFlowManager : MonoBehaviour
         UpdateUI();
     }
 
-    //starting the auth flow
     private async void StartAuthenticationFlow()
     {
-        //Debug.Log("Starting authentication flow...");
+        string loginMethod = WalletSessionState.GetLoginMethod();
+
+        if (loginMethod == WalletSessionState.LOGIN_SEEKER ||
+            loginMethod == WalletSessionState.LOGIN_BOTH)
+        {
+            // Web3.Wallet is always null on startup.
+            // LoginWalletAdapter() will use cached PlayerPrefs["pk"] and
+            // PlayerPrefs["authToken"] to silently reauthorize via the SDK
+            // auth cache without showing a wallet popup.
+            bool reconnected = await TryReconnectMwaWalletWithResult();
+            if (reconnected)
+            {
+                ShowWelcomePanel();
+                if (!_buttonsSlid)
+                {
+                    _buttonsSlid = true;
+                    StartScreenManager.Instance?.SlideButtonsIn();
+                }
+                return;
+            }
+            // Reconnect failed -- cached token expired or revoked
+            // Clear login method so we dont retry on next launch
+            WalletSessionState.ClearLoginMethod();
+        }
 
         if (privyInstance != null)
         {
             var authState = await privyInstance.GetAuthState();
             if (authState == AuthState.Authenticated)
             {
-                //Debug.Log("User is already authenticated, checking wallet status");
                 CheckWalletStatus();
-            }
-            else
-            {
-                //Debug.Log("User not authenticated, showing auth panel");
-                ShowAuthPanel();
+                return;
             }
         }
-        else
-        {
-            //Debug.Log("Privy not ready, showing auth panel");
-            ShowAuthPanel();
-        }
+
+        ShowAuthPanel();
     }
 
     //checking the wallet ststus
@@ -331,6 +345,38 @@ public class AuthenticationFlowManager : MonoBehaviour
         }
     }
 
+    private async Task<bool> TryReconnectMwaWalletWithResult()
+    {
+        try
+        {
+            // Web3.Wallet is null on startup.
+            // Call LoginWalletAdapter() directly -- it creates the adapter
+            // and uses cached authToken + pk for silent reauthorize.
+            // No wallet popup appears if the cached token is valid.
+            Debug.Log("[MWA] Attempting silent reconnect via LoginWalletAdapter");
+            var account = await Web3.Instance.LoginWalletAdapter();
+
+            if (account != null)
+            {
+                WalletSessionState.IsSeekerConnected = true;
+                SeekerWalletManager.Instance?.SetConnectedFromExternal();
+                TransactionToastManager.Instance?.ShowToast(
+                    "Wallet reconnected", true,
+                    TransactionToastManager.ToastPosition.Bottom);
+                Debug.Log("[MWA] Silent reconnect succeeded");
+                return true;
+            }
+
+            Debug.Log("[MWA] LoginWalletAdapter returned null -- reconnect failed");
+            return false;
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"[MWA] Silent reconnect not available: {e.Message}");
+            return false;
+        }
+    }
+
     //private void ShowLoadingPanel()
     //{
     //    HideAllPanels();
@@ -366,6 +412,10 @@ public class AuthenticationFlowManager : MonoBehaviour
                 {
                     connectWalletButton.interactable = false;
                 }
+
+                WalletSessionState.IsSeekerConnected = true;
+                WalletSessionState.SetLoginMethod(WalletSessionState.LOGIN_SEEKER);
+                SeekerWalletManager.Instance?.SetConnectedFromExternal();
 
                 TransactionToastManager.Instance?.ShowToast(
                     "Wallet connected", true,
@@ -479,6 +529,8 @@ public class AuthenticationFlowManager : MonoBehaviour
         {
             walletAddress = embeddedSolanaWallets[0].Address;
             hasWallet = true;
+            WalletSessionState.IsPrivyConnected = true;
+            WalletSessionState.SetLoginMethod(WalletSessionState.LOGIN_PRIVY);
             ShowWelcomePanel();
             TransactionToastManager.Instance?.ShowToast(
                 "Privy connected", true,
@@ -511,6 +563,8 @@ public class AuthenticationFlowManager : MonoBehaviour
                 var newWallet = await createWalletTask;
                 walletAddress = newWallet.Address;
                 hasWallet = true;
+                WalletSessionState.IsPrivyConnected = true;
+                WalletSessionState.SetLoginMethod(WalletSessionState.LOGIN_PRIVY);
                 ShowWelcomePanel();
                 TransactionToastManager.Instance?.ShowToast(
                     "Privy connected", true,
@@ -534,18 +588,38 @@ public class AuthenticationFlowManager : MonoBehaviour
 
     public void Logout()
     {
-        _ = DisconnectMwaWallet();
+        string loginMethod = WalletSessionState.GetLoginMethod();
 
-        if (privyInstance != null)
+        if (loginMethod == WalletSessionState.LOGIN_SEEKER ||
+            loginMethod == WalletSessionState.LOGIN_BOTH)
         {
-            try { privyInstance.Logout(); }
+            _ = DisconnectMwaWallet();
+        }
+
+        if ((loginMethod == WalletSessionState.LOGIN_PRIVY ||
+             loginMethod == WalletSessionState.LOGIN_BOTH) &&
+            privyInstance != null)
+        {
+            try { 
+                privyInstance.Logout(); 
+                PlayerPrefs.Save();
+                Debug.Log($"[Privy] Auth state after logout: {privyInstance.GetAuthState()}");
+            }
             catch (Exception e)
             { Debug.LogError($"Privy logout failed: {e.Message}"); }
         }
 
+        WalletSessionState.IsSeekerConnected = false;
+        WalletSessionState.IsPrivyConnected = false;
+        WalletSessionState.ClearLoginMethod();
         _mwaReconnectAttempted = false;
         _buttonsSlid = false;
         ShowAuthPanel();
+
+        if (connectWalletButton != null)
+            connectWalletButton.interactable = true;
+
+        StartScreenManager.Instance?.HideButtons();
     }
 
     private async Task DisconnectMwaWallet()
@@ -745,9 +819,16 @@ public class AuthenticationFlowManager : MonoBehaviour
         HideAllPanels();
         OpenTokenPanelWithSource(2);
     }
+    public void OpenTokenPanelFromIcon()
+    {
+        HideAllPanels();
+        if (tokenTransferPanel != null)
+            tokenTransferPanel.OpenPanel(2);
+    }
 
     public void OpenTokenPanelWithSource(int source)
     {
+        HideAllPanels();
         if (tokenTransferPanel != null)
         {
             tokenTransferPanel.OpenPanel(source);

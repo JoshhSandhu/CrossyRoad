@@ -220,6 +220,11 @@ public class StartScreenManager : MonoBehaviour
 
         StartCoroutine(WaitForPlayerMovement());
     }
+    public void HideButtons()
+    {
+        StartCoroutine(SlideButtonsOut());
+    }
+
     public void SlideButtonsIn()
     {
         if (startScreenPanel != null)

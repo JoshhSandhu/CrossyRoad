@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using Solana.Unity.SDK;
@@ -32,6 +33,28 @@ public class SeekerWalletManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        StartCoroutine(WaitAndSubscribeToWalletEvents());
+    }
+
+    private IEnumerator WaitAndSubscribeToWalletEvents()
+    {
+        float timeout = 10f;
+        float elapsed = 0f;
+
+        while (Web3.Wallet == null && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (Web3.Wallet != null)
+            SubscribeToWalletEvents();
+        else
+            Debug.LogWarning("[MWA] Web3.Wallet still null after 10s, events not subscribed");
+    }
+
     private void SubscribeToWalletEvents()
     {
         var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
@@ -44,6 +67,7 @@ public class SeekerWalletManager : MonoBehaviour
     private void OnMwaWalletDisconnected()
     {
         isConnected = false;
+        WalletSessionState.IsSeekerConnected = false;
         Debug.Log("[MWA] Wallet disconnected -- auth token cleared");
         TransactionToastManager.Instance?.ShowToast(
             "Wallet disconnected",
@@ -55,6 +79,7 @@ public class SeekerWalletManager : MonoBehaviour
     private void OnMwaWalletReconnected()
     {
         isConnected = true;
+        WalletSessionState.IsSeekerConnected = true;
         Debug.Log("[MWA] Wallet silently reconnected via cached token");
         TransactionToastManager.Instance?.ShowToast(
             "Wallet reconnected",
@@ -74,6 +99,17 @@ public class SeekerWalletManager : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeFromWalletEvents();
+    }
+
+    /// <summary>
+    /// Called when Seeker wallet was connected from an external path
+    /// (e.g. AuthenticationFlowManager.ConnectWallet) that bypasses
+    /// SeekerWalletManager.ConnectToSeekerWallet().
+    /// </summary>
+    public void SetConnectedFromExternal()
+    {
+        isConnected = true;
+        WalletSessionState.IsSeekerConnected = true;
     }
 
     /// <summary>
@@ -155,11 +191,11 @@ public class SeekerWalletManager : MonoBehaviour
         if (!IsConnected)
         {
             Debug.LogWarning("Seeker wallet not connected. Attempting to connect...");
-            var connected = await ConnectToSeekerWallet();
-            if (!connected)
-            {
-                return 0;
-            }
+            //var connected = await ConnectToSeekerWallet();
+            return 0;
+            // if (!connected)
+            // {
+            // }
         }
 
         try

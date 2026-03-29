@@ -3926,17 +3926,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 995490650}
-        m_TargetAssemblyTypeName: TokenTransferPanel, Assembly-CSharp
-        m_MethodName: OpenPanel
-        m_Mode: 3
+      - m_Target: {fileID: 1891029792}
+        m_TargetAssemblyTypeName: AuthenticationFlowManager, Assembly-CSharp
+        m_MethodName: OpenTokenPanelFromIcon
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &507651910
 GameObject:
@@ -8543,6 +8543,10 @@ MonoBehaviour:
   refreshButton: {fileID: 535728309}
   privyLoginButton: {fileID: 127768706}
   seekerConnectWalletButton: {fileID: 158974566}
+  walletTabToggle: {fileID: 2080574225}
+  tabGroupManager: {fileID: 0}
+  seekerToggleSwitch: {fileID: 2080574225}
+  privyToggleSwitch: {fileID: 2080574225}
   loadingIndicator: {fileID: 2009802882}
 --- !u!4 &995490651
 Transform:
@@ -17802,6 +17806,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 995490650}
+        m_TargetAssemblyTypeName: TokenTransferPanel, Assembly-CSharp
+        m_MethodName: OnPrivyTabActivated
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   onToggleOff:
     m_PersistentCalls:
       m_Calls:
@@ -17845,6 +17861,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
         m_MethodName: set_interactable
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 995490650}
+        m_TargetAssemblyTypeName: TokenTransferPanel, Assembly-CSharp
+        m_MethodName: OnSeekerTabActivated
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
