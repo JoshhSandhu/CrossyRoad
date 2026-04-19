@@ -3,59 +3,61 @@
 **Author:** Josh Sandhu  
 **GitHub:** https://github.com/JoshhSandhu
 
-**Relevant Repositories and PRs:**
+**Merged Contributions to Solana.Unity-SDK:**
 - [PR #259 - Android Duplicate Class Fix (Merged)](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/259) - solves [#247](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/247) and [#254](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/254)
 - [PR #269 - Lifecycle + Session Correctness + React Native Parity (Merged)](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/269) - solves [#267](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/267)
 - [PR #276 - Unity Test Framework Infrastructure (Merged)](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/276)
+
+**Reference Example Application:**
 - [CrossyRoad - Seeker Example App](https://github.com/JoshhSandhu/CrossyRoad)
 
 ## Executive Summary
 
-This proposal requests **$10,000 USD equivalent in SKR** to complete and ship the Unity Mobile Wallet Adapter parity surface needed for production-quality Solana Seeker game development.
+This proposal requests **$10,000 USD equivalent in SKR** to complete and ship the remaining Unity Mobile Wallet Adapter parity surface required for production-quality Solana Seeker game development.
 
-Work has already been delivered across three merged SDK contributions, a Seeker-validated Unity example app, and follow-on parity work spanning auth caching, documentation, and transaction submission ergonomics.
+This work builds on recently merged lifecycle correctness improvements and testing infrastructure contributions to the Solana.Unity-SDK, alongside a Seeker-validated Unity example application and follow-up parity work spanning authorization caching, documentation alignment, transaction submission ergonomics, and expanded lifecycle regression coverage in coordination with SDK maintainers.
 
 These changes were validated directly inside gameplay loops running on Solana Seeker hardware.
 
-The goal is not a single feature contribution. It is ownership of the Unity MWA lifecycle and parity surface so Unity developers can build against Solana Mobile with the same confidence and developer experience already available in the React Native SDK.
+The goal is not a single feature contribution. It is ownership of the Unity Mobile Wallet Adapter lifecycle and parity surface so Unity developers can build against Solana Mobile with the same confidence and developer experience already available in the React Native SDK.
 
 ## Alignment With Solana Seeker Ecosystem Adoption
 
 This work enables Unity developers to deploy production-quality mobile gameplay experiences directly targeting Solana Seeker hardware.
 
-The CrossyRoad integration demonstrates end-to-end wallet lifecycle correctness inside a real gameplay loop, reducing uncertainty for developers adopting Solana Mobile Wallet Adapter flows inside Unity projects.
+The CrossyRoad Seeker integration demonstrates end-to-end Mobile Wallet Adapter lifecycle correctness inside a production-style Unity gameplay loop running directly on Solana Seeker hardware, reducing uncertainty for developers adopting Solana Mobile wallet flows inside Unity projects.
 
-By closing SDK, testing, and documentation gaps, Solana Seeker becomes more accessible to Unity game developers who would otherwise need to build and maintain custom session-management infrastructure.
+By closing SDK parity, lifecycle coverage, regression testing, and documentation gaps, this work makes Solana Seeker significantly more accessible to Unity game developers who would otherwise need to implement and maintain custom Mobile Wallet Adapter session-management infrastructure themselves.
 
 ## Alignment With Unity MWA Parity RFP
 
 This proposal directly addresses the Unity Mobile Wallet Adapter parity RFP requirements by:
 
 - fixing session lifecycle correctness
-- exposing capabilities negotiation
+- exposing wallet capability negotiation
 - implementing reconnect and deauthorize flows
-- introducing regression test infrastructure
+- introducing regression test infrastructure for SDK stability
 - delivering documentation parity with the React Native SDK
-- validating integration inside a gameplay loop on Solana Seeker hardware
+- validating integration inside a production-style Unity gameplay loop on Solana Seeker hardware
 
 The scope is focused on parity completion and production readiness rather than speculative feature work.
 
 ## Ecosystem Problem Statement
 
-Unity developers targeting Solana Mobile currently lack lifecycle-complete Mobile Wallet Adapter support compared to the React Native SDK. This creates integration friction, increases boilerplate, and makes production-quality gameplay flows harder to ship.
+Unity developers targeting Solana Mobile currently lack lifecycle-complete Mobile Wallet Adapter support compared to the React Native SDK. This creates integration friction, increases boilerplate requirements, and makes production-quality gameplay flows harder to ship reliably on Solana Seeker hardware.
 
-Current SDK limitations include:
+Prior to the recent lifecycle correctness and testing infrastructure improvements merged into the Solana.Unity-SDK, key limitations included:
 
-- `Logout()` clears local state only and does not revoke the wallet authorization session
-- no `ReconnectWallet()` for silent session restoration after app restart
-- no `DisconnectWallet()` for clean teardown with deauthorization
-- no `GetCapabilities()` exposure for MWA 2.0 feature negotiation
-- no extensible auth token cache abstraction for secure persistence
-- `keepConnectionAlive` can restore cached account state without verifying the auth token is still valid
-- no automated test infrastructure for lifecycle regressions
-- no Unity lifecycle documentation matching the React Native SDK
+- `Logout()` clearing local state without revoking the wallet authorization session
+- missing `ReconnectWallet()` support for silent session restoration after app restart
+- missing `DisconnectWallet()` support for clean session teardown with de-auth
+- no `GetCapabilities()` exposure for Mobile Wallet Adapter 2.0 feature negotiation
+- no extensible authorization token cache abstraction for secure persistence
+- `keepConnectionAlive` restoring cached account state without verifying token validity
+- no automated lifecycle regression testing infrastructure
+- no Unity lifecycle documentation aligned with the React Native SDK parity surface
 
-These gaps were not theoretical. They surfaced while integrating Mobile Wallet Adapter flows into the SolRacer gameplay loop during Frontier Hackathon development, and they were independently confirmed by another developer in [issue #273](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/273), who had to build custom workarounds to ship their own Unity integration.
+These gaps were not theoretical. They surfaced directly while integrating Mobile Wallet Adapter flows into the SolRacer gameplay loop during Frontier Hackathon development, and were independently confirmed by another Unity developer in [issue #273](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/273), who reported needing custom workarounds to ship their own Mobile Wallet Adapter integration.
 
 ## Contributions Delivered So Far
 
@@ -63,7 +65,11 @@ These gaps were not theoretical. They surfaced while integrating Mobile Wallet A
 
 [PR #259](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/259) fixed a real Android build failure in the Solana Unity SDK caused by overlapping AndroidX and Guava artifacts being included both as packaged plugin files and as Gradle-resolved dependencies. In affected projects, Gradle reported duplicate classes such as `android.support.v4.app.RemoteActionCompatParcelizer` and `com.google.guava.listenablefuture`, which stopped Android compilation before an APK or AAB could be produced.
 
-This mattered for Unity mobile developers because the failure reproduced in fresh projects immediately after importing the SDK, blocking normal Android build and run workflows and forcing manual library cleanup as a workaround. It also mattered for Solana Seeker targeting, since Seeker validation depends on successful Android device builds to test Mobile Wallet Adapter and Seed Vault flows on real hardware. The merged upstream fix removed that adoption blocker by moving dependency handling back under Gradle control, and it established contributor trust with maintainers by landing a nontrivial Android build-system fix through review.
+This mattered for Unity mobile developers because the failure reproduced in fresh projects immediately after importing the SDK, blocking normal Android build and run workflows and forcing manual library cleanup as a workaround.
+
+It also mattered for Solana Seeker targeting, since Seeker validation depends on successful Android device builds to test Mobile Wallet Adapter and Seed Vault flows on real hardware.
+
+The merged upstream fix removed that adoption blocker by moving dependency handling back under Gradle control, and it established contributor trust with maintainers by landing a nontrivial Android build-system fix through review.
 
 - technical change made: removed conflicting packaged AndroidX and Guava artifacts and added `AndroidGradleAutoConfig` to patch `mainTemplate.gradle` with compatible dependency resolution rules
 - issues resolved: fixes the duplicate-class Android build failure in [#247](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/247) and the same import-to-build Android blocker reported again in [#254](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/254)
@@ -73,32 +79,40 @@ This mattered for Unity mobile developers because the failure reproduced in fres
 
 [PR #269](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/269) addresses [issue #267](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/267), a real Mobile Wallet Adapter lifecycle bug where `keepConnectionAlive` could restore cached `Account` state from `PlayerPrefs["pk"]` without restoring a valid `authToken`-backed authorization session.
 
-`keepConnectionAlive` is supposed to make process restarts safe for mobile apps: if a cached session is still valid, login should silently reauthorize and return the game to a usable connected state; if it is no longer valid, the SDK should clear stale state and surface a fresh `Authorize()` prompt during reconnect. Before this fix, the adapter could come back after app restart looking connected while lacking a valid auth session, so the first `SignTransaction()` or `SignMessage()` call triggered a full wallet approval flow in the middle of gameplay instead of during login.
+`keepConnectionAlive` is supposed to make process restarts safe for mobile apps: if a cached session is still valid, login should silently reauthorize and return the game to a usable connected state; if it is no longer valid, the SDK should clear stale state and surface a fresh `Authorize()` prompt during reconnect.
 
-For gameplay integrations, that is not a cosmetic reconnect issue. It is a session-correctness failure that breaks the expected game loop. On Solana Seeker, where real gameplay flows depend on Mobile Wallet Adapter and Seed Vault-backed wallet approvals on device, stale session restoration creates ambiguous player state, interrupts actions such as signing match results or reward claims, and makes explicit logout or account switching unreliable after process death. PR #269 fixes that by coupling cached account restoration to cached authorization restoration and by clearing both local and wallet-side session state when the player intentionally disconnects.
+Before this fix, the adapter could come back after app restart looking connected while lacking a valid auth session, so the first `SignTransaction()` or `SignMessage()` call triggered a full wallet approval flow in the middle of gameplay instead of during login.
 
-This work also moves the Unity SDK into parity with the core lifecycle expectations mobile teams already rely on in React Native integrations: reconnect flows should route through `reauthorize`, logout should support explicit wallet-side `deauthorize`, capabilities should be queryable through `get_capabilities`, and apps should have explicit reconnect and disconnect surfaces plus lifecycle events. In that sense, PR #269 is not just a bug fix; it restores the lifecycle correctness required for production mobile gameplay integrations on Solana Seeker and other Android MWA targets.
+For gameplay integrations, that is not a cosmetic reconnect issue. It is a session-correctness failure that breaks the expected game loop. On Solana Seeker, where real gameplay flows depend on Mobile Wallet Adapter and Seed Vault-backed wallet approvals on device, stale session restoration creates ambiguous player state, interrupts actions such as signing match results or reward claims, and makes explicit logout or account switching unreliable after process death.
+
+PR #269 fixes that by coupling cached account restoration to cached authorization restoration and by clearing both local and wallet-side session state when the player intentionally disconnects.
+
+This work also moves the Unity SDK into parity with the core lifecycle expectations mobile teams already rely on in React Native integrations: reconnect flows should route through `reauthorize`, logout should support explicit wallet-side `deauthorize`, capabilities should be queryable through `get_capabilities`, and apps should have explicit reconnect and disconnect surfaces plus lifecycle events.
+
+In that sense, [PR #269](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/269) is not just a bug fix; it restores the lifecycle correctness required for production mobile gameplay integrations on Solana Seeker and other Android MWA targets.
 
 **Changes implemented in the PR:**
 
 | Feature | Status |
 |---|---|
-| `DisconnectWallet()` - deauthorizes the wallet-side session before clearing local state | Done |
-| `ReconnectWallet()` - re-enters through the cached-token reauthorize path and fires reconnect events on success | Done |
-| `GetCapabilities()` - exposes the MWA 2.0 capabilities RPC for wallet feature and limit negotiation | Done |
+| `DisconnectWallet()`: deauthorizes the wallet-side session before clearing local state | Done |
+| `ReconnectWallet()`: re-enters through the cached-token `reauthorize` path and fires reconnect events on success | Done |
+| `GetCapabilities()`: exposes the MWA 2.0 capabilities RPC for wallet feature and limit negotiation | Done |
 | `Deauthorize()` added to `IAdapterOperations` and `MobileWalletAdapterClient` | Done |
 | `OnWalletDisconnected` and `OnWalletReconnected` events | Done |
-| `keepConnectionAlive` fix - requires successful reauthorization before restoring cached session state | Done |
-| `IMwaAuthCache` follow-on tracked in [#271](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/271) | Tracked |
+| `keepConnectionAlive` fix: requires successful reauthorization before restoring cached session state | Done |
 
 - reconnect correctness after process restart: cached account restore now succeeds only when cached authorization is also restored through `Reauthorize()`, otherwise stale state is cleared and login falls back to a fresh `Authorize()` flow
 - logout correctness requiring fresh Seed Vault approval: `DisconnectWallet()` uses `Deauthorize()` before local cleanup so a post-logout relaunch requires new wallet approval instead of silently reviving stale authorization
 - capability negotiation availability: `GetCapabilities()` exposes wallet limits, supported transaction versions, and clone-authorization support needed for MWA 2.0 parity
-- explicit wallet-side deauthorization support: Unity now exposes the full `authorize` / `reauthorize` / `deauthorize` lifecycle surface, with `DisconnectWallet()` + `ReconnectWallet()` completing the app-facing control path
+- explicit wallet-side deauthorization support: Unity now exposes the full `authorize` / `reauthorize` / `deauthorize` lifecycle surface, with `DisconnectWallet()` + `ReconnectWallet()` completing the app facing control path
 
-All changes were validated on Solana Seeker hardware inside a gameplay loop. That validation mattered because the bug reproduced as a real process-restart desynchronization on device, and the fix needed to prove both silent reconnect correctness and explicit logout correctness under actual gameplay conditions. A screen recording demonstrating the flows is attached to PR #269.
+All changes were validated on Solana Seeker hardware inside a gameplay loop. That validation mattered because the bug reproduced as a real process-restart desynchronization on device, and the fix needed to prove both silent reconnect correctness and explicit logout correctness under actual gameplay conditions.
 
-**Screen Recording**
+A screen recording demonstrating the flows is attached to PR #269.
+
+Screen Recording can also be viewed here:
+
 https://youtube.com/shorts/d_3qBRdb2BU?feature=share
 
 ### PR #276 - Unity Test Framework Infrastructure
@@ -128,7 +142,7 @@ All 31 tests are passing in the Unity Test Runner in EditMode.
 
 **Unity Test Framework validation screenshot:**
 
-![Unity Test Framework EditMode results](test-framework.png)
+![Unity Test Framework EditMode results](images/test-framework.png)
 
 ### CrossyRoad Seeker Example App (Gameplay Validation)
 
@@ -162,9 +176,9 @@ Silent restoration is validated through `TryReconnectMwaWalletWithResult()`, whi
 
 Fresh approval is validated through the logout path.
 
-`AuthenticationFlowManager.Logout()` calls `DisconnectMwaWallet()`, which invokes the SDK disconnect flow; in the lifecycle fix set this executes wallet-side `Deauthorize()` before local state is cleared. Combined with clearing the stored login method, this ensures the next launch cannot silently reuse the prior session and must request fresh Seed Vault approval.
+`AuthenticationFlowManager.Logout()` calls `DisconnectMwaWallet()`, which invokes the SDK disconnect flow; in the lifecycle fix set this executes walletside `Deauthorize()` before local state is cleared. Combined with clearing the stored login method, this ensures the next launch cannot silently reuse the prior session and must request fresh Seed Vault approval.
 
-`GetCapabilities()` is called in `SeekerWalletManager.ConnectToSeekerWallet()` immediately after successful MWA connection. This matters because the example validates real device capabilities such as transaction/message request limits and clone-authorization support before treating the wallet as production-ready for gameplay-linked actions.
+`GetCapabilities()` is called in `SeekerWalletManager.ConnectToSeekerWallet()` immediately after successful MWA connection. This matters because the example validates real device capabilities such as transaction/message request limits and clone-authorization support before treating the wallet as productionready for gameplay-linked actions.
 
 Wallet lifecycle events are propagated back into gameplay state instead of remaining isolated inside a wallet demo scene.
 
@@ -176,7 +190,7 @@ Wallet lifecycle events are propagated back into gameplay state instead of remai
 
 Testing inside CrossyRoad is materially different from SDK-only validation because wallet state is not observed in isolation; it directly controls whether the player can resume, enter the game, access wallet-linked UI, and continue through connected gameplay flows after restart. This exposes regressions that a standalone wallet scene can miss, especially around timing, UI state transitions, and reconnect behavior under actual scene flow.
 
-Validation was performed on Solana Seeker hardware using real Mobile Wallet Adapter and Seed Vault authorization flows, including first approval, silent reconnect after relaunch, and forced reapproval after explicit logout. That is the relevant operational path for Solana mobile games, not a simulator-only or editor-only approximation.
+Validation was performed on Solana Seeker hardware using real Mobile Wallet Adapter and Seed Vault authorization flows, including first approval, silent reconnect after relaunch, and forced reapproval after explicit logout. That is the relevant operational path for Solana mobile games, not a simulator-only or editoronly approximation.
 
 Lifecycle correctness matters for mobile game UX because stale sessions, unnecessary approval prompts, or incomplete logout behavior translate directly into broken resume flows, blocked play entry, and inconsistent wallet-dependent UI after the app is backgrounded, killed, or reopened. In a gameplay context, these are user-facing failures, not just SDK edge cases.
 
@@ -236,9 +250,20 @@ The need for Unity Mobile Wallet Adapter lifecycle and parity improvements has a
 
 - [Issue #273](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/273) independently documented the same lifecycle and parity gaps encountered during gameplay integration, confirming that these limitations affected multiple Unity developers building against Solana Mobile Wallet Adapter.
 - Chris from the Solana ecosystem acknowledged the Unity regression testing infrastructure introduced in PR #276 as a meaningful improvement to SDK stability and long-term maintainability for Mobile Wallet Adapter integrations inside Unity environments, reinforcing the need for structured lifecycle testing support within the Solana.Unity-SDK.
+
+  ![Chris acknowledging the Unity regression testing infrastructure in PR #276](images/chris-reply.png)
+
 - Jonas from MagicBlock requested the addition of Unity regression test infrastructure inside the MagicBlock Builders Telegram channel, which directly informed the implementation delivered in PR #276.
+
+  ![Jonas requesting Unity regression test infrastructure in the MagicBlock Builders Telegram channel](images/jonas-chat-testingframework.png)
+
 - Solana.Unity-SDK maintainer Kuldotha reviewed and positively acknowledged the lifecycle correctness fixes and supporting infrastructure contributions, confirming alignment with SDK stability priorities and production readiness goals.
+
+  ![Kuldotha acknowledging the lifecycle correctness fixes and supporting infrastructure contributions](images/kuldotha_maintainer.png)
+
 - Andy from MagicBlock publicly acknowledged the upstream Android duplicate-class fix delivered in PR #259, which resolved a Unity 6 + Android build issue blocking Solana Mobile Wallet Adapter integration and improved SDK usability for developers targeting Solana Seeker hardware.
+
+  ![Andy from MagicBlock acknowledging the upstream Android duplicate-class fix in PR #259](images/andy_magicblocks.png)
 
 Together, this feedback demonstrates that the proposed work is not speculative parity exploration. It reflects active ecosystem demand and maintainer-aligned improvements already moving the Unity Mobile Wallet Adapter toward production readiness on Solana Seeker hardware.
 
