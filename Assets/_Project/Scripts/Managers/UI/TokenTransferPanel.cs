@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Toggle.UI;
 
 /// <summary>
 /// Manages the token transfer panel UI for transferring SOL from Seeker wallet to Privy wallet
@@ -30,6 +31,16 @@ public class TokenTransferPanel : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button backButton;
     [SerializeField] private Button refreshButton;
+
+    [Header("Auth Buttons (for TokenPanel wallet tabs)")]
+    [SerializeField] private Button privyLoginButton;
+    [SerializeField] private Button seekerConnectWalletButton;
+
+    [Header("Toggle References")]
+    [SerializeField] private ToggleSwitch walletTabToggle;
+    [SerializeField] private ToggleSwitchGroupManager tabGroupManager;
+    [SerializeField] private ToggleSwitch seekerToggleSwitch;
+    [SerializeField] private ToggleSwitch privyToggleSwitch;
 
     [Header("Loading Indicator")]
     [SerializeField] private GameObject loadingIndicator;
@@ -67,6 +78,11 @@ public class TokenTransferPanel : MonoBehaviour
             copyPrivyAddressButton.onClick.AddListener(OnCopyPrivyAddressClicked);
         }
 
+        if (privyLoginButton != null)
+            privyLoginButton.onClick.AddListener(OnPrivyLoginClicked);
+        if (seekerConnectWalletButton != null)
+            seekerConnectWalletButton.onClick.AddListener(OnSeekerConnectClicked);
+
         // Hide panel initially
         if (tokenPanel != null)
         {
@@ -88,6 +104,30 @@ public class TokenTransferPanel : MonoBehaviour
         if (tokenPanel != null)
         {
             tokenPanel.SetActive(true);
+
+            WalletSessionState.IsSeekerConnected =
+                SeekerWalletManager.Instance != null &&
+                SeekerWalletManager.Instance.IsConnected;
+            WalletSessionState.IsPrivyConnected =
+                CustomPrivyWalletAdapter.Instance != null &&
+                CustomPrivyWalletAdapter.Instance.IsReady();
+
+            if (!WalletSessionState.IsSeekerConnected &&
+                 WalletSessionState.IsPrivyConnected &&
+                 privyToggleSwitch != null)
+            {
+                privyToggleSwitch.ToggleByGroupManager(true);
+                if (seekerToggleSwitch != null)
+                    seekerToggleSwitch.ToggleByGroupManager(false);
+            }
+            else
+            {
+                if (seekerToggleSwitch != null)
+                    seekerToggleSwitch.ToggleByGroupManager(true);
+                if (privyToggleSwitch != null)
+                    privyToggleSwitch.ToggleByGroupManager(false);
+            }
+
             await RefreshBalances();
         }
     }
@@ -116,31 +156,30 @@ public class TokenTransferPanel : MonoBehaviour
 
         try
         {
-            // Connect to Seeker wallet if not connected
-            if (SeekerWalletManager.Instance != null && !SeekerWalletManager.Instance.IsConnected)
-            {
-                await SeekerWalletManager.Instance.ConnectToSeekerWallet();
-            }
+            WalletSessionState.IsSeekerConnected =
+                SeekerWalletManager.Instance != null &&
+                SeekerWalletManager.Instance.IsConnected;
+            WalletSessionState.IsPrivyConnected =
+                CustomPrivyWalletAdapter.Instance != null &&
+                CustomPrivyWalletAdapter.Instance.IsReady();
 
-            // Update Seeker wallet info
-            if (SeekerWalletManager.Instance != null && SeekerWalletManager.Instance.IsConnected)
+            if (WalletSessionState.IsSeekerConnected)
             {
                 var seekerAddress = SeekerWalletManager.Instance.GetSeekerAddress();
                 var seekerBalance = await SeekerWalletManager.Instance.GetSeekerBalance();
 
                 if (seekerAddressText != null)
                 {
-                    // Show shortened address in UI, copy button has full address
                     string shortAddress = seekerAddress != null && seekerAddress.Length > 12
                         ? $"{seekerAddress.Substring(0, 6)}...{seekerAddress.Substring(seekerAddress.Length - 6)}"
                         : seekerAddress ?? "Not Connected";
                     seekerAddressText.text = $"{shortAddress}";
-                    seekerAddressText.color = Color.lightGreen;
+                    seekerAddressText.color = Color.green;
                 }
 
                 if (seekerBalanceText != null)
                 {
-                    double solBalance = seekerBalance / 1_000_000_000.0; // Convert lamports to SOL
+                    double solBalance = seekerBalance / 1_000_000_000.0;
                     seekerBalanceText.text = $"{solBalance:F6} SOL";
                 }
             }
@@ -157,25 +196,23 @@ public class TokenTransferPanel : MonoBehaviour
                 }
             }
 
-            // Update Privy wallet info
-            if (CustomPrivyWalletAdapter.Instance != null && CustomPrivyWalletAdapter.Instance.IsReady())
+            if (WalletSessionState.IsPrivyConnected)
             {
                 var privyAddress = CustomPrivyWalletAdapter.Instance.GetWalletAddress();
                 var privyBalance = await CustomPrivyWalletAdapter.Instance.GetPrivyBalance();
 
                 if (privyAddressText != null)
                 {
-                    // Show shortened address in UI, copy button has full address
                     string shortAddress = privyAddress != null && privyAddress.Length > 12
                         ? $"{privyAddress.Substring(0, 6)}...{privyAddress.Substring(privyAddress.Length - 6)}"
                         : privyAddress ?? "Not Available";
                     privyAddressText.text = $"{shortAddress}";
-                    privyAddressText.color = Color.lightGreen;
+                    privyAddressText.color = Color.green;
                 }
 
                 if (privyBalanceText != null)
                 {
-                    double solBalance = privyBalance / 1_000_000_000.0; // Convert lamports to SOL
+                    double solBalance = privyBalance / 1_000_000_000.0;
                     privyBalanceText.text = $"{solBalance:F6} SOL";
                 }
             }
@@ -191,6 +228,11 @@ public class TokenTransferPanel : MonoBehaviour
                     privyBalanceText.text = "0 SOL";
                 }
             }
+
+            if (walletTabToggle != null && walletTabToggle.CurrentValue)
+                OnPrivyTabActivated();
+            else
+                OnSeekerTabActivated();
         }
         catch (Exception ex)
         {
@@ -202,6 +244,44 @@ public class TokenTransferPanel : MonoBehaviour
             isRefreshing = false;
             SetLoading(false);
         }
+    }
+
+    public void OnSeekerTabActivated()
+    {
+        if (seekerConnectWalletButton != null)
+            seekerConnectWalletButton.gameObject.SetActive(
+                !WalletSessionState.IsSeekerConnected);
+
+        if (privyLoginButton != null)
+            privyLoginButton.gameObject.SetActive(false);
+
+        UpdateTransferSectionVisibility();
+    }
+
+    public void OnPrivyTabActivated()
+    {
+        if (privyLoginButton != null)
+            privyLoginButton.gameObject.SetActive(
+                !WalletSessionState.IsPrivyConnected);
+
+        if (seekerConnectWalletButton != null)
+            seekerConnectWalletButton.gameObject.SetActive(false);
+
+        UpdateTransferSectionVisibility();
+    }
+
+    private void UpdateTransferSectionVisibility()
+    {
+        bool bothConnected = WalletSessionState.IsSeekerConnected
+                          && WalletSessionState.IsPrivyConnected;
+
+        if (transferButton != null)
+        {
+            transferButton.gameObject.SetActive(bothConnected);
+            transferButton.interactable = bothConnected;
+        }
+        if (transferAmountInput != null)
+            transferAmountInput.gameObject.SetActive(bothConnected);
     }
 
     /// <summary>
@@ -292,7 +372,7 @@ public class TokenTransferPanel : MonoBehaviour
                         TriggerButtonSlideIn();
                         break;
                     case 2:
-                        ShowWelcomePanel();
+                        ShowWelcomePanelDirect();
                         break;
                 }
             }
@@ -329,7 +409,7 @@ public class TokenTransferPanel : MonoBehaviour
                 TriggerButtonSlideIn();
                 break;
             case 2:
-                ShowWelcomePanel();
+                ShowWelcomePanelDirect();
                 break;
         }
     }
@@ -346,11 +426,11 @@ public class TokenTransferPanel : MonoBehaviour
         }
     }
 
-    private void ShowWelcomePanel()
+    private void ShowWelcomePanelDirect()
     {
         if (AuthenticationFlowManager.Instance != null)
         {
-            AuthenticationFlowManager.Instance.ShowWelcomePanel();
+            AuthenticationFlowManager.Instance.ShowWelcomePanelDirect();
         }
         else
         {
@@ -364,6 +444,35 @@ public class TokenTransferPanel : MonoBehaviour
     private async void OnRefreshButtonClicked()
     {
         await RefreshBalances();
+    }
+
+    private void OnPrivyLoginClicked()
+    {
+        ClosePanel();
+        if (AuthenticationFlowManager.Instance != null)
+            AuthenticationFlowManager.Instance.ShowEmailLoginPanel();
+    }
+
+    private async void OnSeekerConnectClicked()
+    {
+        try
+        {
+            if (SeekerWalletManager.Instance != null)
+            {
+                await SeekerWalletManager.Instance.ConnectToSeekerWallet();
+                if (SeekerWalletManager.Instance.IsConnected)
+                {
+                    TransactionToastManager.Instance?.ShowToast(
+                        "Wallet connected", true,
+                        TransactionToastManager.ToastPosition.Bottom);
+                }
+                await RefreshBalances();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[MWA] Connect wallet failed: {e.Message}");
+        }
     }
 
     /// <summary>
