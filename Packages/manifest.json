@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.solana.unity_sdk": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#fix/mwa-keepConnectionAlive-auth-token-restore",
+    "com.solana.unity_sdk": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#feat/mwa-auth-cache-abstraction",
     "com.unity.2d.enhancers": "1.0.0",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.adaptiveperformance.google.android": "6.0.0",

@@ -211,6 +211,29 @@ Planned implementation goals:
 - make reconnect behavior easier to reason about in production apps
 - create a cleaner test seam for lifecycle and persistence validation
 
+Current upstream status: implementation work is now open in [PR #284](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/284), which addresses duplicate tracker issues [#271](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/271) and [#272](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/272). The PR introduces a narrow `IMwaAuthCache` interface with `Get`, `Set`, and `Clear` methods for auth-token persistence, plus a default `PlayerPrefsAuthCache` implementation that preserves the post-PR #269 storage key and default behavior for existing projects.
+
+The purpose of [PR #284](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/284) is to move the SDK from hardcoded plaintext `PlayerPrefs` token storage toward an injectable persistence layer. Production Unity mobile games can keep the default behavior for compatibility, or provide their own Android Keystore, EncryptedSharedPreferences, iOS Keychain, or other secure-storage-backed implementation without forking the SDK internals.
+
+The PR keeps the public API backward compatible by adding the auth cache as an optional constructor parameter on the wallet adapters. Existing call sites continue to compile unchanged, while advanced apps can inject a custom cache when they need stronger at-rest protection or per-wallet identity scoping.
+
+Open PR #284 also adds EditMode coverage for the new cache behavior, including round-trip storage, clear behavior, null and empty token handling, scoped-key isolation, backward compatibility with the PR #269 key, and constructor injection guards. The PR body notes that it was tested on Android with Solana Seeker through Mobile Wallet Adapter inside the CrossyRoad example app.
+
+### MWA lifecycle regression test coverage (#283)
+
+[PR #283](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/283) is an open tooling follow-up to [PR #276](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/276) and the lifecycle work merged in [PR #269](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/269). It adds automated EditMode coverage for the Mobile Wallet Adapter lifecycle surface that was previously validated manually on device.
+
+This PR is tooling-only and does not modify runtime SDK behavior. Its value is regression protection for the parity work already delivered: `Deauthorize`, `GetCapabilities`, `keepConnectionAlive` auth-token restoration, and the legacy-to-namespaced PlayerPrefs migration introduced around the PR #269 lifecycle fixes.
+
+The test coverage added in [PR #283](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/283) includes:
+
+- `CapabilitiesResultTests` for MWA capability response JSON mapping, nullable fields, unknown-field tolerance, and `Response<T>` envelope behavior
+- `MobileWalletAdapterClientLifecycleTests` for exact JSON-RPC request shape, method names, params, request ID sequencing, and return types for `deauthorize` and `get_capabilities`
+- `IAdapterOperationsContractTests` for reflection-based interface contract checks, including `[Preserve]` coverage and the expected six-method adapter surface
+- `SolanaMobileWalletAdapterPrefsTests` for namespaced PlayerPrefs keys, legacy `pk` / `authToken` migration behavior, idempotence, and half-migrated install cases
+
+The PR reports 44 new EditMode tests across 4 test classes, bringing the visible Unity Test Runner total from the earlier baseline to 78 passing EditMode tests in the screenshot attached to the PR. This strengthens the grant's regression-safety story by showing that the lifecycle parity work is being backed by automated tests rather than remaining dependent only on manual Seeker device validation.
+
 ### Documentation parity with React Native SDK
 
 Unity lifecycle documentation will be added to `solana-mobile/solana-mobile-doc-site-v2`, mirroring the React Native Mobile Wallet Adapter documentation structure.
@@ -366,8 +389,11 @@ Overall expected execution window: approximately 2 weeks, subject primarily to m
 - [PR #259 - Android Duplicate Class Fix](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/259)
 - [PR #269 - Lifecycle + Session Correctness + React Native Parity](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/269)
 - [PR #276 - Unity Test Framework Infrastructure](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/276)
+- [PR #283 - MWA Lifecycle EditMode Regression Tests](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/283)
+- [PR #284 - Injectable MWA Auth Token Cache Abstraction](https://github.com/magicblock-labs/Solana.Unity-SDK/pull/284)
 - [Issue #189 - SignAndSendTransaction parity follow-on](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/189)
 - [Issue #267 - keepConnectionAlive bug](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/267)
 - [Issue #271 - IMwaAuthCache tracking](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/271)
+- [Issue #272 - IMwaAuthCache duplicate tracking issue](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/272)
 - [CrossyRoad Example App](https://github.com/JoshhSandhu/CrossyRoad)
 - [Solana Unity SDK Repository](https://github.com/magicblock-labs/Solana.Unity-SDK)

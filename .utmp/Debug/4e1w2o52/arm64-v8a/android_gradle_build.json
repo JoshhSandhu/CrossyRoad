@@ -6,14 +6,14 @@
   ],
   "cleanCommandsComponents": [
     [
-      "D:\\mislanious\\Unity\\Unity_installs\\6000.3.9f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "D:\\mislanious\\Unity\\Unity_installs\\6000.4.0f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
       "-C",
       "D:\\mislanious\\Unity\\Uinty_projects\\Crossy Road\\.utmp\\Debug\\4e1w2o52\\arm64-v8a",
       "clean"
     ]
   ],
   "buildTargetsCommandComponents": [
-    "D:\\mislanious\\Unity\\Unity_installs\\6000.3.9f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "D:\\mislanious\\Unity\\Unity_installs\\6000.4.0f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
     "-C",
     "D:\\mislanious\\Unity\\Uinty_projects\\Crossy Road\\.utmp\\Debug\\4e1w2o52\\arm64-v8a",
     "{LIST_OF_TARGETS_TO_BUILD}"
@@ -36,8 +36,8 @@
   },
   "toolchains": {
     "toolchain": {
-      "cCompilerExecutable": "D:\\mislanious\\Unity\\Unity_installs\\6000.3.9f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
-      "cppCompilerExecutable": "D:\\mislanious\\Unity\\Unity_installs\\6000.3.9f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+      "cCompilerExecutable": "D:\\mislanious\\Unity\\Unity_installs\\6000.4.0f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "D:\\mislanious\\Unity\\Unity_installs\\6000.4.0f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
     }
   },
   "cFileExtensions": [],

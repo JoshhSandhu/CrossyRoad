@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.solana.unity_sdk": {
-      "version": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#fix/mwa-keepConnectionAlive-auth-token-restore",
+      "version": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#feat/mwa-auth-cache-abstraction",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.textmeshpro": "3.0.6"
       },
-      "hash": "3c84d89cf17a116bec04bd8425351798c5c9227f"
+      "hash": "e874dfe5d4f110fcf6672048bbed167daa2bfd22"
     },
     "com.unity.2d.common": {
       "version": "13.0.1",
