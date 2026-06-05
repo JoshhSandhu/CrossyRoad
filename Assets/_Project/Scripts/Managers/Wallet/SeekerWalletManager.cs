@@ -15,6 +15,7 @@ public class SeekerWalletManager : MonoBehaviour
     public static SeekerWalletManager Instance { get; private set; }
 
     private bool isConnected = false;
+    private static bool _capabilitiesFetched = false;
     public bool IsConnected => isConnected && Web3.Wallet != null;
 
     //transaction cost per move in lamports (0.000005 SOL = 5000 lamports)
@@ -141,8 +142,11 @@ public class SeekerWalletManager : MonoBehaviour
                 try
                 {
                     var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
-                    if (adapter != null)
+                    // GetCapabilities opens its own MWA association. Fetch once
+                    // per process so reconnects don't fire an extra wallet flow.
+                    if (adapter != null && !_capabilitiesFetched)
                     {
+                        _capabilitiesFetched = true;
                         var caps = await adapter.GetCapabilities();
                         if (caps != null)
                         {

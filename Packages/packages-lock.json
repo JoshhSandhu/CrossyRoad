@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.solana.unity_sdk": {
-      "version": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#feat/mwa-auth-cache-abstraction",
+      "version": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#test/wallet-cache",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.textmeshpro": "3.0.6"
       },
-      "hash": "e874dfe5d4f110fcf6672048bbed167daa2bfd22"
+      "hash": "a592af694a04705794bbd3b6441ff0c1f0402efb"
     },
     "com.unity.2d.common": {
       "version": "13.0.1",
@@ -160,6 +160,13 @@
     "com.unity.mathematics": {
       "version": "1.3.3",
       "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.mobile.android-logcat": {
+      "version": "1.4.7",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

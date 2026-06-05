@@ -70,6 +70,7 @@ public class AuthenticationFlowManager : MonoBehaviour
     private bool isGameReady = false;
     private bool _mwaReconnectAttempted = false;
     private bool _buttonsSlid = false;
+    private bool _isLoggingOut = false;
 
     private void Awake()
     {
@@ -311,7 +312,10 @@ public class AuthenticationFlowManager : MonoBehaviour
         await UpdateWelcomePanel();
         isGameReady = false;
 
-        if (!_mwaReconnectAttempted)
+        // Only attempt silent reconnect when not already logged in and not
+        // logging out. Prevents a second MWA Login() firing on top of an
+        // existing session (double reauth / wallet popup while logged in).
+        if (!_mwaReconnectAttempted && !_isLoggingOut && Web3.Wallet == null)
         {
             _mwaReconnectAttempted = true;
             _ = TryReconnectMwaWallet();
@@ -328,6 +332,7 @@ public class AuthenticationFlowManager : MonoBehaviour
 
     private async Task TryReconnectMwaWallet()
     {
+        if (_isLoggingOut) return;
         try
         {
             var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
@@ -420,7 +425,9 @@ public class AuthenticationFlowManager : MonoBehaviour
                 TransactionToastManager.Instance?.ShowToast(
                     "Wallet connected", true,
                     TransactionToastManager.ToastPosition.Bottom);
-                ShowWelcomePanel();
+                // Already logged in via LoginWalletAdapter above. Use Direct so
+                // we don't fire a second reauth through ShowWelcomePanel.
+                ShowWelcomePanelDirect();
                 if (!_buttonsSlid)
                 {
                     _buttonsSlid = true;
@@ -586,14 +593,19 @@ public class AuthenticationFlowManager : MonoBehaviour
         }
     }
 
-    public void Logout()
+    public async void Logout()
     {
+        // Block any in-flight / future silent reconnect from racing the
+        // disconnect (avoids Login() firing during/after Logout).
+        _isLoggingOut = true;
+        _mwaReconnectAttempted = true;
+
         string loginMethod = WalletSessionState.GetLoginMethod();
 
         if (loginMethod == WalletSessionState.LOGIN_SEEKER ||
             loginMethod == WalletSessionState.LOGIN_BOTH)
         {
-            _ = DisconnectMwaWallet();
+            await DisconnectMwaWallet();
         }
 
         if ((loginMethod == WalletSessionState.LOGIN_PRIVY ||
@@ -614,6 +626,7 @@ public class AuthenticationFlowManager : MonoBehaviour
         WalletSessionState.ClearLoginMethod();
         _mwaReconnectAttempted = false;
         _buttonsSlid = false;
+        _isLoggingOut = false;
         ShowAuthPanel();
 
         if (connectWalletButton != null)
@@ -626,14 +639,17 @@ public class AuthenticationFlowManager : MonoBehaviour
     {
         try
         {
-            var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
-            if (adapter != null)
+            // Web3.Logout() clears local session/cache only (no MWA association,
+            // no Deauthorize) so logout does NOT open the wallet selector.
+            // DisconnectWallet() would deauthorize wallet-side and pop the sheet.
+            if (Web3.Wallet != null)
             {
-                await adapter.DisconnectWallet();
+                Web3.Instance.Logout();
                 TransactionToastManager.Instance?.ShowToast(
                     "Wallet disconnected", false,
                     TransactionToastManager.ToastPosition.Bottom);
             }
+            await Task.CompletedTask;
         }
         catch (Exception e)
         {
