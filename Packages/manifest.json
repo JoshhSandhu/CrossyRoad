@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.solana.unity_sdk": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#test/wallet-cache",
+    "com.solana.unity_sdk": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#feat/wallet-cache",
     "com.unity.2d.enhancers": "1.0.0",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.adaptiveperformance.google.android": "6.0.0",

@@ -639,17 +639,17 @@ public class AuthenticationFlowManager : MonoBehaviour
     {
         try
         {
-            // Web3.Logout() clears local session/cache only (no MWA association,
-            // no Deauthorize) so logout does NOT open the wallet selector.
-            // DisconnectWallet() would deauthorize wallet-side and pop the sheet.
-            if (Web3.Wallet != null)
+            // TESTING: using DisconnectWallet() (deauthorize wallet-side) to test
+            // the wallet-package targeting fix. Swap back to Web3.Instance.Logout()
+            // for production (silent, no sheet).
+            var adapter = Web3.Wallet as Solana.Unity.SDK.SolanaWalletAdapter;
+            if (adapter != null)
             {
-                Web3.Instance.Logout();
+                await adapter.DisconnectWallet();
                 TransactionToastManager.Instance?.ShowToast(
                     "Wallet disconnected", false,
                     TransactionToastManager.ToastPosition.Bottom);
             }
-            await Task.CompletedTask;
         }
         catch (Exception e)
         {

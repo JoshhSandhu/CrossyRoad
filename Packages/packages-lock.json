@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.solana.unity_sdk": {
-      "version": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#test/wallet-cache",
+      "version": "https://github.com/magicblock-labs/Solana.Unity-SDK.git#feat/wallet-cache",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.textmeshpro": "3.0.6"
       },
-      "hash": "a592af694a04705794bbd3b6441ff0c1f0402efb"
+      "hash": "220322bc619ed8921f8fbbc0fcd49e2fe6fa17e6"
     },
     "com.unity.2d.common": {
       "version": "13.0.1",
