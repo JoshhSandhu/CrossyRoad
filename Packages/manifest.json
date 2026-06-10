@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.solana.unity_sdk": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#fix/mwa-keepConnectionAlive-auth-token-restore",
+    "com.solana.unity_sdk": "https://github.com/JoshhSandhu/Solana.Unity-SDK.git#feat/wallet-cache",
     "com.unity.2d.enhancers": "1.0.0",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.adaptiveperformance.google.android": "6.0.0",
@@ -9,6 +9,7 @@
     "com.unity.device-simulator.devices": "1.0.1",
     "com.unity.ide.visualstudio": "2.0.27",
     "com.unity.inputsystem": "1.19.0",
+    "com.unity.mobile.android-logcat": "1.4.7",
     "com.unity.multiplayer.center": "1.0.1",
     "com.unity.project-auditor-rules": "1.0.3",
     "com.unity.render-pipelines.universal": "17.4.0",
