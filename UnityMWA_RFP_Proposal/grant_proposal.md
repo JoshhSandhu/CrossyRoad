@@ -411,7 +411,8 @@ Overall expected execution window: approximately 1-2 weeks for remaining deliver
 | Deliverable | Value |
 |---|---|
 | PR #269: lifecycle parity implementation | $3,000 |
-| PR #276: Unity Test Framework regression infrastructure | $2,000 |
+| PR #276: Unity Test Framework regression infrastructure (31 EditMode tests) | $1,500 |
+| PR #283: MWA lifecycle EditMode regression tests (+44 tests, 78 total) | $500 |
 | CrossyRoad Seeker example integration | $1,500 |
 | `IMwaAuthCache` + wallet package targeting ([#271](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/271), PR #284) | $1,000 |
 | transaction submission parity work ([#189](https://github.com/magicblock-labs/Solana.Unity-SDK/issues/189)) | $1,000 |
